@@ -37,8 +37,28 @@ fd.close()
 pbPost2.ParseFromString(pbPost.SerializeToString())
 print pbPost2.id
 """
+#lists
+def trimStringAsList(string):
+	string = removeEmptyItems( string.split(","))
+	string = removeEmptyItems(string)
+	string = ",".join(string)
+	return string
+def string2list(string,separator=","):
+	return removeEmptyItems(string.split(separator))
+def removeEmptyItems(liste):
+	liste = filter(None, liste)
+	return liste
 
 
+#other
+def getApproxTimeBySignatureLength(length):
+	r = 1
+	i = 0
+	while i < length:
+		i+=1
+		r *= 2
+	approxtime = r/100000
+	return int(approxtime)
 
 class MemoryControlClass:
 	def getMemUsage():
@@ -84,7 +104,7 @@ class DataOperator:
 			log("error when b64 decoding:")
 			print e
 			return ""
-	def getFileHash(filename, blocksize=2**20):
+	def getFileHash(self,filename, blocksize=2**20):
 		m = hashlib.md5()
 		with open( os.path.join(filename) , "rb" ) as f:
 			while True:
@@ -125,14 +145,8 @@ class DataOperator:
 			return True
 		else:
 			return False
-	def trimStringAsList(self,list):
-		string = removeEmptyItems( string.split(","))
-		string = trimList(string)
-		string = ",".join(string)
-		return string
-	def hex2bin(shex):
-		return bin(int(shex, 16))[2:]
-
+def hex2bin(shex):
+	return bin(int(shex, 16))[2:]
 
 class PostClass:
 	def __init__(self):
@@ -164,7 +178,6 @@ class ValidatorClass():
 		return True
 	def fileExists(self,fname):
 		return os.path.isfile(fname)
-
 
 class CompanionClass():
 	def __init__(self,host="",port=0,ctype="client"):
@@ -287,12 +300,15 @@ class ErrorKeys():
 			return "Public key that you send is not valid."
 		
 
+def readFile(filename,mod='r'):
+	fd = open(filename,mod)
+	source=fd.read()
+	fd.close()
+	return source
 
 
-
-
-		"""
-		clientIsPublic = False
+"""
+clientIsPublic = False
 clientListeningOnHost = ""
 clientListeningOnPort = 0
 clientRequestLengthLimit = 52428800 # 50 MB
@@ -309,7 +325,7 @@ datop = DataOperator()
 parser = ParserClass()
 ui = UI()
 get = None
-si = ShelveInterface()
+#si = ShelveInterface()
 
 #print "List of known hosts: "
 
