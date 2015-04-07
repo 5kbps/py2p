@@ -47,7 +47,25 @@ class MemoryControlClass:
 class SerializatorClass:
 	def serializePost(self,postid):
 		do = "nothing"
-class CharOperatorClass:
+
+class Serializator():
+	def serializePost(self,post,attachFile = True):
+		serialized = protocol_pb2.Post()
+		serialized.id = post.id
+		serialized.name = post.name
+		serialized.subject = post.subject  
+		serialized.text = post.text
+		serialized.time = post.time
+		serialized.signature = post.signature
+		serialized.filename = post.filename
+		if attachFile == True and validator.fileExists(postsFileDir+post.filename):
+			fd = open(postsFileDir+post.filename)
+			serialized.file = fd.read()
+			fd.close()
+		serialized.file = post.fileName
+		return serialized.SerializeToString()
+
+class DataOperator:
 	def padAES(self,data):
 		print "L::::",data
 		return data + (32 - len(data) % 32) * " "
@@ -66,6 +84,15 @@ class CharOperatorClass:
 			log("error when b64 decoding:")
 			print e
 			return ""
+	def getFileHash(filename, blocksize=2**20):
+		m = hashlib.md5()
+		with open( os.path.join(filename) , "rb" ) as f:
+			while True:
+				buf = f.read(blocksize)
+				if not buf:
+					break
+				m.update( buf )
+		return m.hexdigest()
 	def genKey(self):
 		return int(os.urandom(clientPrivateKeyLength).encode('hex'),16)
 	def digit2char(self,digit):
@@ -98,6 +125,14 @@ class CharOperatorClass:
 			return True
 		else:
 			return False
+	def trimStringAsList(self,list):
+		string = removeEmptyItems( string.split(","))
+		string = trimList(string)
+		string = ",".join(string)
+		return string
+	def hex2bin(shex):
+		return bin(int(shex, 16))[2:]
+
 
 class PostClass:
 	def __init__(self):
@@ -105,14 +140,15 @@ class PostClass:
 		self.name = ''
 		self.subject = ''
 		self.text = ''
-		self.created = ''
-		self.signature = ''
+		self.time = 0
+		self.signature = 0
 		self.siglen = 0
-		self.image = ''
-		self.tags = []
-		self.languages = []
-		self.refersto = []
-		self.connectedto = []
+		self.fileName = ''
+		self.tags = set()
+		self.languages = set()
+		self.refersto = ()
+		self.connectedto = ()
+
 
 class ValidatorClass():
 	def isHostname(self,hostname):
@@ -126,10 +162,12 @@ class ValidatorClass():
 		return True
 	def key(self,public_key):
 		return True
+	def fileExists(self,fname):
+		return os.path.isfile(fname)
+
 
 class CompanionClass():
 	def __init__(self,host="",port=0,ctype="client"):
-		global charoperator
 		self.host = host
 		self.port = port
 		self.version = "0.1.1"
@@ -265,9 +303,9 @@ clientPublicWebserverPort
 """
 
 
-stringify = StringifyClass()
-validator = ValidatorClass()
-charoperator = CharOperatorClass()
+strfy = StringifyClass()
+valid = ValidatorClass()
+datop = DataOperator()
 parser = ParserClass()
 ui = UI()
 get = None

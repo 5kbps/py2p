@@ -1,0 +1,24 @@
+message Post{
+	required string id = 1;
+	optional string name = 2;
+	optional string subject = 3;
+	optional string text = 4;
+	optional int64 time = 5;
+	optional int64 signature = 6;
+	optional string filename = 7;
+	repeated bytes file = 8;
+	optional string refer = 9;
+	repeated string tags = 10;
+	repeated string languages = 11;
+}
+
+message MetaData{
+	optional bool isPublic = 1;
+}
+message Data{
+	repeated Post sending = 1;
+	repeated string requesting = 2;
+	repeated string received = 3;
+	repeated string known = 4;
+	optional MetaData meta = 5;
+}

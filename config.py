@@ -31,6 +31,8 @@ remove = delete from host list
 
 
 
+postsDir = "posts/"
+postsFileDir = "posts/files/"
 
 maxMemUsage = 102400 #in KB
 shelveFileName = "data.shelve"
