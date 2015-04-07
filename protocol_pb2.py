@@ -13,10 +13,44 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='',
-  serialized_pb='\n\x0eprotocol.proto\"\xb0\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07subject\x18\x03 \x01(\t\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x0c\n\x04time\x18\x05 \x01(\x03\x12\x11\n\tsignature\x18\x06 \x01(\x03\x12\x10\n\x08\x66ilename\x18\x07 \x01(\t\x12\x0c\n\x04\x66ile\x18\x08 \x01(\x0c\x12\r\n\x05refer\x18\t \x01(\t\x12\x0c\n\x04tags\x18\n \x03(\t\x12\x11\n\tlanguages\x18\x0b \x03(\t\"(\n\x10SendingPostArray\x12\x14\n\x05posts\x18\x01 \x03(\x0b\x32\x05.Post\"%\n\x13RequestingPostArray\x12\x0e\n\x06postid\x18\x01 \x03(\t\"\x1c\n\x08MetaData\x12\x10\n\x08isPublic\x18\x01 \x01(\x08\"l\n\x04\x44\x61ta\x12\x16\n\x07sending\x18\x01 \x03(\x0b\x32\x05.Post\x12\x12\n\nrequesting\x18\x02 \x03(\t\x12\x10\n\x08received\x18\x03 \x03(\t\x12\r\n\x05known\x18\x04 \x03(\t\x12\x17\n\x04meta\x18\x05 \x01(\x0b\x32\t.MetaData')
+  serialized_pb='\n\x0eprotocol.proto\"\xd1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07subject\x18\x03 \x01(\t\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x0c\n\x04time\x18\x05 \x01(\x03\x12\x11\n\tsignature\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x08 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\t \x01(\t\x12\x0c\n\x04tags\x18\n \x03(\t\x12\x11\n\tlanguages\x18\x0b \x03(\t\x1a$\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\"\x1c\n\x08MetaData\x12\x10\n\x08isPublic\x18\x01 \x01(\x08\"l\n\x04\x44\x61ta\x12\x16\n\x07sending\x18\x01 \x03(\x0b\x32\x05.Post\x12\x12\n\nrequesting\x18\x02 \x03(\t\x12\x10\n\x08received\x18\x03 \x03(\t\x12\r\n\x05known\x18\x04 \x03(\t\x12\x17\n\x04meta\x18\x05 \x01(\x0b\x32\t.MetaData')
 
 
 
+
+_POST_FILE = _descriptor.Descriptor(
+  name='File',
+  full_name='Post.File',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='Post.File.name', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='source', full_name='Post.File.source', index=1,
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value="",
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=192,
+  serialized_end=228,
+)
 
 _POST = _descriptor.Descriptor(
   name='Post',
@@ -68,35 +102,28 @@ _POST = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='filename', full_name='Post.filename', index=6,
-      number=7, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
+      name='files', full_name='Post.files', index=6,
+      number=8, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='file', full_name='Post.file', index=7,
-      number=8, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value="",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='refer', full_name='Post.refer', index=8,
+      name='refer', full_name='Post.refer', index=7,
       number=9, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='tags', full_name='Post.tags', index=9,
+      name='tags', full_name='Post.tags', index=8,
       number=10, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='languages', full_name='Post.languages', index=10,
+      name='languages', full_name='Post.languages', index=9,
       number=11, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -105,70 +132,14 @@ _POST = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[],
+  nested_types=[_POST_FILE, ],
   enum_types=[
   ],
   options=None,
   is_extendable=False,
   extension_ranges=[],
   serialized_start=19,
-  serialized_end=195,
-)
-
-
-_SENDINGPOSTARRAY = _descriptor.Descriptor(
-  name='SendingPostArray',
-  full_name='SendingPostArray',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='posts', full_name='SendingPostArray.posts', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=197,
-  serialized_end=237,
-)
-
-
-_REQUESTINGPOSTARRAY = _descriptor.Descriptor(
-  name='RequestingPostArray',
-  full_name='RequestingPostArray',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='postid', full_name='RequestingPostArray.postid', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=239,
-  serialized_end=276,
+  serialized_end=228,
 )
 
 
@@ -195,8 +166,8 @@ _METADATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=278,
-  serialized_end=306,
+  serialized_start=230,
+  serialized_end=258,
 )
 
 
@@ -251,36 +222,29 @@ _DATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=308,
-  serialized_end=416,
+  serialized_start=260,
+  serialized_end=368,
 )
 
-_SENDINGPOSTARRAY.fields_by_name['posts'].message_type = _POST
+_POST_FILE.containing_type = _POST;
+_POST.fields_by_name['files'].message_type = _POST_FILE
 _DATA.fields_by_name['sending'].message_type = _POST
 _DATA.fields_by_name['meta'].message_type = _METADATA
 DESCRIPTOR.message_types_by_name['Post'] = _POST
-DESCRIPTOR.message_types_by_name['SendingPostArray'] = _SENDINGPOSTARRAY
-DESCRIPTOR.message_types_by_name['RequestingPostArray'] = _REQUESTINGPOSTARRAY
 DESCRIPTOR.message_types_by_name['MetaData'] = _METADATA
 DESCRIPTOR.message_types_by_name['Data'] = _DATA
 
 class Post(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
+
+  class File(_message.Message):
+    __metaclass__ = _reflection.GeneratedProtocolMessageType
+    DESCRIPTOR = _POST_FILE
+
+    # @@protoc_insertion_point(class_scope:Post.File)
   DESCRIPTOR = _POST
 
   # @@protoc_insertion_point(class_scope:Post)
-
-class SendingPostArray(_message.Message):
-  __metaclass__ = _reflection.GeneratedProtocolMessageType
-  DESCRIPTOR = _SENDINGPOSTARRAY
-
-  # @@protoc_insertion_point(class_scope:SendingPostArray)
-
-class RequestingPostArray(_message.Message):
-  __metaclass__ = _reflection.GeneratedProtocolMessageType
-  DESCRIPTOR = _REQUESTINGPOSTARRAY
-
-  # @@protoc_insertion_point(class_scope:RequestingPostArray)
 
 class MetaData(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType

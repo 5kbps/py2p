@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+#Новый пост
+newPostDefaultSignatureLength = 5;
+newPostDefaultName = "Anonymous"
+newPostDefaultSubject = ""
+newPostDefaultTags = "tag,test,py2p"
+newPostDefaultFiles = "test.gif,test.jpg"
+newPostDefaultLanguages = "en,ru"
+
 #[ОБЩИЕ НАСТРОЙКИ]
 maxFailedConnections = 10
 clientRequestsInterval = 60
@@ -33,6 +41,7 @@ remove = delete from host list
 
 postsDir = "posts/"
 postsFileDir = "posts/files/"
+attachmentsDir = "attachments/"
 
 maxMemUsage = 102400 #in KB
 shelveFileName = "data.shelve"
