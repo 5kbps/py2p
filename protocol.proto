@@ -2,6 +2,7 @@ message Post{
 	message File{
 		optional string name = 1;
 		optional bytes source = 2;
+		optional string md5hash = 3;
 	}
 	required string id = 1;
 	optional string name = 2;
@@ -30,7 +31,7 @@ message KnownPost{
 	repeated string file_names = 4;
 	repeated string file_sizes = 5;
 	repeated string tags = 6;
-	repeated string languages = 7;
+	repeated string languages = 7 ;
 }
 message Data{
 	repeated Post sending = 1;

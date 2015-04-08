@@ -49,6 +49,10 @@ def removeEmptyItems(liste):
 	liste = filter(None, liste)
 	return liste
 
+#files
+def createDirIfNotExists(directory):
+	if not os.path.exists(directory):
+		os.makedirs(directory)
 
 #other
 def getApproxTimeBySignatureLength(length):
@@ -224,6 +228,10 @@ class ShelveInterface:
 		self.load()
 	def defaults(self):
 		global get
+		createDirIfNotExists(postsDir)
+		createDirIfNotExists(postsFileDir)
+		createDirIfNotExists(attachmentsDir)
+
 		get['connectedto'] = {}
 		get['refersto'] = {}
 		get['tags'] = {}
@@ -266,14 +274,19 @@ class ShelveInterface:
 			file_id_iterator = 0
 			for post_file in post.files:
 				file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]
+				
 				if file_ext != "":
-					fd = open(postsFileDir+post.id+"."+str(file_id_iterator)+"."+file_ext,'wb')
+					file_name = postsFileDir+post.id+"."+str(file_id_iterator)+"."+file_ext
 				else:
-					fd = open(postsFileDir+post.id+"."+str(file_id_iterator),'wb')
-				fd.write(post_file.source)
-				fd.close()
-				file_id_iterator += 1
-				print post.id ,"-> ", post_file.name
+					file_name =  postsFileDir+post.id+"."+str(file_id_iterator)
+				if not valid.fileExists(file_name):
+					fd = open(file_name,'wb')
+					fd.write(post_file.source)
+					fd.close()
+					file_id_iterator += 1
+					print post.id ,"-> ", post_file.name
+				else:
+					print post.id ,"-[exitsts] ", post_file.name
 	def load(self):
 		global get
 		get = shelve.open(shelveFileName, writeback=True)

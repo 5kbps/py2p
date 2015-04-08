@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='',
-  serialized_pb='\n\x0eprotocol.proto\"\xd1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07subject\x18\x03 \x01(\t\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x0c\n\x04time\x18\x05 \x01(\x03\x12\x11\n\tsignature\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a$\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\"\x96\x01\n\x08MetaData\x12\x10\n\x08isPublic\x18\x01 \x01(\x08\x12\x19\n\x11max_posts_at_once\x18\x02 \x01(\x03\x12\x14\n\x0clistening_on\x18\x03 \x01(\t\x12\x16\n\x0e\x61\x63\x63\x65pts_images\x18\x04 \x01(\x08\x12\x15\n\rmax_post_size\x18\x05 \x01(\x03\x12\x18\n\x10max_request_size\x18\x06 \x01(\x03\"\x83\x01\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x13\n\x0b\x66ile_hashes\x18\x03 \x03(\t\x12\x12\n\nfile_names\x18\x04 \x03(\t\x12\x12\n\nfile_sizes\x18\x05 \x03(\t\x12\x0c\n\x04tags\x18\x06 \x03(\t\x12\x11\n\tlanguages\x18\x07 \x03(\t\"x\n\x04\x44\x61ta\x12\x16\n\x07sending\x18\x01 \x03(\x0b\x32\x05.Post\x12\x12\n\nrequesting\x18\x02 \x03(\t\x12\x10\n\x08received\x18\x03 \x03(\t\x12\x19\n\x05known\x18\x04 \x03(\x0b\x32\n.KnownPost\x12\x17\n\x04meta\x18\x05 \x01(\x0b\x32\t.MetaData')
+  serialized_pb='\n\x0eprotocol.proto\"\xe2\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07subject\x18\x03 \x01(\t\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x0c\n\x04time\x18\x05 \x01(\x03\x12\x11\n\tsignature\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\"\x96\x01\n\x08MetaData\x12\x10\n\x08isPublic\x18\x01 \x01(\x08\x12\x19\n\x11max_posts_at_once\x18\x02 \x01(\x03\x12\x14\n\x0clistening_on\x18\x03 \x01(\t\x12\x16\n\x0e\x61\x63\x63\x65pts_images\x18\x04 \x01(\x08\x12\x15\n\rmax_post_size\x18\x05 \x01(\x03\x12\x18\n\x10max_request_size\x18\x06 \x01(\x03\"\x83\x01\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x13\n\x0b\x66ile_hashes\x18\x03 \x03(\t\x12\x12\n\nfile_names\x18\x04 \x03(\t\x12\x12\n\nfile_sizes\x18\x05 \x03(\t\x12\x0c\n\x04tags\x18\x06 \x03(\t\x12\x11\n\tlanguages\x18\x07 \x03(\t\"x\n\x04\x44\x61ta\x12\x16\n\x07sending\x18\x01 \x03(\x0b\x32\x05.Post\x12\x12\n\nrequesting\x18\x02 \x03(\t\x12\x10\n\x08received\x18\x03 \x03(\t\x12\x19\n\x05known\x18\x04 \x03(\x0b\x32\n.KnownPost\x12\x17\n\x04meta\x18\x05 \x01(\x0b\x32\t.MetaData')
 
 
 
@@ -39,6 +39,13 @@ _POST_FILE = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='md5hash', full_name='Post.File.md5hash', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -49,7 +56,7 @@ _POST_FILE = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=192,
-  serialized_end=228,
+  serialized_end=245,
 )
 
 _POST = _descriptor.Descriptor(
@@ -139,7 +146,7 @@ _POST = _descriptor.Descriptor(
   is_extendable=False,
   extension_ranges=[],
   serialized_start=19,
-  serialized_end=228,
+  serialized_end=245,
 )
 
 
@@ -201,8 +208,8 @@ _METADATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=231,
-  serialized_end=381,
+  serialized_start=248,
+  serialized_end=398,
 )
 
 
@@ -271,8 +278,8 @@ _KNOWNPOST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=384,
-  serialized_end=515,
+  serialized_start=401,
+  serialized_end=532,
 )
 
 
@@ -327,8 +334,8 @@ _DATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=517,
-  serialized_end=637,
+  serialized_start=534,
+  serialized_end=654,
 )
 
 _POST_FILE.containing_type = _POST;
