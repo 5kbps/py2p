@@ -32,13 +32,22 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 				fo = post.files.add()
 				fo.name = f
 				fo.source = readFile(attachmentsDir+ f,'rb')
-	tags = trimStringAsList(tags)
-	languages = trimStringAsList(languages)
+	tag_list = trimStringAsList(tags)
+	for tag in tag_list:
+		if valid.tag(tag):
+			to = post.tags.add()
+			to = tag
+	languages_list = trimStringAsList(languages)
+	for lang in languages_list:
+		if valid.lang(lang):
+			lo = post.languages.add()
+			lo = lang
 	connectedto =""
 	sig_shift = 0
 	print "Generating \"proof of work\" signature. It can take some time (approximately "+str(getApproxTimeBySignatureLength(int(signature_length)))+"s)"
 	starttime = int(time.time()*1000000)
-	while True:	
+	post_content = name+subject+text+str(curtime)+tags
+	while True:
 		id = md5((name+subject+text+str(curtime)+str(sig_shift)+tags+languages+refersto).encode('utf-8')).hexdigest()[2:]
 		tid =md5((id+str(sig_shift)).encode('utf-8')).hexdigest()[2:]
 		id2 = hex2bin(id)

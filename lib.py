@@ -9,7 +9,7 @@ import sys
 import html
 import urllib
 import os
-import config
+from config import *
 import time
 from xml.sax.saxutils import escape, unescape
 import datetime
@@ -178,6 +178,11 @@ class ValidatorClass():
 		return True
 	def fileExists(self,fname):
 		return os.path.isfile(fname)
+	def tag(self,tag):
+		#validate tag
+		return True
+	def lang(self,lang):
+		return lang in ["ru","en","de","fr","bl"]
 
 class CompanionClass():
 	def __init__(self,host="",port=0,ctype="client"):
@@ -223,6 +228,7 @@ class ShelveInterface:
 		get['refersto'] = {}
 		get['tags'] = {}
 		get['bytag'] = {}
+		get['bylang'] = {}
 		get['time'] = {}
 		get['siglen'] = 0
 		get['hosts'] = set()
@@ -234,6 +240,29 @@ class ShelveInterface:
 		get['requesting'] = set()
 		get['deleted'] = set()
 		get['initialized'] = True
+		self.parsePosts()
+
+	def parsePosts(self):
+		post_files = os.listdir(postsDir)	
+		print post_files
+		for post_file in post_files:
+			post = protocol_pb2.Post()
+			post.ParseFromString( readFile(postsDir+ post_file) )
+			if hasattr( post, "refersto"):
+				if not post.refersto in get['connectedto']:
+					get['connectedto'][post.refersto] = set()
+				get['connectedto'][post.refersto].add( post.id)
+			if hasattr(post, "refersto"):
+				if not post.id in get['refersto']:
+					get['refersto'][post.id] = post.refersto
+			for tag in post.tags:
+				if not tag in get['bytag']:
+					get['bytag'][tag] = set()
+				get['bytag'][tag].add(post.id)
+			for lang in post.languages:
+				if not lang in get['bylang']:
+					get['bylang'][lang] = set()
+				get['bylang'][lang].add(post.id)
 	def load(self):
 		global get
 		get = shelve.open(shelveFileName, writeback=True)
@@ -325,7 +354,7 @@ datop = DataOperator()
 parser = ParserClass()
 ui = UI()
 get = None
-#si = ShelveInterface()
+si = ShelveInterface()
 
 #print "List of known hosts: "
 
