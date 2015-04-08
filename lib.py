@@ -241,6 +241,7 @@ class ShelveInterface:
 		get['siglen'] = 0
 		get['hosts'] = set()
 		get['clients'] = {}
+		get['files'] = {}
 		#get['hosts'].add(CompanionClass().addHost("a-chan.org:5441"))
 		get['hosts'].add(CompanionClass().addHost("127.0.0.1:5441"))
 
@@ -271,19 +272,19 @@ class ShelveInterface:
 				if not lang in get['bylang'] and lang in listLanguages():
 					get['bylang'][lang] = set()
 				get['bylang'][lang].add(post.id)
-			file_id_iterator = 0
 			for post_file in post.files:
-				file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]
-				
+				if not post.id in get['files']:
+					get['files'][post.id] = set()
+				get['files'][post.id].add(post_file.md5hash)
+				file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]				
 				if file_ext != "":
-					file_name = postsFileDir+post.id+"."+str(file_id_iterator)+"."+file_ext
+					file_name = postsFileDir+post_file.md5hash+"."+file_ext
 				else:
-					file_name =  postsFileDir+post.id+"."+str(file_id_iterator)
+					file_name =  postsFileDir+post_file.md5hash
 				if not valid.fileExists(file_name):
 					fd = open(file_name,'wb')
 					fd.write(post_file.source)
 					fd.close()
-					file_id_iterator += 1
 					print post.id ,"-> ", post_file.name
 				else:
 					print post.id ,"-[exitsts] ", post_file.name

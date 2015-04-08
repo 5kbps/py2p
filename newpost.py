@@ -31,6 +31,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 			if valid.fileExists(attachmentsDir+ f):
 				fo = post.files.add()
 				fo.name = f
+				fo.md5hash = datop.getFileHash(attachmentsDir + f)
 				fo.source = readFile(attachmentsDir+ f,'rb')
 	tag_list = trimStringAsList(tags)
 	for tag in tag_list:
