@@ -63,7 +63,11 @@ def getApproxTimeBySignatureLength(length):
 		r *= 2
 	approxtime = r/100000
 	return int(approxtime)
+def listLanguages():
+	return ["en","ru","pol","uk","fr","de","da","et","fi","ja","lv","pol","es","sv"]
 
+
+#classes
 class MemoryControlClass:
 	def getMemUsage():
 		return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -268,7 +272,7 @@ class ShelveInterface:
 					get['bytag'][tag] = set()
 				get['bytag'][tag].add(post.id)
 			for lang in post.languages:
-				if not lang in get['bylang']:
+				if not lang in get['bylang'] and lang in listLanguages():
 					get['bylang'][lang] = set()
 				get['bylang'][lang].add(post.id)
 			file_id_iterator = 0
