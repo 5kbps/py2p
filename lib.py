@@ -43,7 +43,9 @@ def trimStringAsList(string):
 	string = removeEmptyItems(string)
 	string = ",".join(string)
 	return string
+
 def string2list(string,separator=","):
+
 	return removeEmptyItems(string.split(separator))
 def removeEmptyItems(liste):
 	liste = filter(None, liste)
@@ -91,7 +93,7 @@ class Serializator():
 
 class DataOperator:
 	def padAES(self,data):
-		print "L::::",data
+		#print "L::::",data
 		return data + (32 - len(data) % 32) * " "
 	def EncodeAES(self,data,key):
 		cipher = AES.new(self.padAES(key))
@@ -219,6 +221,68 @@ class CompanionClass():
 		self.host = host
 		self.port = port
 		return self
+class PostManagerClass:
+	def delete(self,postid):
+		if valid.fileExists(postsDir+postid):
+			post = protocol_pb2.Post()
+			post.ParseFromString( readFile(postsDir+ postid) )
+			print "deletion"
+			if valid.fileExists(postsDir+post.id):
+				# removing files
+				for post_file in post.files:
+					if len(post_file.name.split("."))>1:
+						file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]
+					else:
+						file_ext = ""
+					file_name =	post_file.md5hash+"."+file_ext
+					if post_file.md5hash in get['byfilemd5hash']:
+						if post.id in get['byfilemd5hash'][post_file.md5hash]:
+							get['byfilemd5hash'][post_file.md5hash].remove(post.id)
+							if len(get['byfilemd5hash'][post_file.md5hash]) == 0:
+								print "Deleting:", post.id
+								del get['byfilemd5hash'][post_file.md5hash]
+								if valid.fileExists(postsFileDir+file_name):
+									os.remove(postsFileDir+file_name)
+									print "removed attached file: " + file_name+" - "+post.id
+								else:
+									print "cannot remove attached file: "+file_name+" - "+post.id
+
+				#removing tags 
+				if post.id in get['tags']:
+					tags = get['tags'][post.id]
+					for tag in tags:
+						if post.id in get['bytag'][tag]:
+							get['bytag'][tag].remove(post.id)
+							if len(get['bytag'][tag])==0:
+								del get['bytag'][tag]
+					del get['tags'][post.id]
+
+				if post.id in get['languages']:
+					lengs = get['languages'][post.id]
+					for lang in langs:
+						if post.id in get['bylang'][lang]:
+							get['bylang'][lang].remove(post.id)
+							if len(get['bylang'][lang])==0:
+								del get['bylang'][lang]
+					del get['languages'][post.id]
+				if post.id in get['connectedto']:
+					del get['connectedto'][post.id]
+				if post.id in get['refersto']:
+					del get['refersto'][post.id]
+				if post.id in get['time']:
+					del get['time'][post.id]
+				if post.id in get['files']:
+					del get['files'][post.id]
+				os.remove(postsDir+post.id)
+
+
+				#TODO
+				#del get['siglen'][post.id]
+				print post.id , " succesfully deleted!"
+			else:
+				print "cannot delete post: ",post.id
+	#todo
+
 class UI:
 	def log(self,text):
 		print text
@@ -235,6 +299,7 @@ class ShelveInterface:
 		get['connectedto'] = {}
 		get['refersto'] = {}
 		get['tags'] = {}
+		get['languages'] = {}
 		get['bytag'] = {}
 		get['bylang'] = {}
 		get['time'] = {}
@@ -242,6 +307,7 @@ class ShelveInterface:
 		get['hosts'] = set()
 		get['clients'] = {}
 		get['files'] = {}
+		get['byfilemd5hash'] = {}
 		#get['hosts'].add(CompanionClass().addHost("a-chan.org:5441"))
 		get['hosts'].add(CompanionClass().addHost("127.0.0.1:5441"))
 
@@ -253,7 +319,7 @@ class ShelveInterface:
 
 	def parsePosts(self):
 		post_files = os.listdir(postsDir)	
-		print post_files
+		#print post_files
 		for post_file in post_files:
 			post = protocol_pb2.Post()
 			post.ParseFromString( readFile(postsDir+ post_file) )
@@ -269,13 +335,23 @@ class ShelveInterface:
 					get['bytag'][tag] = set()
 				get['bytag'][tag].add(post.id)
 			for lang in post.languages:
+
+				if not post.id in get['languages']:
+					get['languages'][post.id] = set()
+				get['languages'][post.id].add(lang)
+
 				if not lang in get['bylang'] and lang in listLanguages():
 					get['bylang'][lang] = set()
 				get['bylang'][lang].add(post.id)
 			for post_file in post.files:
+
 				if not post.id in get['files']:
 					get['files'][post.id] = set()
 				get['files'][post.id].add(post_file.md5hash)
+
+				if not post_file.md5hash in get['byfilemd5hash']:
+					get['byfilemd5hash'][post_file.md5hash] = set()
+				get['byfilemd5hash'][post_file.md5hash].add(post.id)
 				file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]				
 				if file_ext != "":
 					file_name = postsFileDir+post_file.md5hash+"."+file_ext
@@ -285,7 +361,7 @@ class ShelveInterface:
 					fd = open(file_name,'wb')
 					fd.write(post_file.source)
 					fd.close()
-					print post.id ,"-> ", post_file.name
+					#print post.id ,"-> ", post_file.name
 				else:
 					print post.id ,"-[exitsts] ", post_file.name
 	def load(self):
@@ -389,3 +465,6 @@ si = ShelveInterface()
 	print "   " ,companion.host, companion.port
 """
 #print stringify.flags()
+#print get['byfilemd5hash']
+PostManagerClass().delete('ad8xu1mqx6nzzrruzhqlnjx')
+print get

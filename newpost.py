@@ -58,7 +58,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 		else:
 			sig_shift+=1
 	endtime = int(time.time()*1000000)
-	post.id = id
+	post.id = datop.int36(int(id,16))
 	postFileText = post.SerializeToString()
 	#writing to file
 	fd = open(postsDir+str(datop.int36(int(id,16))),'w')
