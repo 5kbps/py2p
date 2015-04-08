@@ -34,9 +34,16 @@ message KnownPost{
 	repeated string languages = 7 ;
 }
 message Data{
-	repeated Post sending = 1;
-	repeated string requesting = 2;
-	repeated string received = 3;
-	repeated KnownPost known = 4;
-	optional MetaData meta = 5;
+	message Keys{
+		optional string clientKey = 1;
+		optional string serverKey = 2;
+		optional string sendingKey = 3;
+		optional bool needKeyRegeneration = 4;
+	}
+	required Keys keys = 1;
+	repeated Post sending = 2;
+	repeated string requesting = 3;
+	repeated string received = 4;
+	repeated KnownPost known = 5;
+	optional MetaData meta = 6;
 }

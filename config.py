@@ -38,7 +38,7 @@ remove = delete from host list
 
 
 
-
+# slashes are important
 postsDir = "posts/"
 postsFileDir = "files/"
 attachmentsDir = "attachments/"

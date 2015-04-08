@@ -72,10 +72,6 @@ class MemoryControlClass:
 	def getMemUsage():
 		return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
-class SerializatorClass:
-	def serializePost(self,postid):
-		do = "nothing"
-
 class Serializator():
 	def serializePost(self,post,attachFile = True):
 		serialized = protocol_pb2.Post()
