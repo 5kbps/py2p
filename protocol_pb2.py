@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='',
-  serialized_pb='\n\x0eprotocol.proto\"\xd1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07subject\x18\x03 \x01(\t\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x0c\n\x04time\x18\x05 \x01(\x03\x12\x11\n\tsignature\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x08 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\t \x01(\t\x12\x0c\n\x04tags\x18\n \x03(\t\x12\x11\n\tlanguages\x18\x0b \x03(\t\x1a$\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\"\x1c\n\x08MetaData\x12\x10\n\x08isPublic\x18\x01 \x01(\x08\"l\n\x04\x44\x61ta\x12\x16\n\x07sending\x18\x01 \x03(\x0b\x32\x05.Post\x12\x12\n\nrequesting\x18\x02 \x03(\t\x12\x10\n\x08received\x18\x03 \x03(\t\x12\r\n\x05known\x18\x04 \x03(\t\x12\x17\n\x04meta\x18\x05 \x01(\x0b\x32\t.MetaData')
+  serialized_pb='\n\x0eprotocol.proto\"\xd1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\x0f\n\x07subject\x18\x03 \x01(\t\x12\x0c\n\x04text\x18\x04 \x01(\t\x12\x0c\n\x04time\x18\x05 \x01(\x03\x12\x11\n\tsignature\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a$\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\"\x96\x01\n\x08MetaData\x12\x10\n\x08isPublic\x18\x01 \x01(\x08\x12\x19\n\x11max_posts_at_once\x18\x02 \x01(\x03\x12\x14\n\x0clistening_on\x18\x03 \x01(\t\x12\x16\n\x0e\x61\x63\x63\x65pts_images\x18\x04 \x01(\x08\x12\x15\n\rmax_post_size\x18\x05 \x01(\x03\x12\x18\n\x10max_request_size\x18\x06 \x01(\x03\"\x83\x01\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x13\n\x0b\x66ile_hashes\x18\x03 \x03(\t\x12\x12\n\nfile_names\x18\x04 \x03(\t\x12\x12\n\nfile_sizes\x18\x05 \x03(\t\x12\x0c\n\x04tags\x18\x06 \x03(\t\x12\x11\n\tlanguages\x18\x07 \x03(\t\"x\n\x04\x44\x61ta\x12\x16\n\x07sending\x18\x01 \x03(\x0b\x32\x05.Post\x12\x12\n\nrequesting\x18\x02 \x03(\t\x12\x10\n\x08received\x18\x03 \x03(\t\x12\x19\n\x05known\x18\x04 \x03(\x0b\x32\n.KnownPost\x12\x17\n\x04meta\x18\x05 \x01(\x0b\x32\t.MetaData')
 
 
 
@@ -103,28 +103,28 @@ _POST = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='files', full_name='Post.files', index=6,
-      number=8, type=11, cpp_type=10, label=3,
+      number=7, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='refer', full_name='Post.refer', index=7,
-      number=9, type=9, cpp_type=9, label=1,
+      number=8, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='tags', full_name='Post.tags', index=8,
-      number=10, type=9, cpp_type=9, label=3,
+      number=9, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
       name='languages', full_name='Post.languages', index=9,
-      number=11, type=9, cpp_type=9, label=3,
+      number=10, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -157,6 +157,41 @@ _METADATA = _descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    _descriptor.FieldDescriptor(
+      name='max_posts_at_once', full_name='MetaData.max_posts_at_once', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='listening_on', full_name='MetaData.listening_on', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='accepts_images', full_name='MetaData.accepts_images', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='max_post_size', full_name='MetaData.max_post_size', index=4,
+      number=5, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='max_request_size', full_name='MetaData.max_request_size', index=5,
+      number=6, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -166,8 +201,78 @@ _METADATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=230,
-  serialized_end=258,
+  serialized_start=231,
+  serialized_end=381,
+)
+
+
+_KNOWNPOST = _descriptor.Descriptor(
+  name='KnownPost',
+  full_name='KnownPost',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='id', full_name='KnownPost.id', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='size', full_name='KnownPost.size', index=1,
+      number=2, type=3, cpp_type=2, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='file_hashes', full_name='KnownPost.file_hashes', index=2,
+      number=3, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='file_names', full_name='KnownPost.file_names', index=3,
+      number=4, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='file_sizes', full_name='KnownPost.file_sizes', index=4,
+      number=5, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='tags', full_name='KnownPost.tags', index=5,
+      number=6, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='languages', full_name='KnownPost.languages', index=6,
+      number=7, type=9, cpp_type=9, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=384,
+  serialized_end=515,
 )
 
 
@@ -201,7 +306,7 @@ _DATA = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='known', full_name='Data.known', index=3,
-      number=4, type=9, cpp_type=9, label=3,
+      number=4, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -222,16 +327,18 @@ _DATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=260,
-  serialized_end=368,
+  serialized_start=517,
+  serialized_end=637,
 )
 
 _POST_FILE.containing_type = _POST;
 _POST.fields_by_name['files'].message_type = _POST_FILE
 _DATA.fields_by_name['sending'].message_type = _POST
+_DATA.fields_by_name['known'].message_type = _KNOWNPOST
 _DATA.fields_by_name['meta'].message_type = _METADATA
 DESCRIPTOR.message_types_by_name['Post'] = _POST
 DESCRIPTOR.message_types_by_name['MetaData'] = _METADATA
+DESCRIPTOR.message_types_by_name['KnownPost'] = _KNOWNPOST
 DESCRIPTOR.message_types_by_name['Data'] = _DATA
 
 class Post(_message.Message):
@@ -251,6 +358,12 @@ class MetaData(_message.Message):
   DESCRIPTOR = _METADATA
 
   # @@protoc_insertion_point(class_scope:MetaData)
+
+class KnownPost(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _KNOWNPOST
+
+  # @@protoc_insertion_point(class_scope:KnownPost)
 
 class Data(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType

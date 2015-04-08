@@ -248,7 +248,7 @@ class ShelveInterface:
 		for post_file in post_files:
 			post = protocol_pb2.Post()
 			post.ParseFromString( readFile(postsDir+ post_file) )
-			if hasattr( post, "refersto"):
+			if hasattr( post, "refersto"): 
 				if not post.refersto in get['connectedto']:
 					get['connectedto'][post.refersto] = set()
 				get['connectedto'][post.refersto].add( post.id)
