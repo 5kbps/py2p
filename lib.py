@@ -248,7 +248,7 @@ class ShelveInterface:
 		for post_file in post_files:
 			post = protocol_pb2.Post()
 			post.ParseFromString( readFile(postsDir+ post_file) )
-			if hasattr( post, "refersto"): 
+			if hasattr( post, "refersto"):
 				if not post.refersto in get['connectedto']:
 					get['connectedto'][post.refersto] = set()
 				get['connectedto'][post.refersto].add( post.id)
@@ -263,12 +263,25 @@ class ShelveInterface:
 				if not lang in get['bylang']:
 					get['bylang'][lang] = set()
 				get['bylang'][lang].add(post.id)
+			file_id_iterator = 0
+			for post_file in post.files:
+				file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]
+				if file_ext != "":
+					fd = open(postsFileDir+post.id+"."+str(file_id_iterator)+"."+file_ext,'wb')
+				else:
+					fd = open(postsFileDir+post.id+"."+str(file_id_iterator),'wb')
+				fd.write(post_file.source)
+				fd.close()
+				file_id_iterator += 1
+				print post.id ,"-> ", post_file.name
 	def load(self):
 		global get
 		get = shelve.open(shelveFileName, writeback=True)
 		if not "initialized" in get:
 			self.defaults()
-			print "Database generated"
+			print "Database: generated"
+		self.parsePosts()
+		print "Database: received posts parsed"
 	def save(self):
 		global get
 		get.sync()

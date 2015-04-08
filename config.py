@@ -40,7 +40,7 @@ remove = delete from host list
 
 
 postsDir = "posts/"
-postsFileDir = "posts/files/"
+postsFileDir = "files/"
 attachmentsDir = "attachments/"
 
 maxMemUsage = 102400 #in KB
