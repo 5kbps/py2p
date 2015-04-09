@@ -71,7 +71,7 @@ def listLanguages():
 
 #classes
 class MemoryControlClass:
-	def getMemUsage():
+	def getMemUsage(self):
 		return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
 
 class Serializator():
@@ -231,10 +231,10 @@ class PostManagerClass:
 				# removing files
 				for post_file in post.files:
 					if len(post_file.name.split("."))>1:
-						file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]
+						file_ext = "."+post_file.name.split(".")[len(post_file.name.split("."))-1]
 					else:
 						file_ext = ""
-					file_name =	post_file.md5hash+"."+file_ext
+					file_name =	post_file.md5hash+file_ext
 					if post_file.md5hash in get['byfilemd5hash']:
 						if post.id in get['byfilemd5hash'][post_file.md5hash]:
 							get['byfilemd5hash'][post_file.md5hash].remove(post.id)
@@ -286,7 +286,10 @@ class PostManagerClass:
 class UI:
 	def log(self,text):
 		print text
-
+class requestingPost:
+	def __init__(self,postid):
+		self.attempts = 0
+		self.added = int(time.time())
 class ShelveInterface:
 	def __init__(self):
 		self.load()
@@ -295,7 +298,7 @@ class ShelveInterface:
 		createDirIfNotExists(postsDir)
 		createDirIfNotExists(postsFileDir)
 		createDirIfNotExists(attachmentsDir)
-
+		#post index
 		get['connectedto'] = {}
 		get['refersto'] = {}
 		get['tags'] = {}
@@ -308,16 +311,19 @@ class ShelveInterface:
 		get['clients'] = {}
 		get['files'] = {}
 		get['byfilemd5hash'] = {}
-		#get['hosts'].add(CompanionClass().addHost("a-chan.org:5441"))
+		#peering
 		get['hosts'].add(CompanionClass().addHost("127.0.0.1:5441"))
+		get['clients'] = {}
 
+		#postmap
 		get['received'] = set()
 		get['requesting'] = set()
 		get['deleted'] = set()
-		get['initialized'] = True
+		#get['initialized'] = True
 		self.parsePosts()
 
 	def parsePosts(self):
+		startTime = time.time()
 		post_files = os.listdir(postsDir)	
 		#print post_files
 		for post_file in post_files:
@@ -363,7 +369,14 @@ class ShelveInterface:
 					fd.close()
 					#print post.id ,"-> ", post_file.name
 				else:
-					print post.id ,"-[exitsts] ", post_file.name
+					do = "nothing"
+					#print post.id ,"-[exitsts] ", post_file.name
+			if post.id in get['requesting']:
+				get['requesting'].remove(post.id)# На всякий случай
+			get['received'].add(post.id)
+		endTime = time.time()
+		print "Post parsing took ", float(endTime - startTime )
+		print "Memory:",MemoryControlClass().getMemUsage()
 	def load(self):
 		global get
 		get = shelve.open(shelveFileName, writeback=True)
@@ -404,17 +417,6 @@ class StringifyClass:
 class ParserClass:
 	def parseKey(self,key):
 		return long(key)
-	def flags(self,string):
-		return_companion = CompanionClass()
-		return_companion.version = safeSplit(string=string, separator=":",index=0)
-		return_companion.is_public = charoperator.bool(safeSplit(string=string, separator=":",index=1))
-		return_companion.listening_on_host = safeSplit(string=string, separator=":",index=0)
-		return_companion.listening_on_port = charoperator.parseInt( safeSplit(string=string, separator=":",index=0))
-		return_companion.request_length_limit = charoperator.parseInt( safeSplit(string=string, separator=":",index=0))
-		return_companion.max_post_size = charoperator.parseInt( safeSplit(string=string, separator=":",index=0))
-		return_companion.accepts_images = charoperator.bool( safeSplit(string=string, separator=":",index=0))
-		return_companion.public_webserver_host = safeSplit(string=string, separator=":",index=0)
-		return_companion.public_webserver_port = charoperator.parseInt( safeSplit(string=string, separator=":",index=0))
 
 class ErrorKeys():
 	def getTextByCode(self,code):
@@ -467,4 +469,4 @@ si = ShelveInterface()
 #print stringify.flags()
 #print get['byfilemd5hash']
 PostManagerClass().delete('ad8xu1mqx6nzzrruzhqlnjx')
-print get
+#print get

@@ -9,7 +9,7 @@ import urllib
 import time
 import socket
 import protocol_pb2
-from lib import datop, valid
+#from lib import datop, valid
 from lib import *
 
 import sys
@@ -64,6 +64,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	fd = open(postsDir+str(datop.int36(int(id,16))),'w')
 	fd.write(postFileText)
 	fd.close()
+	si.parsePosts()
 	# adding connectedto links
 	#for postid in refersto_list:
 	#	lib.addPostConnectedTo(postid,id)
