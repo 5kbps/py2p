@@ -69,16 +69,24 @@ class Client:
 	def getFirstRequestData(self,companion):
 		global datop
 		data = protocol_pb2.Data()		
-			if companion.sharedKey != 0:
-				clientKey = datop.genKey()
-				serverKey = datop.genKey()
-				secretKey = datop.genKey()
-				sendingKey= pow(serverKey,secretKey,clientKey)
-				data.keys.clientKey = clientKey
-				data.keys.serverKey = serverKey
-				data.keys.sendingKey= sendingKey
-				data.keys.needKeyRegeneration = True
-				
+		clientKey = datop.genKey()
+		serverKey = datop.genKey()
+		secretKey = datop.genKey()
+		sendingKey= pow(serverKey,secretKey,clientKey)
+		data.keys.clientKey = clientKey
+		data.keys.serverKey = serverKey
+		data.keys.sendingKey= sendingKey
+		data.keys.needKeyRegeneration = True
+		companion.clientKey = clientKey
+		companion.serverKey = serverKey
+		companion.secretKey = secretKey
+		data.meta = protocol_pb2.MetaData()
+		data.meta.is_public = True
+		data.meta.max_posts_at_once = clientMaxPostsCount
+		data.meta.max_post_size = clientMaxPostSize
+		data.meta.max_request_size = clientRequestLengthLimit
+		data.meta.listening_on = serverListeningOn
+		return data
 	def startCycle(self):
 		global get
 		for companion in get['hosts']:
@@ -119,7 +127,7 @@ class Client:
 		data = protocol_pb2.Data()
 		try:
 			data.ParseFromString(received_data)
-			if r.keys
+			if data.
 		except BaseException:
 			print "FAILED"
 client = Client()

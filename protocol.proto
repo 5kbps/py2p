@@ -16,7 +16,7 @@ message Post{
 	repeated string languages = 10;
 }
 message MetaData{
-	optional bool 	isPublic = 			1;
+	optional bool 	is_public = 			1;
 	optional int64 	max_posts_at_once = 2;
 	optional string listening_on = 		3;
 	optional bool 	accepts_images = 	4;
@@ -43,7 +43,10 @@ message Data{
 	required Keys keys = 1;
 	repeated Post sending = 2;
 	repeated string requesting = 3;
-	repeated string received = 4;
-	repeated KnownPost known = 5;
-	optional MetaData meta = 6;
+	repeated KnownPost known = 4;
+	optional MetaData meta = 5;
+}
+message Host{
+	required string address	= 1;
+	optional string isPublic = 2;
 }

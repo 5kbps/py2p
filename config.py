@@ -14,14 +14,13 @@ maxFailedConnections = 10
 clientRequestsInterval = 60
 clientRequestTimeout = 10
 clientMaxIterationCount = 100
+clientMaxPostSize = 5242880
+clientMaxPostsCount = 100
 # Количество последовательных запросов к серверу, после которых клиент должен отключиться
 clientVersion = "0.1.1"
 clientIsPublic = False
-clientListeningOnHost = ""
-clientListeningOnPort = 0
 clientRequestLengthLimit = 52428800 # 50 MB
 clientAcceptImages = True
-clientMaxPostSize = 5242880
 clientPublicWebserverHost = ""
 clientPublicWebserverPort = 0
 
@@ -50,6 +49,7 @@ postDeletingMode = "move"
 postDeletingMovePath = "outdated"
 
 #[НАСТРОЙКИ СЕРВЕРА]
+serverListeningOn = "127.0.0.1:5441"
 serverPort = 5441
 serverMaxConnections = 10
 
