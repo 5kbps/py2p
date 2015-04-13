@@ -127,7 +127,7 @@ class Client:
 		data = protocol_pb2.Data()
 		try:
 			data.ParseFromString(received_data)
-			if data.
+			if data.p
 		except BaseException:
 			print "FAILED"
 client = Client()
