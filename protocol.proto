@@ -9,44 +9,40 @@ message Post{
 	optional string subject = 3;
 	optional string text = 4;
 	optional int64 time = 5;
-	optional int64 signature = 6;
-	repeated File files = 7;
-	optional string refer = 8;
-	repeated string tags = 9;
-	repeated string languages = 10;
-}
-message MetaData{
-	optional bool 	is_public = 			1;
-	optional int64 	max_posts_at_once = 2;
-	optional string listening_on = 		3;
-	optional bool 	accepts_images = 	4;
-	optional int64 	max_post_size =		5;
-	optional int64 	max_request_size=	6;
+	repeated File files = 6;
+	optional string refer = 7;
+	repeated string tags = 8;
+	repeated string languages = 9;
 }
 
-message KnownPost{
-	required string id = 1;
-	optional int64 size = 2;
-	repeated string file_hashes = 3;
-	repeated string file_names = 4;
-	repeated string file_sizes = 5;
-	repeated string tags = 6;
-	repeated string languages = 7 ;
-}
 message Data{
-	message Keys{
+/*	message Keys{
 		optional string clientKey = 1;
 		optional string serverKey = 2;
 		optional string sendingKey = 3;
 		optional bool needKeyRegeneration = 4;
+	}*/
+	message Host{
+		required string address	= 1;
+		optional string isPublic = 2;
 	}
-	required Keys keys = 1;
+	message ReceivedPost{
+		required string id = 1;
+		optional int64 size = 2;
+		repeated string tags = 6;
+		repeated string languages = 7 ;
+	}
+	message MetaData{
+		optional int64 	max_posts_at_once = 2;
+		optional string listening_on = 		3;
+		optional bool 	accepts_images = 	4;
+		optional int64 	max_post_size =		5;
+		optional int64 	max_request_size=	6;
+	}
+
 	repeated Post sending = 2;
 	repeated string requesting = 3;
-	repeated KnownPost known = 4;
+	repeated ReceivedPost known = 4;
 	optional MetaData meta = 5;
-}
-message Host{
-	required string address	= 1;
-	optional string isPublic = 2;
+
 }

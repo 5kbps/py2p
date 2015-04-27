@@ -17,7 +17,6 @@ from threading import Thread
 import protocol_pb2
 setproctitle.setproctitle("py2pserver")
 class Handler(SocketServer.BaseRequestHandler):
-	"One instance per connection.  Override handle(self) to customize action."
 	def handle(self):
 		global get, si
 		# self.request is the client connection
@@ -54,7 +53,7 @@ class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	def computeKeys(self,companion):
 		global datop
 		print "Generating keys..."
-		return_string = ""
+		
 		if companion.sharedKey == 0:
 			if companion.serverKey == 0:
 				companion.serverKey = datop.genKey()
@@ -85,7 +84,9 @@ class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	def processData(self,companion,received_data):
 		global get, valid
 		data = protocol_pb2.Data()
-		data 
+		data.ParseFromString(received_data)
+		print "CLIENT KEY",data.keys.clientKey
+		return "ooo"
 
 
 if __name__ == "__main__":
@@ -96,5 +97,3 @@ if __name__ == "__main__":
 		server.serve_forever()
 	except KeyboardInterrupt:
 		sys.exit(0)
-	except BaseException as e:
-		print e 

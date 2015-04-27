@@ -55,6 +55,7 @@ def removeEmptyItems(liste):
 def createDirIfNotExists(directory):
 	if not os.path.exists(directory):
 		os.makedirs(directory)
+def getPostSize(file):
 
 #other
 def getApproxTimeBySignatureLength(length):
@@ -67,7 +68,6 @@ def getApproxTimeBySignatureLength(length):
 	return int(approxtime)
 def listLanguages():
 	return ["en","ru","pol","uk","fr","de","da","et","fi","ja","lv","pol","es","sv"]
-
 
 #classes
 class MemoryControlClass:
@@ -110,6 +110,7 @@ class DataOperator:
 			log("error when b64 decoding:")
 			print e
 			return ""
+
 	def getFileHash(self,filename, blocksize=2**20):
 		m = hashlib.md5()
 		with open( os.path.join(filename) , "rb" ) as f:
@@ -166,8 +167,8 @@ class PostClass:
 		self.fileName = ''
 		self.tags = set()
 		self.languages = set()
-		self.refersto = ()
-		self.connectedto = ()
+		self.refersto = ""
+		self.connectedto = set()
 
 
 class ValidatorClass():
@@ -213,7 +214,6 @@ class CompanionClass():
 		self.receivedKey = 0
 		self.secretKey = 0
 		self.sharedKey = 0
-		
 	def addHost(self,host="127.0.0.1:5441"):
 		host = host.split(":")
 		port = host[1]
@@ -226,7 +226,6 @@ class PostManagerClass:
 		if valid.fileExists(postsDir+postid):
 			post = protocol_pb2.Post()
 			post.ParseFromString( readFile(postsDir+ postid) )
-			print "deletion"
 			if valid.fileExists(postsDir+post.id):
 				# removing files
 				for post_file in post.files:
@@ -256,7 +255,7 @@ class PostManagerClass:
 							if len(get['bytag'][tag])==0:
 								del get['bytag'][tag]
 					del get['tags'][post.id]
-
+				#removing languages
 				if post.id in get['languages']:
 					lengs = get['languages'][post.id]
 					for lang in langs:
@@ -274,13 +273,13 @@ class PostManagerClass:
 				if post.id in get['files']:
 					del get['files'][post.id]
 				os.remove(postsDir+post.id)
-
+				get['deleted'].add(post.id)
 
 				#TODO
 				#del get['siglen'][post.id]
 				print post.id , " succesfully deleted!"
 			else:
-				print "cannot delete post: ",post.id
+				print "cannot delete post: ",post.id,"file not exists!"
 	#todo
 
 class UI:
@@ -320,7 +319,6 @@ class ShelveInterface:
 		get['requesting'] = set()
 		get['deleted'] = set()
 		#get['initialized'] = True
-		self.parsePosts()
 
 	def parsePosts(self):
 		startTime = time.time()
@@ -382,6 +380,7 @@ class ShelveInterface:
 		get = shelve.open(shelveFileName, writeback=True)
 		if not "initialized" in get:
 			self.defaults()
+			get['initialized'] = True
 			print "Database: generated"
 		self.parsePosts()
 		print "Database: received posts parsed"
@@ -440,19 +439,6 @@ def readFile(filename,mod='r'):
 	fd.close()
 	return source
 
-
-"""
-clientIsPublic = False
-clientListeningOnHost = ""
-clientListeningOnPort = 0
-clientRequestLengthLimit = 52428800 # 50 MB
-clientAcceptImages = True
-clientMaxPostSize = 5242880
-clientPublicWebserverHost = ""
-clientPublicWebserverPort
-"""
-
-
 strfy = StringifyClass()
 valid = ValidatorClass()
 datop = DataOperator()
@@ -468,5 +454,4 @@ si = ShelveInterface()
 """
 #print stringify.flags()
 #print get['byfilemd5hash']
-PostManagerClass().delete('ad8xu1mqx6nzzrruzhqlnjx')
 #print get

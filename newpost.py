@@ -3,6 +3,7 @@
 
 import os
 import json
+import sys
 from hashlib import md5
 from base64 import b64encode
 import urllib
@@ -83,4 +84,9 @@ if siglen == "":
 	siglen = newPostDefaultSignatureLength
 if files=="":
 	files = newPostDefaultFiles
-np = CreatePost(name,subject,text,files,tags,refersto,"en,ru",siglen)
+
+if sys.argv[1] == "--test":
+	for i in range(1,1000):
+		np = CreatePost(name,subject,text,files,tags,refersto,"en,ru",siglen)
+else:
+	np = CreatePost(name,subject,text,files,tags,refersto,"en,ru",siglen)

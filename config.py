@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #Новый пост
-newPostDefaultSignatureLength = 5;
+newPostDefaultSignatureLength = 1;
 newPostDefaultName = "Anonymous"
 newPostDefaultSubject = ""
 newPostDefaultTags = "tag,test,py2p"
@@ -11,31 +11,31 @@ newPostDefaultLanguages = "en,ru"
 
 #[ОБЩИЕ НАСТРОЙКИ]
 maxFailedConnections = 10
+maxReceivedPostsCount = 1000
+#maximum posts that can be saved
 clientRequestsInterval = 60
 clientRequestTimeout = 10
 clientMaxIterationCount = 100
 clientMaxPostSize = 5242880
-clientMaxPostsCount = 100
-# Количество последовательных запросов к серверу, после которых клиент должен отключиться
 clientVersion = "0.1.1"
 clientIsPublic = False
 clientRequestLengthLimit = 52428800 # 50 MB
-clientAcceptImages = True
+clientMaxPostsAtOnce = 100
+clientAcceptFiles = True
 clientPublicWebserverHost = ""
 clientPublicWebserverPort = 0
 
-clientPrivateKeyLength = 10
-clientPublicKeyLength = 10
+#clientPrivateKeyLength = 10
+#clientPublicKeyLength = 10
 clientRejectedConnectionsLimit = 30
 clientAfterReachingRejectedConnectionsLimit = "smart_mode"
 """
 proceed = connect 
 smart_mode = Подключаться, если число циклов опроса серверов делится на количество 
-пропущенных соединений (оптимальный вариант) TRANSLATE
+пропущенных соединений (оптимальный вариант) TODO TRANSLATE
 remove = delete from host list
 """
-
-
+clientRejectedConnectionsSmartModeLimit = 100
 
 # slashes are important
 postsDir = "posts/"
@@ -50,9 +50,7 @@ postDeletingMovePath = "outdated"
 
 #[НАСТРОЙКИ СЕРВЕРА]
 serverListeningOn = "127.0.0.1:5441"
-serverPort = 5441
 serverMaxConnections = 10
-
 
 
 
