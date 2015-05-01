@@ -1,75 +1,63 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#Новый пост
-newPostDefaultSignatureLength = 1;
+#[GLOBAL SETTINGS]
+postsDir = "posts/"
+postsFileDir = "files/"
+attachmentsDir = "attachments/"
+deletedPostsDir = "moved/"
+outdatedPostsDir = "old/"
+
+maxMemUsage = 102400 #in KB TODO
+maxPostsCount = 1000 #0 to disable TODO
+enablePostDeleting = True #TODO
+postDeletingMode = "move" #TODO
+
+#[POSTING SETTINGS]
+newPostDefaultPOW = 1;
 newPostDefaultName = "Anonymous"
 newPostDefaultSubject = ""
 newPostDefaultTags = "tag,test,py2p"
 newPostDefaultFiles = "test.gif,test.jpg"
 newPostDefaultLanguages = "en,ru"
 
-#[ОБЩИЕ НАСТРОЙКИ]
-maxFailedConnections = 10
-maxReceivedPostsCount = 1000
-#maximum posts that can be saved
-clientRequestsInterval = 60
-clientRequestTimeout = 10
-clientMaxIterationCount = 100
-clientMaxPostSize = 5242880
-clientVersion = "0.1.1"
-clientIsPublic = False
-clientRequestLengthLimit = 52428800 # 50 MB
-clientMaxPostsAtOnce = 100
-clientAcceptFiles = True
-clientPublicWebserverHost = ""
-clientPublicWebserverPort = 0
-
-#clientPrivateKeyLength = 10
-#clientPublicKeyLength = 10
-clientRejectedConnectionsLimit = 30
-clientAfterReachingRejectedConnectionsLimit = "smart_mode"
+#[CLIENT SETTINGS]
+# TODO TRANSLATE
+clientRequestsInterval = 1 				# Интервал между запросами к разным серверам
+clientMaxIterationCount = 10 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
+clientMaxPostSize = 5242880 			# Максимальный размер поста
+clientMaxPostsAtOnce = 100 				# Максимальное количество постов, передаваемых за раз
+clientRequiredPOW = 0 					# POW, требуемый для запроса поста поста
+clientMaxRequestPOW = 3 				# Максимальный POW, который клиент будет вычислять для запроса постов
+clientMaxPOWTimeShift = 10 				# срок жизни POW для запроса поста.
+										# Если прописанное в запросе время отличается от текущего на большее число, POW считается недействительным
+clientRequestLengthLimit = 52428800 	# Максимальный размер запроса
+clientAcceptFiles = True 				# Принимает посты с файлами
+clientRejectedConnectionsLimit = 30 	# Количество отклоненных подряд запросов
+clientBehaviorAfterReachingRejectedConnectionsLimit = "smart_mode" 		# 
+clientRejectedConnectionsSmartModeLimit = 100
 """
 proceed = connect 
 smart_mode = Подключаться, если число циклов опроса серверов делится на количество 
 пропущенных соединений (оптимальный вариант) TODO TRANSLATE
 remove = delete from host list
 """
-clientRejectedConnectionsSmartModeLimit = 100
-
-# slashes are important
-postsDir = "posts/"
-postsFileDir = "files/"
-attachmentsDir = "attachments/"
-
-maxMemUsage = 102400 #in KB
-shelveFileName = "data.shelve"
-enablePostDeleting = True
-postDeletingMode = "move"
-postDeletingMovePath = "outdated"
-
-#[НАСТРОЙКИ СЕРВЕРА]
-serverListeningOn = "127.0.0.1:5441"
-serverMaxConnections = 10
 
 
+#[SERVER SETTINGS]
+serverPort = 5441
+serverMaxPostsAtOnce = 100
+serverMaxPostSize = 5242880
+serverMaxRequestSize = 52428800 # 50 MB
+serverMaxRequestPOW = 3
+serverRequiredPOW = 0
+serverMaxPOWTimeShift = 10
+serverAcceptFiles = True
 
 
-
-
-
-
-
-
-
-
-#[НАСТРОЙКИ ВЕБСЕРВЕРА]
-
-
-
-
+#[WEBSERVER SETTINGS]
 webServerPort = 5440
-# Сервер слушает на этом порту
+# server listent on this port
 webServerPostingEnabled = True
 # Разрешить постить через веб-морду, а не с помощью скрипта
 webServerPostRecursionLevel = 10
@@ -85,4 +73,6 @@ webServerEnableThumbnails = True
 webServerThumbnailSize = 200,200
 webServerThumbnailQuality = 50
 
-logging = True
+loggingEnabled = True
+logFileName = "log.txt"
+logMaxSize = 52428800 #50 MB

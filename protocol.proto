@@ -4,45 +4,42 @@ message Post{
 		optional bytes source = 2;
 		optional string md5hash = 3;
 	}
-	required string id = 1;
-	optional string name = 2;
-	optional string subject = 3;
-	optional string text = 4;
-	optional int64 time = 5;
-	repeated File files = 6;
-	optional string refer = 7;
-	repeated string tags = 8;
-	repeated string languages = 9;
+	optional string id = 1;
+	optional int64 pow = 2;
+	optional string name = 3;
+	optional string subject = 4;
+	optional string text = 5;
+	optional int64 time = 6;
+	repeated File files = 7;
+	optional string refer = 8;
+	repeated string tags = 9;
+	repeated string languages = 10;
 }
 
 message Data{
-/*	message Keys{
-		optional string clientKey = 1;
-		optional string serverKey = 2;
-		optional string sendingKey = 3;
-		optional bool needKeyRegeneration = 4;
-	}*/
-	message Host{
-		required string address	= 1;
-		optional string isPublic = 2;
-	}
-	message ReceivedPost{
+	message KnownPost{
 		required string id = 1;
 		optional int64 size = 2;
 		repeated string tags = 6;
 		repeated string languages = 7 ;
 	}
 	message MetaData{
-		optional int64 	max_posts_at_once = 2;
-		optional string listening_on = 		3;
-		optional bool 	accepts_images = 	4;
-		optional int64 	max_post_size =		5;
-		optional int64 	max_request_size=	6;
+		optional int64 	maxPostsAtOnce = 1;
+		optional int64 	maxPostSize = 2;
+		optional int64 	maxRequestSize =3;
+		optional int32  requestPOW = 4;
+		optional string serverAddress = 5;
+		optional int32  version = 6;
+		optional bool	versionIncompatibility = 7;
 	}
-
+	message PostRequest{
+		optional string id = 1;
+		optional int64 pow = 2;
+		optional int64 time = 3;
+	}
 	repeated Post sending = 2;
-	repeated string requesting = 3;
-	repeated ReceivedPost known = 4;
-	optional MetaData meta = 5;
+	repeated PostRequest requesting = 3;
+	repeated KnownPost known = 4;
+	required MetaData meta = 5;
 
 }
