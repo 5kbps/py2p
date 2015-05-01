@@ -70,7 +70,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 
 
 if "--test" in sys.argv:
-	for i in range(1,10):
+	for i in range(1,3):
 		np = CreatePost("name","subject","text","test.jpg","o,tag,test","refersto","en,ru",3)
 else:
 	name = raw_input("Name: ")
@@ -82,7 +82,9 @@ else:
 	refersto = raw_input("Insert links to other posts to make an answer (comma separated): ")
 	POW = raw_input("Sugnature length (0-25): ")
 	if POW == "":
-		POW = newPostDefaultSignatureLength
+		POW = newPostDefaultPOW
+	else:
+		POW = int(POW)
 	if files=="":
 		files = newPostDefaultFiles
 	if tags=="":

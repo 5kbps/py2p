@@ -25,6 +25,8 @@ defaultProtocolSettings = {
 	"requestPOW": 0,
 	"version": py2pVersion
 }
+def R():
+	print "--------------------------------------"
 #lists
 def trimStringAsList(string):
 	string = removeEmptyItems( string.split(","))
@@ -81,6 +83,8 @@ def isReceived(postid):
 	return fileExists(postsDir+postid)
 def isDeleted(postid):
 	return False
+def isAvaliable(postid):
+	return not isDeleted(postid) and not isLocal(postid) and isReceived(postid)
 def isLocal(postid):
 	return False
 def isPostId(postid):
@@ -92,7 +96,10 @@ def readPost(postid):
 	if isReceived(postid):
 		post.ParseFromString(readFile(postsDir+postid,'rb'))
 	return post
-
+def writePost(post):
+	fd = open(postsDir+post.id,'wb')
+	fd.write(post.SerializeToString())
+	fd.close()
 def getFilePow(postid):
 	post = readPost(postid)
 	return getPostPow(post)
@@ -156,57 +163,59 @@ def updateDB():
 	post_files = os.listdir(postsDir)	
 	#print post_files
 	for post_file in post_files:
-		post = protocol_pb2.Post()
-		post.ParseFromString( readFile(postsDir+ post_file) )
-		if hasattr( post, "refersto"):
-			if not post.refersto in get['connectedto']:
-				get['connectedto'][post.refersto] = set()
-			get['connectedto'][post.refersto].add( post.id)
-		if hasattr(post, "refersto"):
-			if not post.id in get['refersto']:
-				get['refersto'][post.id] = post.refersto
-		for tag in post.tags:
-			if not tag in get['bytag']:
-				get['bytag'][tag] = set()
-			get['bytag'][tag].add(post.id)
-			if not hasattr( get['tags'], post.id):
-				get['tags'][post.id] = set()
-			get['tags'][post.id].add(tag)
-		for lang in post.languages:
-
-			if not post.id in get['languages']:
-				get['languages'][post.id] = set()
-			get['languages'][post.id].add(lang)
-
-			if not lang in get['bylang'] and lang in languagesList:
-				get['bylang'][lang] = set()
-			get['bylang'][lang].add(post.id)
-		for post_file in post.files:
-
-			if not post.id in get['files']:
-				get['files'][post.id] = set()
-			get['files'][post.id].add(post_file.md5hash)
-
-			if not post_file.md5hash in get['byfilemd5hash']:
-				get['byfilemd5hash'][post_file.md5hash] = set()
-			get['byfilemd5hash'][post_file.md5hash].add(post.id)
-			file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]				
-			if file_ext != "":
-				file_name = postsFileDir+post_file.md5hash+"."+file_ext
-			else:
-				file_name =  postsFileDir+post_file.md5hash
-			if not fileExists(file_name):
-				fd = open(file_name,'wb')
-				fd.write(post_file.source)
-				fd.close()
-				#print post.id ,"-> ", post_file.name
-			else:
-				do = "nothing"
-				#print post.id ,"-[exitsts] ", post_file.name
-		get['received'].add(post.id)
+		add2DB(post_file)
 	endTime = time.time()
 	print "Post parsing took ", float(endTime - startTime )
 	print "Memory:",getMemUsage()
+	
+def add2DB(postid):
+	post = readPost(postid)
+	if hasattr( post, "refersto"):
+		if not post.refersto in get['connectedto']:
+			get['connectedto'][post.refersto] = set()
+		get['connectedto'][post.refersto].add( post.id)
+	if hasattr(post, "refersto"):
+		if not post.id in get['refersto']:
+			get['refersto'][post.id] = post.refersto
+	for tag in post.tags:
+		if not tag in get['bytag']:
+			get['bytag'][tag] = set()
+		get['bytag'][tag].add(post.id)
+		if not hasattr( get['tags'], post.id):
+			get['tags'][post.id] = set()
+		get['tags'][post.id].add(tag)
+	for lang in post.languages:
+
+		if not post.id in get['languages']:
+			get['languages'][post.id] = set()
+		get['languages'][post.id].add(lang)
+
+		if not lang in get['bylang'] and lang in languagesList:
+			get['bylang'][lang] = set()
+		get['bylang'][lang].add(post.id)
+	for post_file in post.files:
+
+		if not post.id in get['files']:
+			get['files'][post.id] = set()
+		get['files'][post.id].add(post_file.md5hash)
+
+		if not post_file.md5hash in get['byfilemd5hash']:
+			get['byfilemd5hash'][post_file.md5hash] = set()
+		get['byfilemd5hash'][post_file.md5hash].add(post.id)
+		file_ext = post_file.name.split(".")[len(post_file.name.split("."))-1]				
+		if file_ext != "":
+			file_name = postsFileDir+post_file.md5hash+"."+file_ext
+		else:
+			file_name =  postsFileDir+post_file.md5hash
+		if not fileExists(file_name):
+			fd = open(file_name,'wb')
+			fd.write(post_file.source)
+			fd.close()
+			#print post.id ,"-> ", post_file.name
+		else:
+			do = "nothing"
+			#print post.id ,"-[exitsts] ", post_file.name
+	get['received'].add(post.id)
 
 def deletePost(postid):
 	if fileExists(postsDir+postid):
@@ -343,6 +352,10 @@ class Server():
 		self.rejected_connections = 0
 		self.received_posts_count = 0
 		self.received_posts_total_size = 0
+
+		self.toSend = set()
+		self.toRequest = set()
+
 	def addHost(self,host="127.0.0.1:5441"):
 		host = host.split(":")
 		port = host[1]
@@ -363,6 +376,8 @@ class Client():
 		self.total_rejected_connections = 0
 		self.rejected_connections = 0
 		
+		self.toSend = set()
+		self.toRequest = set()
 		self.requested_post_count = 0
 		self.sent_post_count 	  = 0
 	def addHost(self,host="127.0.0.1:5441"):
@@ -377,3 +392,7 @@ class Client():
 get = {}
 
 valid = ValidatorClass()
+
+#initDB()
+#updateDB()
+#print get

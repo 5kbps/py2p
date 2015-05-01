@@ -17,6 +17,24 @@ message Post{
 }
 
 message Data{
+	message Post{
+		message File{
+			optional string name = 1;
+			optional bytes source = 2;
+			optional string md5hash = 3;
+		}
+		optional string id = 1;
+		optional int64 pow = 2;
+		optional string name = 3;
+		optional string subject = 4;
+		optional string text = 5;
+		optional int64 time = 6;
+		repeated File files = 7;
+		optional string refer = 8;
+		repeated string tags = 9;
+		repeated string languages = 10;
+	}
+
 	message KnownPost{
 		required string id = 1;
 		optional int64 size = 2;
@@ -24,13 +42,13 @@ message Data{
 		repeated string languages = 7 ;
 	}
 	message MetaData{
-		optional int64 	maxPostsAtOnce = 1;
-		optional int64 	maxPostSize = 2;
-		optional int64 	maxRequestSize =3;
-		optional int32  requestPOW = 4;
-		optional string serverAddress = 5;
-		optional int32  version = 6;
-		optional bool	versionIncompatibility = 7;
+		optional int64 	maxPostSize = 1;
+		optional int64 	maxRequestSize =2;
+		optional int32  requiredPOW = 3;
+		optional string serverAddress = 4;
+		optional int32  version = 5;
+		optional bool	versionIncompatibility = 6;
+		optional bool 	acceptFiles = 7;
 	}
 	message PostRequest{
 		optional string id = 1;
@@ -40,6 +58,6 @@ message Data{
 	repeated Post sending = 2;
 	repeated PostRequest requesting = 3;
 	repeated KnownPost known = 4;
-	required MetaData meta = 5;
+	optional MetaData meta = 5;
 
 }
