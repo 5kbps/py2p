@@ -18,7 +18,6 @@ sys.setdefaultencoding('utf8')
 languagesList = ["en","ru","pol","uk","fr","de","fi","ja","lv","pol","es","sv"]
 py2pVersion = 0
 defaultProtocolSettings = {
-	"maxPostsAtOnce": 100000,
 	"maxPostSize": 5242880,
 	"maxRequestSize": 104857600,
 	"acceptFiles": True,
@@ -57,6 +56,10 @@ def readFile(filename,mode="rb"):
 		return content
 	else:
 		return ""
+def writeFile(filename,content,mode="wb"):
+	fd = open(filename,mode)
+	fd.write(content)
+	fd.close()
 def fileExists(filename):
 	return os.path.isfile(filename)
 def deleteFile(filename):
@@ -97,9 +100,10 @@ def readPost(postid):
 		post.ParseFromString(readFile(postsDir+postid,'rb'))
 	return post
 def writePost(post):
-	fd = open(postsDir+post.id,'wb')
-	fd.write(post.SerializeToString())
-	fd.close()
+	if post.id:
+		fd = open(postsDir+post.id,'wb')
+		fd.write(post.SerializeToString())
+		fd.close()
 def getFilePow(postid):
 	post = readPost(postid)
 	return getPostPow(post)
@@ -144,9 +148,10 @@ def initDB():
 	get['time'] = {}
 	get['pow'] = {}
 	get['servers'] = set()
-	get['clients'] = {}
+	get['companions'] = {}
 	get['files'] = {}
 	get['byfilemd5hash'] = {}
+	get['requesting'] = {}
 	#peering
 	get['servers'].add(Server().addHost("127.0.0.1:5441"))
 	get['clients'] = {}
@@ -167,7 +172,7 @@ def updateDB():
 	endTime = time.time()
 	print "Post parsing took ", float(endTime - startTime )
 	print "Memory:",getMemUsage()
-	
+
 def add2DB(postid):
 	post = readPost(postid)
 	if hasattr( post, "refersto"):
@@ -311,22 +316,6 @@ def log(text):
 		print text
 #classes
 
-class PostClass:
-	def __init__(self):
-		self.id = ''
-		self.name = ''
-		self.subject = ''
-		self.text = ''
-		self.time = 0
-		self.signature = 0
-		self.siglen = 0
-		self.fileName = ''
-		self.tags = set()
-		self.languages = set()
-		self.refersto = ""
-		self.connectedto = set()
-
-
 class ValidatorClass():
 	def hostname(self,hostname):
 		if len(hostname) > 255:
@@ -353,9 +342,6 @@ class Server():
 		self.received_posts_count = 0
 		self.received_posts_total_size = 0
 
-		self.toSend = set()
-		self.toRequest = set()
-
 	def addHost(self,host="127.0.0.1:5441"):
 		host = host.split(":")
 		port = host[1]
@@ -367,7 +353,6 @@ class Server():
 class Client():
 	def __init__(self,host="",port=0):
 		self.version = py2pVersion
-		self.requestLengthLimit = 52428800 #50 MB
 		self.maxPostSize = 5242880 # 5 MB
 		self.maxPostsAtOnce = 100
 		self.publicWebserverAddress = ''
@@ -376,18 +361,8 @@ class Client():
 		self.total_rejected_connections = 0
 		self.rejected_connections = 0
 		
-		self.toSend = set()
-		self.toRequest = set()
 		self.requested_post_count = 0
 		self.sent_post_count 	  = 0
-	def addHost(self,host="127.0.0.1:5441"):
-		host = host.split(":")
-		port = host[1]
-		host = host[0]
-		self.host = host
-		self.port = port
-		return self
-
 
 get = {}
 

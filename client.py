@@ -43,7 +43,7 @@ class ClientClass:
 		global get
 		data = protocol_pb2.Data()
 		data = attachMeta(data)
-		data = attachKnownPosts(data)
+		data = attachKnownPosts(data,maxRequestSize)
 		return data.SerializeToString()
 	def startCycle(self):
 		global get
@@ -82,28 +82,13 @@ class ClientClass:
 #						flagToBreak = True
 					iteration+=1
 					print "iteration",iteration
-					if iteration > 2:#clientMaxIterationCount:
+					if iteration > 20:#clientMaxIterationCount:
 						flagToBreak = True
-					data2send = self.processData(server, received)
+					data2send , server= processData(server, received)
 				else:
 					print "Data to send is empty, connection closed"
 					sock.close()
 					flagToBreak = True
 			sock.close()
-	def processData(self,server,received_data):
-		global get, valid
-		rd = protocol_pb2.Data()
-		rd.ParseFromString(received_data)
-		server, rd = normalizeData(server,rd)
-		receivePosts(rd)
-
-		data = protocol_pb2.Data()
-		data = attachMeta(data)
-		if not hasattr(rd,"requesting"):
-			data = attachKnownPosts(data,rd)
-		if maxRequestPOW >= server.requestPOW:
-			data = requestPosts(server,data,rd)
-		data = sendPosts(server,data,rd)
-		return data.SerializeToString()
 client = ClientClass()
 client.startCycle()

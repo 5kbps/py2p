@@ -7,8 +7,8 @@ postsFileDir = "files/"
 attachmentsDir = "attachments/"
 deletedPostsDir = "moved/"
 outdatedPostsDir = "old/"
+webserverDir = "webserver/"
 
-maxMemUsage = 102400 #in KB TODO
 maxPostsCount = 1000 #0 to disable TODO
 enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO

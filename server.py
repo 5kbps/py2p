@@ -15,20 +15,21 @@ class Handler(SocketServer.BaseRequestHandler):
 		global get
 		# self.request is the client connection
 		print "		[Processing a request...]",self.client_address
-		received_data = self.request.recv(maxRequestSize+maxPostSize)  # clip input at
+		received_data = self.request.recv(maxRequestSize)
 		#Getting "client" object
 		print "GOT IT", len(received_data)
 		client_address = self.client_address
-		if not self.client_address[0] in get['clients']:
+		if not self.client_address[0] in get['companions']:
 			print "new peer", client_address[0]
 			#print "list",get['clients']
-			client = get['clients'][client_address[0]] = Client()
+			client = Client()
 			client.host = self.client_address[0]
 			client.port = self.client_address[1]
 		else:
 			print "known peer", self.client_address
-			client = get['clients'][client_address[0]]
-		reply = server.processData(client, received_data)
+			client = get['companions'][client_address[0]]
+		reply,client = processData(client, received_data)
+		get['companions'][client_address[0]] = client
 		if reply is not None and reply is not "":
 			print "			Sending a reply", len(reply)
 			self.request.send(reply)
@@ -37,25 +38,12 @@ class Handler(SocketServer.BaseRequestHandler):
 #class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	def __init__(self, server_address, RequestHandlerClass):
+		SocketServer.TCPServer.allow_reuse_address = True
 		SocketServer.TCPServer.__init__(self, server_address, RequestHandlerClass)
+		SocketServer.TCPServer.allow_reuse_address = True
 		self.served = 0
 		self.port = server_address[1]
 		print "[Server started]"
-	def processData(self,client,received_data):
-		global get, valid
-		rd = protocol_pb2.Data()
-		rd.ParseFromString(received_data)
-		client, rd = normalizeData(client,rd)
-		receivePosts(rd)
-
-		data=protocol_pb2.Data()
-		data = attachMeta(data)
-		if len(data.requesting)==0:
-			data = attachKnownPosts(data)
-		if serverMaxRequestPOW >= client.requestPOW:
-			data = requestPosts(client,data,rd)
-		data = sendPosts(client,data,rd)
-		return data.SerializeToString()
 if __name__ == "__main__":
 	global server
 	server = serverClass(("127.0.0.1", serverPort), Handler)

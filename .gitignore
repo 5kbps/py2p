@@ -2,4 +2,5 @@
 *.shelve
 files/*
 posts/*
+webserver/posts/*
 *.txt
