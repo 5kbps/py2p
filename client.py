@@ -80,11 +80,13 @@ class ClientClass:
 #					except BaseException as e:#
 #						print "		Error: ", e
 #						flagToBreak = True
-					iteration+=1
 					print "iteration",iteration
-					if iteration > 20:#clientMaxIterationCount:
+					if iteration > clientMaxIterationCount:
 						flagToBreak = True
 					data2send , server= processData(server, received)
+					if server.toSend == 0 and server.toRequest == 0 and iteration > 0:
+						flagToBreak = True
+					iteration+=1
 				else:
 					print "Data to send is empty, connection closed"
 					sock.close()

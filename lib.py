@@ -6,6 +6,7 @@ import sys
 import html
 import urllib
 from config import *
+from base64 import b64decode
 import time
 import resource
 from PIL import Image
@@ -101,7 +102,7 @@ def readPost(postid):
 	return post
 def writePost(post):
 	if post.id:
-		fd = open(postsDir+post.id,'wb')
+		fd = open(postsDir+post.id,'w')
 		fd.write(post.SerializeToString())
 		fd.close()
 def getFilePow(postid):
@@ -214,7 +215,7 @@ def add2DB(postid):
 			file_name =  postsFileDir+post_file.md5hash
 		if not fileExists(file_name):
 			fd = open(file_name,'wb')
-			fd.write(post_file.source)
+			fd.write(b64decode(post_file.source))
 			fd.close()
 			#print post.id ,"-> ", post_file.name
 		else:
@@ -363,6 +364,16 @@ class Client():
 		
 		self.requested_post_count = 0
 		self.sent_post_count 	  = 0
+"""
+class PostClass():
+	def __init__(self):
+		self.id = ""
+		self.name = ""
+		self.subject = ""
+		self.text = ""
+		self.files = set()
+		self.
+"""
 
 get = {}
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from config import *
 from lib import *
+from base64 import b64encode, b64decode
 from copy import deepcopy
 import time
 import sys
@@ -11,19 +12,22 @@ sys.setdefaultencoding('utf8')
 # data
 def processData(companion,received_data):
 	global get, valid
-	rd = protocol_pb2.Data()	
+	updateDB()
+	print "____LEN",len(received_data)
+	rd = protocol_pb2.Data()
 	rd.ParseFromString(received_data)
 	companion, rd = normalizeData(companion,rd)
 	companion = receivePosts(rd,companion)
 	data=protocol_pb2.Data()
 	data = attachMeta(data)
-	if len(data.requesting)==0:
-		data = attachKnownPosts(data,rd.meta.maxRequestSize)
+#	if len(data.requesting)==0:
+	data = attachKnownPosts(data,rd.meta.maxRequestSize)
 	if serverMaxRequestPOW >= companion.requestPOW:
 		data,companion = requestPosts(companion,data,rd)
 	data,companion = sendPosts(companion,data,rd)
-	print "REAL LENGTH ",len(data.SerializeToString())
 	print "LENGTH 		",data.ByteSize()
+	companion.toRequest = len(data.requesting)
+	companion.toSend = len(data.sending)
 	if data.ByteSize()>maxRequestSize:
 		print maxRequestSize,"<",data.ByteSize()
 		sys.exit(0)
@@ -49,21 +53,23 @@ def attachMeta(data):
 #posts
 def attachKnownPosts(data,limit):
 	print ":attachKnownPosts"
-	nd = deepcopy(data)
+	#nd = deepcopy(data)
 	for post in get['received']:
-		cur_post = nd.known.add()
+		cur_post = data.known.add()
 		cur_post.id = post
 		cur_post.size = getPostSize(post)
 		for tag in get["tags"][post]:
 			cur_post.tags.append(tag)
 		for language in get["languages"][post]:
 			cur_post.languages.append(language)
-		if checkLimits(nd):
-			data = nd
+		if checkLimits(data,maxRequestSize,1024):
+			#data = deepcopy(nd)
 			print "		[+]",post,": ",cur_post.ByteSize()
 		else:
-			nd = data
+			#nd = deepcopy(data)
+			cur_post.remove()
 			print "		[-]:",post
+			break
 	return data
 def isGood(known_post):
 	return True
@@ -78,11 +84,12 @@ def requestPosts(companion,data,rd):
 			requesting_post.id = post.id
 			requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requiredPOW)
 			if checkLimits(nd):
-				data = nd
+				data = deepcopy(nd)
 				print "		[+]",post.id
 			else:
-				nd = data
+				nd = deepcopy(data)
 				print "		[-]",post.id
+				break
 		else:
 			print "		[--]",post.id
 	return data, companion
@@ -93,15 +100,17 @@ def sendPosts(companion,data,rd):
 	for requesting_post in rd.requesting:
 		if checkRequestPOW(requesting_post,companion.requestPOW):
 			if isAvaliable(requesting_post.id):
-				fileContent = readFile(postsDir+requesting_post.id)
-				post = nd.sending.add()
-				post.ParseFromString(fileContent)
+				#post = nd.sending.append(fileContent.decode('unicode_escape') )
+				post = nd.sending.append(b64encode(readFile(postsDir+requesting_post.id)))
+#				post.ParseFromString(readFile(postsDir+requesting_post.id))
 				if checkLimits(nd):
-					data = nd
+					data = deepcopy(nd)
 					print "		[+]:",requesting_post.id,"(",nd.ByteSize(),")"
 				else:
-					nd = data
+					nd = deepcopy(data)
 					print "		[-]:",requesting_post.id
+					break
+				break
 			else:
 				print "post not avaliable", requesting_post.id
 		else:
@@ -110,7 +119,9 @@ def sendPosts(companion,data,rd):
 	return data, companion
 def receivePosts(rd,companion):
 	print ":receivePosts"
-	for post in rd.sending:
+	for post_source in rd.sending:
+		post = protocol_pb2.Post()
+		post.ParseFromString(b64decode(post_source))
 		if not isDeleted(post.id) and not isReceived(post.id):
 			print "		[new post received]:",post.id
 			writePost(post)
@@ -147,5 +158,5 @@ def getRequestPOW(post,requiredPOW):
 		timeNow = 0;
 	return powValue, timeNow
 def checkLimits(data,limit=maxRequestSize,increment=0):
-	print "		:checkLimits:",data.ByteSize(),"?",limit+increment
-	return data.ByteSize() < limit+increment-maxPostSize
+	#print "		:checkLimits:",data.ByteSize(),"?",limit+increment
+	return data.ByteSize() < limit+increment

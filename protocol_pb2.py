@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='',
-  serialized_pb='\n\x0eprotocol.proto\"\xdc\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\"\x96\x05\n\x04\x44\x61ta\x12\x1b\n\x07sending\x18\x02 \x03(\x0b\x32\n.Data.Post\x12%\n\nrequesting\x18\x03 \x03(\x0b\x32\x11.Data.PostRequest\x12\x1e\n\x05known\x18\x04 \x03(\x0b\x32\x0f.Data.KnownPost\x12\x1c\n\x04meta\x18\x05 \x01(\x0b\x32\x0e.Data.MetaData\x1a\xe1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\x03\x12\x1e\n\x05\x66iles\x18\x07 \x03(\x0b\x32\x0f.Data.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\x1a\x46\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0c\n\x04tags\x18\x06 \x03(\t\x12\x11\n\tlanguages\x18\x07 \x03(\t\x1a\xa9\x01\n\x08MetaData\x12\x13\n\x0bmaxPostSize\x18\x01 \x01(\x03\x12\x16\n\x0emaxRequestSize\x18\x02 \x01(\x03\x12\x13\n\x0brequiredPOW\x18\x03 \x01(\x05\x12\x15\n\rserverAddress\x18\x04 \x01(\t\x12\x0f\n\x07version\x18\x05 \x01(\x05\x12\x1e\n\x16versionIncompatibility\x18\x06 \x01(\x08\x12\x13\n\x0b\x61\x63\x63\x65ptFiles\x18\x07 \x01(\x08\x1a\x34\n\x0bPostRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04time\x18\x03 \x01(\x03')
+  serialized_pb='\n\x0eprotocol.proto\"\xdc\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\x03\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\t\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\"\xa6\x03\n\x04\x44\x61ta\x12\x0f\n\x07sending\x18\x02 \x03(\t\x12%\n\nrequesting\x18\x03 \x03(\x0b\x32\x11.Data.PostRequest\x12\x1e\n\x05known\x18\x04 \x03(\x0b\x32\x0f.Data.KnownPost\x12\x1c\n\x04meta\x18\x05 \x01(\x0b\x32\x0e.Data.MetaData\x1a\x46\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0c\n\x04tags\x18\x06 \x03(\t\x12\x11\n\tlanguages\x18\x07 \x03(\t\x1a\xa9\x01\n\x08MetaData\x12\x13\n\x0bmaxPostSize\x18\x01 \x01(\x03\x12\x16\n\x0emaxRequestSize\x18\x02 \x01(\x03\x12\x13\n\x0brequiredPOW\x18\x03 \x01(\x05\x12\x15\n\rserverAddress\x18\x04 \x01(\t\x12\x0f\n\x07version\x18\x05 \x01(\x05\x12\x1e\n\x16versionIncompatibility\x18\x06 \x01(\x08\x12\x13\n\x0b\x61\x63\x63\x65ptFiles\x18\x07 \x01(\x08\x1a\x34\n\x0bPostRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04time\x18\x03 \x01(\x03')
 
 
 
@@ -34,8 +34,8 @@ _POST_FILE = _descriptor.Descriptor(
       options=None),
     _descriptor.FieldDescriptor(
       name='source', full_name='Post.File.source', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value="",
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=unicode("", "utf-8"),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
@@ -150,137 +150,6 @@ _POST = _descriptor.Descriptor(
 )
 
 
-_DATA_POST_FILE = _descriptor.Descriptor(
-  name='File',
-  full_name='Data.Post.File',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='name', full_name='Data.Post.File.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='source', full_name='Data.Post.File.source', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value="",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='md5hash', full_name='Data.Post.File.md5hash', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=186,
-  serialized_end=239,
-)
-
-_DATA_POST = _descriptor.Descriptor(
-  name='Post',
-  full_name='Data.Post',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='id', full_name='Data.Post.id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='pow', full_name='Data.Post.pow', index=1,
-      number=2, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='name', full_name='Data.Post.name', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='subject', full_name='Data.Post.subject', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='text', full_name='Data.Post.text', index=4,
-      number=5, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='time', full_name='Data.Post.time', index=5,
-      number=6, type=3, cpp_type=2, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='files', full_name='Data.Post.files', index=6,
-      number=7, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='refer', full_name='Data.Post.refer', index=7,
-      number=8, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=unicode("", "utf-8"),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='tags', full_name='Data.Post.tags', index=8,
-      number=9, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-    _descriptor.FieldDescriptor(
-      name='languages', full_name='Data.Post.languages', index=9,
-      number=10, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      options=None),
-  ],
-  extensions=[
-  ],
-  nested_types=[_DATA_POST_FILE, ],
-  enum_types=[
-  ],
-  options=None,
-  is_extendable=False,
-  extension_ranges=[],
-  serialized_start=381,
-  serialized_end=606,
-)
-
 _DATA_KNOWNPOST = _descriptor.Descriptor(
   name='KnownPost',
   full_name='Data.KnownPost',
@@ -325,8 +194,8 @@ _DATA_KNOWNPOST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=608,
-  serialized_end=678,
+  serialized_start=368,
+  serialized_end=438,
 )
 
 _DATA_METADATA = _descriptor.Descriptor(
@@ -394,8 +263,8 @@ _DATA_METADATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=681,
-  serialized_end=850,
+  serialized_start=441,
+  serialized_end=610,
 )
 
 _DATA_POSTREQUEST = _descriptor.Descriptor(
@@ -435,8 +304,8 @@ _DATA_POSTREQUEST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=852,
-  serialized_end=904,
+  serialized_start=612,
+  serialized_end=664,
 )
 
 _DATA = _descriptor.Descriptor(
@@ -448,7 +317,7 @@ _DATA = _descriptor.Descriptor(
   fields=[
     _descriptor.FieldDescriptor(
       name='sending', full_name='Data.sending', index=0,
-      number=2, type=11, cpp_type=10, label=3,
+      number=2, type=9, cpp_type=9, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -477,25 +346,21 @@ _DATA = _descriptor.Descriptor(
   ],
   extensions=[
   ],
-  nested_types=[_DATA_POST, _DATA_KNOWNPOST, _DATA_METADATA, _DATA_POSTREQUEST, ],
+  nested_types=[_DATA_KNOWNPOST, _DATA_METADATA, _DATA_POSTREQUEST, ],
   enum_types=[
   ],
   options=None,
   is_extendable=False,
   extension_ranges=[],
   serialized_start=242,
-  serialized_end=904,
+  serialized_end=664,
 )
 
 _POST_FILE.containing_type = _POST;
 _POST.fields_by_name['files'].message_type = _POST_FILE
-_DATA_POST_FILE.containing_type = _DATA_POST;
-_DATA_POST.fields_by_name['files'].message_type = _DATA_POST_FILE
-_DATA_POST.containing_type = _DATA;
 _DATA_KNOWNPOST.containing_type = _DATA;
 _DATA_METADATA.containing_type = _DATA;
 _DATA_POSTREQUEST.containing_type = _DATA;
-_DATA.fields_by_name['sending'].message_type = _DATA_POST
 _DATA.fields_by_name['requesting'].message_type = _DATA_POSTREQUEST
 _DATA.fields_by_name['known'].message_type = _DATA_KNOWNPOST
 _DATA.fields_by_name['meta'].message_type = _DATA_METADATA
@@ -516,18 +381,6 @@ class Post(_message.Message):
 
 class Data(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
-
-  class Post(_message.Message):
-    __metaclass__ = _reflection.GeneratedProtocolMessageType
-
-    class File(_message.Message):
-      __metaclass__ = _reflection.GeneratedProtocolMessageType
-      DESCRIPTOR = _DATA_POST_FILE
-
-      # @@protoc_insertion_point(class_scope:Data.Post.File)
-    DESCRIPTOR = _DATA_POST
-
-    # @@protoc_insertion_point(class_scope:Data.Post)
 
   class KnownPost(_message.Message):
     __metaclass__ = _reflection.GeneratedProtocolMessageType

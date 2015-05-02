@@ -1,7 +1,7 @@
 message Post{
 	message File{
 		optional string name = 1;
-		optional bytes source = 2;
+		optional string source = 2;
 		optional string md5hash = 3;
 	}
 	optional string id = 1;
@@ -17,24 +17,6 @@ message Post{
 }
 
 message Data{
-	message Post{
-		message File{
-			optional string name = 1;
-			optional bytes source = 2;
-			optional string md5hash = 3;
-		}
-		optional string id = 1;
-		optional int64 pow = 2;
-		optional string name = 3;
-		optional string subject = 4;
-		optional string text = 5;
-		optional int64 time = 6;
-		repeated File files = 7;
-		optional string refer = 8;
-		repeated string tags = 9;
-		repeated string languages = 10;
-	}
-
 	message KnownPost{
 		required string id = 1;
 		optional int64 size = 2;
@@ -55,9 +37,8 @@ message Data{
 		optional int64 pow = 2;
 		optional int64 time = 3;
 	}
-	repeated Post sending = 2;
+	repeated string sending = 2;
 	repeated PostRequest requesting = 3;
 	repeated KnownPost known = 4;
 	optional MetaData meta = 5;
-
 }

@@ -14,7 +14,7 @@ enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
 
 maxPostSize = 5242880 			# Максимальный размер поста
-maxRequestSize = 52428800 	# Максимальный размер запроса
+maxRequestSize = 128000000 	# Максимальный размер запроса
 acceptFiles = True 				# Принимает посты с файлами
 requiredPOW = 0 					# POW, требуемый для запроса поста поста
 maxRequestPOW = 3 				# Максимальный POW, который клиент будет вычислять для запроса постов
@@ -31,7 +31,7 @@ newPostDefaultLanguages = "en,ru"
 
 #[CLIENT SETTINGS]
 clientRequestsInterval = 1 				# Интервал между запросами к разным серверам
-clientMaxIterationCount = 10 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
+clientMaxIterationCount = 100 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
 clientMaxPOWTimeShift = 10 				# срок жизни POW для запроса поста.
 										# Если прописанное в запросе время отличается от текущего на большее число секунд, POW считается недействительным
 clientRejectedConnectionsLimit = 30 	# Количество отклоненных подряд запросов
