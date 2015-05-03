@@ -1,21 +1,42 @@
 #!/usr/bin/env python
 from config import *
 from lib import *
-from base64 import b64encode, b64decode
 from copy import deepcopy
 import time
 import sys
+import struct
 import protocol_pb2
 reload(sys)  
 sys.setdefaultencoding('utf8')
+#networking
+def send_msg(sock, msg):
+	msg = struct.pack('>I', len(msg)) + msg
+	sock.sendall(msg)
 
+def recv_msg(sock):
+	raw_msglen = recvall(sock, 4)
+	if not raw_msglen:
+		return None
+	msglen = struct.unpack('>I', raw_msglen)[0]
+	# Read the message data
+	return recvall(sock, msglen)
+
+def recvall(sock, n):
+	data = ''
+	while len(data) < n:
+		packet = sock.recv(n - len(data))
+		if not packet:
+			return None
+		data += packet
+	return data
 # data
 def processData(companion,received_data):
 	global get, valid
 	updateDB()
-	print "____LEN",len(received_data)
+	print "	<-[r] source length:",len(received_data)
 	rd = protocol_pb2.Data()
 	rd.ParseFromString(received_data)
+	print " <-[r] byte length:",rd.ByteSize()
 	companion, rd = normalizeData(companion,rd)
 	companion = receivePosts(rd,companion)
 	data=protocol_pb2.Data()
@@ -31,6 +52,18 @@ def processData(companion,received_data):
 	if data.ByteSize()>maxRequestSize:
 		print maxRequestSize,"<",data.ByteSize()
 		sys.exit(0)
+	test = protocol_pb2.Data()
+	try:
+		test.ParseFromString(data.SerializeToString())
+	except BaseException:
+		fd = open("error_",'w')
+		fd.write(data.SerializeToString())
+		fd.close()
+		print data
+		print "!!!"
+		sys.exit(0)
+	print "->[s] source length",len(data.SerializeToString())
+	print "->[s] byte length",data.ByteSize()
 	return data.SerializeToString(),companion
 
 def normalizeData(companion,rd):
@@ -100,9 +133,13 @@ def sendPosts(companion,data,rd):
 	for requesting_post in rd.requesting:
 		if checkRequestPOW(requesting_post,companion.requestPOW):
 			if isAvaliable(requesting_post.id):
-				#post = nd.sending.append(fileContent.decode('unicode_escape') )
-				post = nd.sending.append(b64encode(readFile(postsDir+requesting_post.id)))
-#				post.ParseFromString(readFile(postsDir+requesting_post.id))
+
+				post = nd.sending.append( readFile(postsDir+ requesting_post.id) )
+				#post = nd.sending.append(b64encode(readFile(postsDir+requesting_post.id)))
+				
+#				post = nd.sending.add()
+				#post.ParseFromString(readFile(postsDir+requesting_post.id))
+				
 				if checkLimits(nd):
 					data = deepcopy(nd)
 					print "		[+]:",requesting_post.id,"(",nd.ByteSize(),")"
@@ -120,8 +157,8 @@ def sendPosts(companion,data,rd):
 def receivePosts(rd,companion):
 	print ":receivePosts"
 	for post_source in rd.sending:
-		post = protocol_pb2.Post()
-		post.ParseFromString(b64decode(post_source))
+		post = protocol_pb2.Post()#
+		post.ParseFromString(post_source)
 		if not isDeleted(post.id) and not isReceived(post.id):
 			print "		[new post received]:",post.id
 			writePost(post)

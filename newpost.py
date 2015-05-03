@@ -31,7 +31,8 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 				fo = post.files.add()
 				fo.name = f
 				fo.md5hash = md5File(attachmentsDir + f)
-				fo.source = b64encode(readFile(attachmentsDir+ f,'r'))
+				#fo.source = b64encode(readFile(attachmentsDir+ f,'r'))
+				fo.source = readFile(attachmentsDir+ f,'r')
 	tag_list = string2list(tags)
 	for tag in tag_list:
 		if valid.tag(tag):
@@ -70,8 +71,8 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 
 
 if "--test" in sys.argv:
-	for i in range(1,20):
-		np = CreatePost("name","subject","text","test.gif","o,tag,test","refersto","en,ru",3)
+	for i in range(1,2):
+		np = CreatePost("name","subject","text","5mb.gif","o,tag,test","refersto","en,ru",3)
 else:
 	name = raw_input("Name: ")
 	subject = raw_input("Subject: ")

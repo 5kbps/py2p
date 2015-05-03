@@ -215,7 +215,7 @@ def add2DB(postid):
 			file_name =  postsFileDir+post_file.md5hash
 		if not fileExists(file_name):
 			fd = open(file_name,'wb')
-			fd.write(b64decode(post_file.source))
+			fd.write(post_file.source)
 			fd.close()
 			#print post.id ,"-> ", post_file.name
 		else:
@@ -364,16 +364,30 @@ class Client():
 		
 		self.requested_post_count = 0
 		self.sent_post_count 	  = 0
-"""
+class PostField():
+	def __init__(self,fieldType,fieldValue):
+		self.type = fieldType
+		self.value = fieldValue
+		return self
 class PostClass():
-	def __init__(self):
-		self.id = ""
-		self.name = ""
-		self.subject = ""
-		self.text = ""
-		self.files = set()
-		self.
-"""
+	def __init__(self,data):
+		self.fields = set()
+		for key in data.keys():
+			self.fields.add(PostField(key,data[key]))
+	def serialize():
+		string = ""
+		flist = list(self.fields)
+		for field in flist:
+			string+=str(field.type)+":"+str(len(field.value))+";"
+			string+="[end];"
+		for field in flist:
+			string += field.value
+
+	def deserialize(string):
+		self.fields = set()
+		fields = {}
+		#for line in string.split(';'):
+
 
 get = {}
 

@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import socket
-import base64
 import re
 import os
 import lib
@@ -13,6 +12,7 @@ import time
 import errno
 import setproctitle
 import protocol_pb2
+
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -70,16 +70,16 @@ class ClientClass:
 					received = ""
 #					try:
 					sock.connect((server.host, int(server.port))) 
-					sock.sendall(str(data2send))
+					send_msg(sock,data2send)
+					received = recv_msg(sock)
+#					sock.sendall(str(data2send))
+					'''
 					while True:
 						t_received = sock.recv(maxRequestSize)
 						if not t_received:
 							break
 						else:
-							received += t_received
-#					except BaseException as e:#
-#						print "		Error: ", e
-#						flagToBreak = True
+							received += t_received'''
 					print "iteration",iteration
 					if iteration > clientMaxIterationCount:
 						flagToBreak = True
