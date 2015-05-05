@@ -20,9 +20,9 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	###
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
-	post.name = name
-	post.subject = subject
-	post.text = text
+	post.name = unicode(name.strip())
+	post.subject = unicode(subject.strip())
+	post.text = unicode(text.strip())
 	post.time = current_time
 	if files != "":
 		file_list = string2list(files)	
@@ -33,14 +33,15 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 				fo.md5hash = md5File(attachmentsDir + f)
 				#fo.source = b64encode(readFile(attachmentsDir+ f,'r'))
 				fo.source = readFile(attachmentsDir+ f,'r')
-	tag_list = string2list(tags)
+	tag_list = string2list(unicode(tags))
+	languages_list = string2list(unicode(languages))
 	for tag in tag_list:
 		if valid.tag(tag):
 			to = post.tags.append(tag)
-	languages_list = string2list(languages)
 	for lang in languages_list:
 		if valid.lang(lang):
 			lo = post.languages.append(lang)
+	post.refer = refersto.strip()
 	if getApproxTimeBySignatureLength(int(minimumPow)) > 3:
 		print "Generating \"proof of work\" signature. It can take some time (approximately "+str(getApproxTimeBySignatureLength(int(minimumPow)))+"s)..."
 	start_time = int(time.time()*1000000)
@@ -71,8 +72,8 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 
 
 if "--test" in sys.argv:
-	for i in range(1,2):
-		np = CreatePost("name","subject","text","5mb.gif","o,tag,test","refersto","en,ru",3)
+	for i in range(1,400):
+		np = CreatePost("name","subject","text","test.jpg","o,tag,test","1fth8tdm4ef7dlvlyl8fsmwy","en,ru",3)
 else:
 	name = raw_input("Name: ")
 	subject = raw_input("Subject: ")

@@ -8,6 +8,7 @@ import struct
 import protocol_pb2
 reload(sys)  
 sys.setdefaultencoding('utf8')
+
 #networking
 def send_msg(sock, msg):
 	msg = struct.pack('>I', len(msg)) + msg
@@ -30,92 +31,98 @@ def recvall(sock, n):
 		data += packet
 	return data
 # data
-def processData(companion,received_data):
+def getFirstRequestData():
+	global get
+	data = protocol_pb2.Data()
+	data = attachMeta(data)
+	data = attachKnownPosts(data)
+	return data.SerializeToString()
+
+def processData(received_data):
 	global get, valid
+
+	result = {
+		"sending":0,
+		"requesting":0,
+		"flagToBreak":False,
+		"received":0
+	}
 	updateDB()
-	print "	<-[r] source length:",len(received_data)
 	rd = protocol_pb2.Data()
 	rd.ParseFromString(received_data)
 	print " <-[r] byte length:",rd.ByteSize()
-	companion, rd = normalizeData(companion,rd)
-	companion = receivePosts(rd,companion)
+	rd = normalizeData(rd)
+	result['received'] = receivePosts(rd)
+	getServers(rd)
 	data=protocol_pb2.Data()
 	data = attachMeta(data)
 #	if len(data.requesting)==0:
-	data = attachKnownPosts(data,rd.meta.maxRequestSize)
-	if serverMaxRequestPOW >= companion.requestPOW:
-		data,companion = requestPosts(companion,data,rd)
-	data,companion = sendPosts(companion,data,rd)
-	print "LENGTH 		",data.ByteSize()
-	companion.toRequest = len(data.requesting)
-	companion.toSend = len(data.sending)
+	data = attachKnownPosts(data)
+	if serverMaxRequestPOW >= rd.meta.requestPOW:
+		data = requestPosts(data,rd)
+	data,result['sending'] = sendPosts(data,rd)
+	result['flagToBreak'] = bool(len(data.requesting) + len(data.sending)) == False
 	if data.ByteSize()>maxRequestSize:
-		print maxRequestSize,"<",data.ByteSize()
-		sys.exit(0)
+		r['flagToBreak'] = True
 	test = protocol_pb2.Data()
 	try:
 		test.ParseFromString(data.SerializeToString())
-	except BaseException:
-		fd = open("error_",'w')
-		fd.write(data.SerializeToString())
-		fd.close()
-		print data
-		print "!!!"
-		sys.exit(0)
+	except BaseException as e:
+		print e
+		result['flagToBreak'] = True
 	print "->[s] source length",len(data.SerializeToString())
 	print "->[s] byte length",data.ByteSize()
-	return data.SerializeToString(),companion
+	return data.SerializeToString(),result
 
-def normalizeData(companion,rd):
+def normalizeData(rd):
 	print "		:normalizeData"
-	for key in defaultProtocolSettings.keys():
-		if hasattr(rd.meta, key):
-			setattr(companion,key,getattr(rd.meta,key))
-		else:
-			if not hasattr(companion,key):
-				setattr(companion,key,defaultProtocolSettings[key])
-		print "			",key,":",getattr(companion,key)
-	return companion, rd
+	if not hasattr(rd.meta,"requestPOW"):
+		rd.meta.requestPOW = 0
+	return rd
 def attachMeta(data):
+	global get
 	print ":attachMeta"
-	data.meta.acceptFiles	= acceptFiles
-	data.meta.requiredPOW 	= requiredPOW
+	data.meta.requestPOW 	= requestPOW
 	data.meta.version 		= py2pVersion
+	for c in get['servers'].list:
+		#if not c.address.startswith( "127." ) and not c.address.startswith("localhost"):	
+		data.meta.servers.append(c.address)
+		print "			[+]",c.address
 	return data
 
 #posts
-def attachKnownPosts(data,limit):
+def attachKnownPosts(data):
 	print ":attachKnownPosts"
-	#nd = deepcopy(data)
 	for post in get['received']:
 		cur_post = data.known.add()
 		cur_post.id = post
 		cur_post.size = getPostSize(post)
+		if post in get['pow']:
+			cur_post.pow = get['pow'][post]
 		for tag in get["tags"][post]:
 			cur_post.tags.append(tag)
 		for language in get["languages"][post]:
 			cur_post.languages.append(language)
 		if checkLimits(data,maxRequestSize,1024):
-			#data = deepcopy(nd)
 			print "		[+]",post,": ",cur_post.ByteSize()
 		else:
-			#nd = deepcopy(data)
 			cur_post.remove()
 			print "		[-]:",post
 			break
 	return data
 def isGood(known_post):
 	return True
-def requestPosts(companion,data,rd):
+def requestPosts(data,rd):
 	global get
 	print ":requestPosts"
+	
 	timeNow = int(time.time())
 	nd = deepcopy(data)
 	for post in rd.known:
 		if not isReceived(post.id) and not isDeleted(post.id) and isGood(post):
 			requesting_post = nd.requesting.add()
 			requesting_post.id = post.id
-			requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requiredPOW)
+			requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requestPOW)
 			if checkLimits(nd):
 				data = deepcopy(nd)
 				print "		[+]",post.id
@@ -124,45 +131,61 @@ def requestPosts(companion,data,rd):
 				print "		[-]",post.id
 				break
 		else:
+			pass
 			print "		[--]",post.id
-	return data, companion
+	return data
 
-def sendPosts(companion,data,rd):
+def sendPosts(data,rd):
 	print ":sendPosts"
 	nd = deepcopy(data)
+	counter = 0
 	for requesting_post in rd.requesting:
-		if checkRequestPOW(requesting_post,companion.requestPOW):
+		if checkRequestPOW(requesting_post,rd.meta.requestPOW):
 			if isAvaliable(requesting_post.id):
-
-				post = nd.sending.append( readFile(postsDir+ requesting_post.id) )
-				#post = nd.sending.append(b64encode(readFile(postsDir+requesting_post.id)))
-				
-#				post = nd.sending.add()
-				#post.ParseFromString(readFile(postsDir+requesting_post.id))
-				
+				post = nd.sending.append( readFile(postsDir+ requesting_post.id) )				
 				if checkLimits(nd):
 					data = deepcopy(nd)
+					counter += 1
 					print "		[+]:",requesting_post.id,"(",nd.ByteSize(),")"
 				else:
 					nd = deepcopy(data)
 					print "		[-]:",requesting_post.id
 					break
-				break
 			else:
 				print "post not avaliable", requesting_post.id
 		else:
 			print "POW check failed, post was not sent",requesting_post.id
 	print "		[data sending length]:",len(data.sending)
-	return data, companion
-def receivePosts(rd,companion):
+	return data, counter
+def getServers(data):
+	global get
+	print "		:getServers"
+	sl = getServerList()
+	if hasattr(data.meta,"servers"):
+		for c in data.meta.servers:
+			if not c in sl:
+				print "			[+]",c.address
+				s = get['servers'].list.add()
+				s.address = c
+				s.rejected = 0
+				s.received = 0
+				s.new = True
+			else:
+				pass
+				print "			[-]",c," - already in list!"
+	saveServers()
+
+def receivePosts(rd):
 	print ":receivePosts"
+	counter = 0
 	for post_source in rd.sending:
 		post = protocol_pb2.Post()#
 		post.ParseFromString(post_source)
 		if not isDeleted(post.id) and not isReceived(post.id):
 			print "		[new post received]:",post.id
 			writePost(post)
-	return companion
+			counter += 1
+	return counter
 #POW
 def checkRequestPOW(requesting_post,requiredPOW):
 	if requiredPOW != 0:

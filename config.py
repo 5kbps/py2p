@@ -3,12 +3,16 @@
 
 #[GLOBAL SETTINGS]
 postsDir = "posts/"
-postsFileDir = "files/"
+postsFileDir = "webserver/file/"
 attachmentsDir = "attachments/"
 deletedPostsDir = "moved/"
 outdatedPostsDir = "old/"
 webserverDir = "webserver/"
-
+webserverPostsDir = "webserver/posts/"
+webserverThreadsDir = "webserver/threads/"
+webserverImageThumbDir = "webserver/thumb/"
+serversListFile = "meta/servers"
+defaultServersListFile = "meta/servers-default"
 maxPostsCount = 1000 #0 to disable TODO
 enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
@@ -16,10 +20,8 @@ postDeletingMode = "move" #TODO
 maxPostSize = 5242880		# Максимальный размер поста
 maxRequestSize = 52428800 	# Максимальный размер запроса
 acceptFiles = True 				# Принимает посты с файлами
-requiredPOW = 0 					# POW, требуемый для запроса поста поста
+requestPOW = 0 				# POW, требуемый для запроса поста поста
 maxRequestPOW = 3 				# Максимальный POW, который клиент будет вычислять для запроса постов
-maxToRequestListLength = 100
-maxToSendListLength	   = 100
 
 #[POSTING SETTINGS]
 newPostDefaultPOW = 1;
@@ -30,12 +32,12 @@ newPostDefaultFiles = "test.gif,test.jpg"
 newPostDefaultLanguages = "en,ru"
 
 #[CLIENT SETTINGS]
-clientRequestsInterval = 1 				# Интервал между запросами к разным серверам
+clientRequestsInterval = 1			# Интервал между запросами к разным серверам
 clientMaxIterationCount = 100 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
 clientMaxPOWTimeShift = 10 				# срок жизни POW для запроса поста.
 										# Если прописанное в запросе время отличается от текущего на большее число секунд, POW считается недействительным
-clientRejectedConnectionsLimit = 30 	# Количество отклоненных подряд запросов
-clientBehaviorAfterReachingRejectedConnectionsLimit = "smart_mode" 		# 
+clientRejectedConnectionsLimit = 3	# Количество отклоненных подряд запросов
+clientBehaviorAfterReachingRejectedConnectionsLimit = "remove" 		# 
 clientRejectedConnectionsSmartModeLimit = 100
 """
 proceed = connect 
@@ -47,7 +49,6 @@ remove = delete from host list
 #[SERVER SETTINGS]
 serverPort = 5441
 serverMaxRequestPOW = 3
-serverRequiredPOW = 0
 serverMaxPOWTimeShift = 10
 
 #[WEBSERVER SETTINGS]
@@ -59,7 +60,9 @@ webServerPostingSignatureLength = 1 # Длина подписи, которую 
 webServerEnableThumbnails = True # Генерировать превью
 webServerThumbnailSize = 200,200
 webServerThumbnailQuality = 50
+webserverPostsOnPage = 100
 
+webserverPostingMaxFileCount = 1
 loggingEnabled = False #TODO
 logFileName = "log.txt"
 logMaxSize = 52428800 #50 MB

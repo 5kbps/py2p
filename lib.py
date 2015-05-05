@@ -18,13 +18,6 @@ sys.setdefaultencoding('utf8')
 #constants
 languagesList = ["en","ru","pol","uk","fr","de","fi","ja","lv","pol","es","sv"]
 py2pVersion = 0
-defaultProtocolSettings = {
-	"maxPostSize": 5242880,
-	"maxRequestSize": 104857600,
-	"acceptFiles": True,
-	"requestPOW": 0,
-	"version": py2pVersion
-}
 def R():
 	print "--------------------------------------"
 #lists
@@ -44,10 +37,20 @@ def removeEmptyItems(liste):
 def createDirIfNotExists(directory):
 	if not os.path.exists(directory):
 		os.makedirs(directory)
+def getExt(filename):
+	if filename.find(".")!=-1:
+		return filename.split(".")[len(filename.split("."))-1]
+	else:
+		return ""
 def checkDirs():
 	createDirIfNotExists(postsDir)
 	createDirIfNotExists(postsFileDir)
 	createDirIfNotExists(attachmentsDir)
+	createDirIfNotExists(webserverDir)
+	createDirIfNotExists(webserverPostsDir)
+	createDirIfNotExists(webserverThreadsDir)
+	createDirIfNotExists(webserverImageThumbDir)
+	createDirIfNotExists("meta")
 
 def readFile(filename,mode="rb"):
 	if fileExists(filename):
@@ -58,9 +61,13 @@ def readFile(filename,mode="rb"):
 	else:
 		return ""
 def writeFile(filename,content,mode="wb"):
-	fd = open(filename,mode)
-	fd.write(content)
-	fd.close()
+	try:
+		fd = open(filename,mode)
+		fd.write(content)
+		fd.close()
+	except BaseException as e:
+		print "		:writeFile failed", e
+		pass
 def fileExists(filename):
 	return os.path.isfile(filename)
 def deleteFile(filename):
@@ -140,49 +147,95 @@ def stringifyPost(post):
 def initDB():
 	global get
 	#post index
-	get['connectedto'] = {}
-	get['refersto'] = {}
+	get['connected'] = {}
+	get['refer'] = {}
 	get['tags'] = {}
 	get['languages'] = {}
 	get['bytag'] = {}
 	get['bylang'] = {}
 	get['time'] = {}
 	get['pow'] = {}
-	get['servers'] = set()
 	get['companions'] = {}
 	get['files'] = {}
 	get['byfilemd5hash'] = {}
 	get['requesting'] = {}
+	get['pow'] = {}
 	#peering
-	get['servers'].add(Server().addHost("127.0.0.1:5441"))
 	get['clients'] = {}
-
 	#postmap
 	get['received'] = set()
 	get['deleted'] = set()
 	updateDB()
+	loadServers()
+#	loadServers()
+#	addServer("127.0.0.1:5441")
 	#get['initialized'] = True
 
-def updateDB():
+
+def addServer(address):
+	global get
+	server = get['servers'].list.add()
+	server.address = address
+	server.rejected = 0
+	server.received = 0
+	server.new = True
+
+def loadServers():
+	global get
+	print "		:loadServers"
+	get['servers'] = protocol_pb2.ServersList()
+	try:
+		get['servers'].ParseFromString(readFile(serversListFile))
+	except BaseException:
+		print "		:loadServers: [warning] cannot load servers list! ("+serversListFile+") (using default one)"
+		try:
+			get['servers'].ParseFromString(readFile(defaultServersListFile))
+		except BaseException:
+			print "		:loadServers: [error] cannot load default servers list! ("+defaultServersListFile+") (exiting)"
+			sys.exit(0)
+	for server in get['servers'].list:
+		server.rejected = 0
+		if not hasattr(server,"address"):
+			server.address = "127.0.0.1;5441"
+		if not hasattr(server,"received"):
+			server.received = 0
+		if not hasattr(server,"received"):
+			server.received = 0
+def saveServers():
+	writeFile(serversListFile,get['servers'].SerializeToString())
+def getServerList():
+	global get
+	r = []
+	for s in get['servers'].list:
+		if hasattr(s,"address"):
+			r.append(s.address)
+	return r
+def updateDB(callback = 0):
 	global get, languagesList
 	startTime = time.time()
-	post_files = os.listdir(postsDir)	
-	#print post_files
+	post_files = os.listdir(postsDir)
+	for post in get['received']:
+		if not post in post_files:
+			purgePost(post)
 	for post_file in post_files:
-		add2DB(post_file)
+		if not post_file in get['received']:
+			add2DB(post_file)
+			if callback != 0:
+				callback(post_file)
 	endTime = time.time()
 	print "Post parsing took ", float(endTime - startTime )
 	print "Memory:",getMemUsage()
 
 def add2DB(postid):
 	post = readPost(postid)
-	if hasattr( post, "refersto"):
-		if not post.refersto in get['connectedto']:
-			get['connectedto'][post.refersto] = set()
-		get['connectedto'][post.refersto].add( post.id)
-	if hasattr(post, "refersto"):
-		if not post.id in get['refersto']:
-			get['refersto'][post.id] = post.refersto
+	# referrers
+	if hasattr( post, "refer"):
+		if not post.refer in get['connected']:
+			get['connected'][post.refer] = set()
+		get['connected'][post.refer].add( post.id)
+		if not post.id in get['refer']:
+			get['refer'][post.id] = post.refer
+	#tags
 	for tag in post.tags:
 		if not tag in get['bytag']:
 			get['bytag'][tag] = set()
@@ -190,8 +243,8 @@ def add2DB(postid):
 		if not hasattr( get['tags'], post.id):
 			get['tags'][post.id] = set()
 		get['tags'][post.id].add(tag)
+	#languages
 	for lang in post.languages:
-
 		if not post.id in get['languages']:
 			get['languages'][post.id] = set()
 		get['languages'][post.id].add(lang)
@@ -199,8 +252,8 @@ def add2DB(postid):
 		if not lang in get['bylang'] and lang in languagesList:
 			get['bylang'][lang] = set()
 		get['bylang'][lang].add(post.id)
+	#files
 	for post_file in post.files:
-
 		if not post.id in get['files']:
 			get['files'][post.id] = set()
 		get['files'][post.id].add(post_file.md5hash)
@@ -221,6 +274,8 @@ def add2DB(postid):
 		else:
 			do = "nothing"
 			#print post.id ,"-[exitsts] ", post_file.name
+	get['time'][post.id] = post.time
+	get['pow'][post.id] = getPostPow(post)
 	get['received'].add(post.id)
 
 def deletePost(postid):
@@ -240,43 +295,57 @@ def deletePost(postid):
 					if len(get['byfilemd5hash'][post_file.md5hash]) == 0:
 						print "Deleting:", post.id
 						del get['byfilemd5hash'][post_file.md5hash]
+						#remove main file
 						if fileExists(postsFileDir+file_name):
 							deleteFile(postsFileDir+file_name)
 							print "removed attached file: " + file_name+" - "+post.id
+						#remove thumbnail
+						if fileExists(webserverImageThumbDir+post_file.md5hash+".jpg"):
+							deleteFile(webserverImageThumbDir+post_file.md5hash+".jpg")
 						else:
 							print "cannot remove attached file: "+file_name+" - "+post.id
+		os.remove(postsDir+postid)
+		get['deleted'].add(postid)
 	else:
-		print "cannot delete post: ",post.id,"file not exists!"
+		print "cannot delete post: ",postid,"file not exists!"
+	purgePost(postid)
+
+def purgePost(postid):
 	#removing tags 
-	if post.id in get['tags']:
-		tags = get['tags'][post.id]
+	if postid in get['tags']:
+		tags = get['tags'][postid]
 		for tag in tags:
-			if post.id in get['bytag'][tag]:
-				get['bytag'][tag].remove(post.id)
+			if postid in get['bytag'][tag]:
+				get['bytag'][tag].remove(postid)
 				if len(get['bytag'][tag])==0:
 					del get['bytag'][tag]
-		del get['tags'][post.id]
+		del get['tags'][postid]
 	#removing languages
-	if post.id in get['languages']:
-		lengs = get['languages'][post.id]
+	if postid in get['languages']:
+		langs = get['languages'][postid]
 		for lang in langs:
-			if post.id in get['bylang'][lang]:
-				get['bylang'][lang].remove(post.id)
+			if postid in get['bylang'][lang]:
+				get['bylang'][lang].remove(postid)
 				if len(get['bylang'][lang])==0:
 					del get['bylang'][lang]
-		del get['languages'][post.id]
-	if post.id in get['connectedto']:
-		del get['connectedto'][post.id]
-	if post.id in get['refersto']:
-		del get['refersto'][post.id]
-	if post.id in get['time']:
-		del get['time'][post.id]
-	if post.id in get['files']:
-		del get['files'][post.id]
-	os.remove(postsDir+post.id)
-	get['deleted'].add(post.id)
+		del get['languages'][postid]
+	if postid in get['connected']:
+		del get['connected'][postid]
+	if postid in get['refer']:
+		del get['refer'][postid]
+	if postid in get['time']:
+		del get['time'][postid]
+	if postid in get['pow']:
+		del get['pow'][postid]
+	if postid in get['files']:
+		del get['files'][postid]
 
 #math
+def toInt(string,default=0):
+	try:
+		return int(string)
+	except BaseException:
+		return default
 def digit2char(digit):
 	if digit < 10:
 		return str(digit)
@@ -331,7 +400,7 @@ class ValidatorClass():
 		return True
 	def lang(self,lang):
 		return lang in languagesList
-
+"""
 class Server():
 	def __init__(self,host="",port=0,ctype="client"):
 		self.host = host
@@ -339,55 +408,21 @@ class Server():
 		self.publicWebserverHost = ''
 		self.total_accepted_connections = 0
 		self.total_rejected_connections = 0
+		self.failed = 0
 		self.rejected_connections = 0
 		self.received_posts_count = 0
 		self.received_posts_total_size = 0
 
 	def addHost(self,host="127.0.0.1:5441"):
+		global get
+		get['hostlist'].add(host.replace("\n",""))
 		host = host.split(":")
 		port = host[1]
 		host = host[0]
 		self.host = host
 		self.port = port
 		return self
-
-class Client():
-	def __init__(self,host="",port=0):
-		self.version = py2pVersion
-		self.maxPostSize = 5242880 # 5 MB
-		self.maxPostsAtOnce = 100
-		self.publicWebserverAddress = ''
-
-		self.total_accepted_connections = 0
-		self.total_rejected_connections = 0
-		self.rejected_connections = 0
-		
-		self.requested_post_count = 0
-		self.sent_post_count 	  = 0
-class PostField():
-	def __init__(self,fieldType,fieldValue):
-		self.type = fieldType
-		self.value = fieldValue
-		return self
-class PostClass():
-	def __init__(self,data):
-		self.fields = set()
-		for key in data.keys():
-			self.fields.add(PostField(key,data[key]))
-	def serialize():
-		string = ""
-		flist = list(self.fields)
-		for field in flist:
-			string+=str(field.type)+":"+str(len(field.value))+";"
-			string+="[end];"
-		for field in flist:
-			string += field.value
-
-	def deserialize(string):
-		self.fields = set()
-		fields = {}
-		#for line in string.split(';'):
-
+"""
 
 get = {}
 

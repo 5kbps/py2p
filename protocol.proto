@@ -15,7 +15,15 @@ message Post{
 	repeated string tags = 9;
 	repeated string languages = 10;
 }
-
+message ServersList{
+	message ServerEntry{
+		optional string address = 1;
+		optional int64 rejected = 2;
+		optional int64 received = 3;
+		optional bool new = 4;
+	}
+	repeated ServerEntry list = 1;
+}
 message Data{
 	message Post{
 		message File{
@@ -38,25 +46,23 @@ message Data{
 	message KnownPost{
 		required string id = 1;
 		optional int64 size = 2;
-		repeated string tags = 6;
-		repeated string languages = 7 ;
+		optional int64 pow = 3;
+		repeated string tags = 4;
+		repeated string languages = 5;
 	}
 	message MetaData{
 		optional int64 	maxPostSize = 1;
-		optional int64 	maxRequestSize =2;
-		optional int32  requiredPOW = 3;
-		optional string serverAddress = 4;
-		optional int32  version = 5;
-		optional bool	versionIncompatibility = 6;
-		optional bool 	acceptFiles = 7;
+		optional int32  requestPOW = 2;
+		optional int32  version = 3;
+		repeated string servers = 4;
 	}
 	message PostRequest{
 		optional string id = 1;
 		optional int64 pow = 2;
 		optional int64 time = 3;
 	}
-	repeated bytes sending = 2;
-	repeated PostRequest requesting = 3;
-	repeated KnownPost known = 4;
-	optional MetaData meta = 5;
+	repeated bytes sending = 1;
+	repeated PostRequest requesting = 2;
+	repeated KnownPost known = 3;
+	optional MetaData meta = 4;
 }
