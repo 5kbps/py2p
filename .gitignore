@@ -4,4 +4,5 @@ files/*
 posts/*
 attachments/*
 webserver/posts/*
+webserver/thumb/*
 *.txt
