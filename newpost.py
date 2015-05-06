@@ -23,7 +23,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	post.name = unicode(name.strip())
 	post.subject = unicode(subject.strip())
 	post.text = unicode(text.strip())
-	post.time = current_time
+	post.time = str(current_time)
 	if files != "":
 		file_list = string2list(files)	
 		for f in file_list:

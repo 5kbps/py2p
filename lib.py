@@ -21,6 +21,32 @@ py2pVersion = 0
 def R():
 	print "--------------------------------------"
 #lists
+def get_class_members(klass):
+    ret = dir(klass)
+    if hasattr(klass,'__bases__'):
+        for base in klass.__bases__:
+            ret = ret + get_class_members(base)
+    return ret
+
+
+def uniq( seq ): 
+    """ the 'set()' way ( use dict when there's no set ) """
+    return list(set(seq))
+
+def get_object_attrs( obj ):
+    # code borrowed from the rlcompleter module ( see the code for Completer::attr_matches() )
+    ret = dir( obj )
+    ## if "__builtins__" in ret:
+    ##    ret.remove("__builtins__")
+
+    if hasattr( obj, '__class__'):
+        ret.append('__class__')
+        ret.extend( get_class_members(obj.__class__) )
+
+        ret = uniq( ret )
+
+    return ret
+
 def trimStringAsList(string):
 	string = removeEmptyItems( string.split(","))
 	string = removeEmptyItems(string)
@@ -137,6 +163,7 @@ def stringifyPost(post):
 	if hasattr(post, "files"):
 		for file_entry in post.files:
 			string += str(file_entry.md5hash)
+			string += str(file_entry.name)
 	if hasattr(post, "tags"):
 		for tag in post.tags:
 			string += str(tag)
@@ -153,7 +180,7 @@ def initDB():
 	get['languages'] = {}
 	get['bytag'] = {}
 	get['bylang'] = {}
-	get['time'] = {}
+	get['timestamp'] = {}
 	get['pow'] = {}
 	get['companions'] = {}
 	get['files'] = {}
@@ -165,6 +192,8 @@ def initDB():
 	#postmap
 	get['received'] = set()
 	get['deleted'] = set()
+	get['protected'] = {} # posts that cannot be deleted
+
 	updateDB()
 	loadServers()
 #	loadServers()
@@ -223,18 +252,73 @@ def updateDB(callback = 0):
 			if callback != 0:
 				callback(post_file)
 	endTime = time.time()
+	loadProtectedPosts()
 	print "Post parsing took ", float(endTime - startTime )
 	print "Memory:",getMemUsage()
+
+def loadProtectedPosts():
+	global get
+#	print ":loadProtectedPosts"
+	protected = removeEmptyItems( readFile(protectedPostsFile,"r").split("\n"))
+	for protected_file in protected:
+		protected_file = protected_file.split(":")
+		if len(protected_file) >=2 :
+			postid = protected_file[0]
+			deletetime = protected_file[1]
+			deletetime = toInt(deletetime,0)
+			html = ""
+			for i in range(2,len(protected_file)):
+				html += protected_file[i]+":"
+			html = html[:-1]
+			get['protected'][postid] = {
+				"deletetime": deletetime,
+				"html":html
+			}
+#			print "		[+]",postid,deletetime,html
+		else:
+			pass
+#			print "		[-]",postid
+
+def saveProtectedPosts():
+	global get
+	r = ""
+	#print ":saveProtectedPosts"
+	for postid in get["protected"].keys():
+		if isReceived(postid):
+			if "deletetime" in get["protected"][postid]:
+				deletetime = get["protected"][postid]["deletetime"]
+			else:
+				deletetime = 0
+			if "html" in get['protected'][postid]:
+				html = get['protected'][postid]['html']
+			else:
+				html = ""
+			r+=postid+":"+str(deletetime)+":"+html+"\n"
+			#print "		",r[:-1]
+	r = r[:-1]
+	writeFile(protectedPostsFile,r,'w')
+
+def addProtectedPost(postid,deletetime=-1,html=defaultAdminSign,callback=0):
+	if isReceived(postid):
+		deletetime = toInt(deletetime, 0)
+		get['protected'][postid] = {
+			"deletetime": deletetime,
+			"html":html
+		}
+		if callback != 0:
+			callback(postid)
+		saveProtectedPosts()
 
 def add2DB(postid):
 	post = readPost(postid)
 	# referrers
 	if hasattr( post, "refer"):
-		if not post.refer in get['connected']:
-			get['connected'][post.refer] = set()
-		get['connected'][post.refer].add( post.id)
-		if not post.id in get['refer']:
-			get['refer'][post.id] = post.refer
+		if isReceived(post.refer):
+			if not post.refer in get['connected']:
+				get['connected'][post.refer] = set()
+			get['connected'][post.refer].add( post.id)
+			if not post.id in get['refer']:
+				get['refer'][post.id] = post.refer
 	#tags
 	for tag in post.tags:
 		if not tag in get['bytag']:
@@ -274,7 +358,8 @@ def add2DB(postid):
 		else:
 			do = "nothing"
 			#print post.id ,"-[exitsts] ", post_file.name
-	get['time'][post.id] = post.time
+
+	get['timestamp'][post.id] = post.time
 	get['pow'][post.id] = getPostPow(post)
 	get['received'].add(post.id)
 
@@ -333,13 +418,18 @@ def purgePost(postid):
 		del get['connected'][postid]
 	if postid in get['refer']:
 		del get['refer'][postid]
-	if postid in get['time']:
-		del get['time'][postid]
+	if postid in get['timestamp']:
+		del get['timestamp'][postid]
 	if postid in get['pow']:
 		del get['pow'][postid]
 	if postid in get['files']:
 		del get['files'][postid]
+	if postid in get['protected']:
+		del get['protected'][postid]
 
+def cutPosts():
+	# to delete posts if their count is more than maximum
+	pass
 #math
 def toInt(string,default=0):
 	try:

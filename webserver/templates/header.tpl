@@ -4,6 +4,7 @@
 		<meta charset="utf-8">
 		<title>%%title%%</title>
 		<link rel="stylesheet" href="/static/style.css">
+		<script src="/static/script.js"></script>
 		%%head%%
 	</head>
 	<body>

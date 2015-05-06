@@ -13,6 +13,7 @@ webserverThreadsDir = "webserver/threads/"
 webserverImageThumbDir = "webserver/thumb/"
 serversListFile = "meta/servers"
 defaultServersListFile = "meta/servers-default"
+protectedPostsFile = "meta/protected_posts"
 maxPostsCount = 1000 #0 to disable TODO
 enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
@@ -54,15 +55,24 @@ serverMaxPOWTimeShift = 10
 #[WEBSERVER SETTINGS]
 webServerPort = 5440 # server listent on this port
 webServerPostingEnabled = True # Разрешить постить через веб-морду, а не с помощью скрипта
-webServerPostRecursionLevel = 10 # Глубина рекурсии
 webServerPostReflistHidden = True # Скрывать ссылки на другие посты
 webServerPostingSignatureLength = 1 # Длина подписи, которую генерирует сервер при постинге через веб-морду
 webServerEnableThumbnails = True # Генерировать превью
 webServerThumbnailSize = 200,200
 webServerThumbnailQuality = 50
-webserverPostsOnPage = 100
+webserverPostsOnPage = 3
 
+webserverTreeViewRecursionLevel = 3 # Глубина рекурсии
+webserverTreeViewCutOn = 4 # 
+
+webserverAdditionalTags = "py2p,additional"
+webserverAdditionalLanguages = "ru,en"
 webserverPostingMaxFileCount = 1
 loggingEnabled = False #TODO
 logFileName = "log.txt"
 logMaxSize = 52428800 #50 MB
+webserverPostingPOW = 2
+webserverSupportedImageFormats = ['jpg','gif','png','jpeg']
+webserverPostingFileFormats = webserverSupportedImageFormats + ['tar','gz','rar']
+
+defaultAdminSign = "<span style=\"color:red\">Admin</span>"

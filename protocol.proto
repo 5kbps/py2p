@@ -9,7 +9,7 @@ message Post{
 	optional string name = 3;
 	optional string subject = 4;
 	optional string text = 5;
-	optional int64 time = 6;
+	optional string time = 6;
 	repeated File files = 7;
 	optional string refer = 8;
 	repeated string tags = 9;

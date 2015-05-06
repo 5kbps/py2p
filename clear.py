@@ -13,8 +13,8 @@ for post_file in os.listdir(webserverImageThumbDir):
 	os.remove(webserverImageThumbDir+post_file)
 if os.path.isfile(serversListFile):
 	os.remove(serversListFile)
-if os.path.isfile(defaultServersListFile):
-	os.remove(defaultServersListFile)
+#if os.path.isfile(defaultServersListFile):
+#	os.remove(defaultServersListFile)
 checkDirs()
 servers = protocol_pb2.ServersList()
 entry = servers.list.add()
@@ -23,3 +23,4 @@ entry.rejected = 0
 entry.received  = 0
 entry.new = True
 writeFile(serversListFile,servers.SerializeToString())
+writeFile(defaultServersListFile,servers.SerializeToString())

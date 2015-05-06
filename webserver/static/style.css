@@ -6,7 +6,7 @@ body{
 	outline: none;
 }
 .post{
-	border-radius: 10px;
+	border-radius: 14px;
 	overflow: hidden;
 	font-family: monospace;
 	background-color: white;
@@ -58,7 +58,6 @@ hr{
 	display:inline-block;
 	vertical-align: top;
 }
-.fla
 .pagelist{
 	font-weight: bold;
 	font-size: 16px;
@@ -86,4 +85,28 @@ hr{
 	margin: 3px;
 	color:white;
 	text-shadow: 0 0 1px #555;
+}
+.posttreelink{	
+	float: right;
+	border-radius: 90px;
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
+	border: 1px solid rgba(0,0,0,0.1);
+	margin: 5px;
+}
+.treelink{
+	font-size: 16px;
+	font-weight: bold;
+	padding: 6px;
+	margin: 3px;
+	color:white;
+	text-shadow: 0 0 1px #555;
+}
+.postformname, .postformsubject,.postformtext{
+	width: 400px;
+}
+.postformtext{
+	height: 200px;
+}
+.postformsubmit{
+	float: right;
 }
