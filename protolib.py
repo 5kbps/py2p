@@ -58,8 +58,8 @@ def processData(received_data):
 	data = attachMeta(data)
 #	if len(data.requesting)==0:
 	data = attachKnownPosts(data)
-	if serverMaxRequestPOW >= rd.meta.requestPOW:
-		data = requestPosts(data,rd)
+	#if maxRequestPOW >= rd.meta.requestPOW:
+	data = requestPosts(data,rd)
 	data,result['sending'] = sendPosts(data,rd)
 	result['flagToBreak'] = bool(len(data.requesting) + len(data.sending)) == False
 	if data.ByteSize()>maxRequestSize:
@@ -94,68 +94,65 @@ def attachMeta(data):
 def attachKnownPosts(data):
 	print ":attachKnownPosts"
 	for post in get['received']:
-		cur_post = data.known.add()
-		cur_post.id = post
-		cur_post.size = getPostSize(post)
-		if post in get['pow']:
-			cur_post.pow = get['pow'][post]
-		for tag in get["tags"][post]:
-			cur_post.tags.append(tag)
-		for language in get["languages"][post]:
-			cur_post.languages.append(language)
 		if checkLimits(data,maxRequestSize,1024):
-			print "		[+]",post,": ",cur_post.ByteSize()
+			cur_post = data.known.add()
+			cur_post.id = post
+			cur_post.size = getPostSize(post)
+			if post in get['pow']:
+				cur_post.pow = get['pow'][post]
+			for tag in get["tags"][post]:
+				cur_post.tags.append(tag)
+			for language in get["languages"][post]:
+				cur_post.languages.append(language)
+				pass
+	#			print "		[+]",post,": ",cur_post.ByteSize()
 		else:
-			cur_post.remove()
-			print "		[-]:",post
+#			print "		[-]:",post
 			break
+	print "		[",len(data.known),"]"
 	return data
 def isGood(known_post):
 	return True
 def requestPosts(data,rd):
 	global get
 	print ":requestPosts"
-	
 	timeNow = int(time.time())
-	nd = deepcopy(data)
 	for post in rd.known:
 		if not isReceived(post.id) and not isDeleted(post.id) and isGood(post):
-			requesting_post = nd.requesting.add()
+			requesting_post = data.requesting.add()
 			requesting_post.id = post.id
 			requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requestPOW)
-			if checkLimits(nd):
-				data = deepcopy(nd)
-				print "		[+]",post.id
+			if checkLimits(data,maxRequestSize,1024):
+				pass
+#				print "		[+]",post.id
 			else:
-				nd = deepcopy(data)
-				print "		[-]",post.id
+#				print "		[-]",post.id
 				break
 		else:
 			pass
-			print "		[--]",post.id
+#			print "		[--]",post.id
+	print "		[",len(data.requesting),"]"
 	return data
 
 def sendPosts(data,rd):
 	print ":sendPosts"
-	nd = deepcopy(data)
 	counter = 0
 	for requesting_post in rd.requesting:
 		if checkRequestPOW(requesting_post,rd.meta.requestPOW):
-			if isAvaliable(requesting_post.id):
-				post = nd.sending.append( readFile(postsDir+ requesting_post.id) )				
-				if checkLimits(nd):
-					data = deepcopy(nd)
+			if isAvaliable(requesting_post.id):		
+				if checkLimits(data,maxRequestSize,getFileSize(postsDir+requesting_post.id)):
+					post = data.sending.append( readFile(postsDir+ requesting_post.id) )		
 					counter += 1
-					print "		[+]:",requesting_post.id,"(",nd.ByteSize(),")"
+#					print "		[+]:",requesting_post.id,"(",nd.ByteSize(),")"
 				else:
-					nd = deepcopy(data)
-					print "		[-]:",requesting_post.id
-					break
+					pass
+#					print "		[-]:",requesting_post.id
+#				break
 			else:
 				print "post not avaliable", requesting_post.id
 		else:
 			print "POW check failed, post was not sent",requesting_post.id
-	print "		[data sending length]:",len(data.sending)
+	print "		[",len(data.sending),"]"
 	return data, counter
 def getServers(data):
 	global get
@@ -164,7 +161,7 @@ def getServers(data):
 	if hasattr(data.meta,"servers"):
 		for c in data.meta.servers:
 			if not c in sl:
-				print "			[+]",c.address
+				print "			[+]",c
 				s = get['servers'].list.add()
 				s.address = c
 				s.rejected = 0
@@ -176,7 +173,6 @@ def getServers(data):
 	saveServers()
 
 def receivePosts(rd):
-	print ":receivePosts"
 	counter = 0
 	for post_source in rd.sending:
 		post = protocol_pb2.Post()#
@@ -185,6 +181,7 @@ def receivePosts(rd):
 			print "		[new post received]:",post.id
 			writePost(post)
 			counter += 1
+	print ":receivePosts [",counter,"]"
 	return counter
 #POW
 def checkRequestPOW(requesting_post,requiredPOW):

@@ -19,7 +19,7 @@ enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
 
 maxPostSize = 5242880		# Максимальный размер поста
-maxRequestSize = 52428800 	# Максимальный размер запроса
+maxRequestSize = 524288000 	# Максимальный размер запроса
 acceptFiles = True 				# Принимает посты с файлами
 requestPOW = 0 				# POW, требуемый для запроса поста поста
 maxRequestPOW = 3 				# Максимальный POW, который клиент будет вычислять для запроса постов
