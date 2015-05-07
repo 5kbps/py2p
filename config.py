@@ -49,7 +49,6 @@ remove = delete from host list
 
 #[SERVER SETTINGS]
 serverPort = 5441
-serverMaxRequestPOW = 3
 serverMaxPOWTimeShift = 10
 
 #[WEBSERVER SETTINGS]

@@ -58,8 +58,8 @@ def processData(received_data):
 	data = attachMeta(data)
 #	if len(data.requesting)==0:
 	data = attachKnownPosts(data)
-	#if maxRequestPOW >= rd.meta.requestPOW:
-	data = requestPosts(data,rd)
+	if maxRequestPOW >= rd.meta.requestPOW:
+		data = requestPosts(data,rd)
 	data,result['sending'] = sendPosts(data,rd)
 	result['flagToBreak'] = bool(len(data.requesting) + len(data.sending)) == False
 	if data.ByteSize()>maxRequestSize:
