@@ -58,29 +58,42 @@ function handleSelect(evt){
 					}
 					filethumb.src= s
 				}
-//				id('filesource_'+num).value=e.target.result
-//				alert(e.target.result)
-				//num = e.target.id.split('_')[1]
-				//alert(num*1+1)
-				/*
-				if(id('fileentry_'+num)==null){
-					fileentry = document.createElement('div');
-					fileentry.className = 'fileentry'
-					fileentry.id = 'fileentry_'+num
-					imageselect = document.createElement('input')
-					imageselect.id = 'imageselect_'+num
-					imageselect.type = 'file'
-					imageselect.name = 'file_'+num
-					imagesource = document.createElement('input')
-					imagesource.id = 'imagesource_'+num
-					imagesource.type = 'hidden'
-					imagesource.name = 'source_'+num
-					id('filelist').appendChild(fileentry)
-					fileentry.appendChild(imageselect)
-					fileentry.appendChild(imagesource)
-				}*/
 			};
 		})(f);
 		reader.readAsDataURL(f);
 	}
+}
+function thumbExpand(elem){
+	if(elem.src != elem.parentNode.getElementsByClassName("filelink")[0].href){
+		elem.src = elem.parentNode.getElementsByClassName("filelink")[0].href
+	}else{
+		elem.src = "/thumb/"+ elem.parentNode.getElementsByClassName("filelink")[0].href.split("/")[4].split(".")[0]+".jpg"
+	}
+}
+
+function appendTag(e) {
+    if (e.keyCode == 13 || e.charCode == 35) {
+		id("tags").value += "#"+id("taginput").value+"#"
+		newtag = document.createElement("a")
+		newtag.onclick=function(){
+			removeTag(this)
+		}
+		newtag.className = "usertag tag"
+		newtag.textContent = '#'+id("taginput").value
+		id("usertags").appendChild(newtag)
+		id("taginput").value = ""
+        var src = e.srcElement || e.target;
+        if (src.tagName.toLowerCase() != "textarea") {
+            if (e.preventDefault) {
+                e.preventDefault();
+                e.cancelBubble = true;
+            } else {
+                e.returnValue = false;
+            }
+        }
+    }
+}
+function removeTag(elem){
+	id("tags").value = id("tags").value.replace(elem.textContent+"#",'')
+	elem.remove()
 }

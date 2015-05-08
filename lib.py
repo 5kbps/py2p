@@ -5,6 +5,7 @@ import os
 import sys
 import html
 import urllib
+import re
 from config import *
 from base64 import b64decode
 import time
@@ -208,7 +209,6 @@ def initDB():
 	#postmap
 	get['received'] = set()
 	get['deleted'] = set()
-	get['protected'] = {} # posts that cannot be deleted
 
 	updateDB()
 	loadServers()
@@ -275,54 +275,23 @@ def updateDB(callback = 0):
 def loadProtectedPosts():
 	global get
 #	print ":loadProtectedPosts"
-	protected = removeEmptyItems( readFile(protectedPostsFile,"r").split("\n"))
-	for protected_file in protected:
-		protected_file = protected_file.split(":")
-		if len(protected_file) >=2 :
-			postid = protected_file[0]
-			deletetime = protected_file[1]
-			deletetime = toInt(deletetime,0)
-			html = ""
-			for i in range(2,len(protected_file)):
-				html += protected_file[i]+":"
-			html = html[:-1]
-			get['protected'][postid] = {
-				"deletetime": deletetime,
-				"html":html
-			}
-#			print "		[+]",postid,deletetime,html
-		else:
-			pass
-#			print "		[-]",postid
+	protected = protocol_pb2.ProtectedPosts() 
+	protected.ParseFromString(readFile(protectedPostsFile,"r"))
+	get['protected'] = protected.list
 
 def saveProtectedPosts():
 	global get
-	r = ""
-	#print ":saveProtectedPosts"
-	for postid in get["protected"].keys():
-		if isReceived(postid):
-			if "deletetime" in get["protected"][postid]:
-				deletetime = get["protected"][postid]["deletetime"]
-			else:
-				deletetime = 0
-			if "html" in get['protected'][postid]:
-				html = get['protected'][postid]['html']
-			else:
-				html = ""
-			r+=postid+":"+str(deletetime)+":"+html+"\n"
-			#print "		",r[:-1]
-	r = r[:-1]
-	writeFile(protectedPostsFile,r,'w')
+	protected = protocol_pb2.ProtectedPosts()
+	protected.list = get['protected']
+	writeFile(protectedPostsFile,protected.SerializeToString(),'w')
 
-def addProtectedPost(postid,deletetime=-1,html=defaultAdminSign,callback=0):
+def addProtectedPost(postid,timebonus=-1,modhtml=defaultAdminSign,modname=defaultAdminName, sticked=False,callback=0):
 	if isReceived(postid):
-		deletetime = toInt(deletetime, 0)
-		get['protected'][postid] = {
-			"deletetime": deletetime,
-			"html":html
-		}
-		if callback != 0:
-			callback(postid)
+		p = get['protected'].add()
+		p.timebonus = timebonus
+		p.modhtml = modhtml
+		p.modname = modname
+		p.sticked = sticked
 		saveProtectedPosts()
 
 def add2DB(postid):
@@ -508,6 +477,16 @@ class ValidatorClass():
 		return lang in languagesList
 	def base64URL(self,url):
 		return b64decode(url[url.find("base64,")+7:])
+	def hostname(self,hostname):
+		if not hostname:
+			return False
+		if len(hostname) > 255:
+			return False
+		if hostname[-1] == ".":
+			hostname = hostname[:-1] # strip exactly one dot from the right, if present
+		allowed = re.compile("(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
+		return all(allowed.match(x) for x in hostname.split("."))
+
 """
 class Server():
 	def __init__(self,host="",port=0,ctype="client"):

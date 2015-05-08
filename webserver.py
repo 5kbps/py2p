@@ -167,7 +167,8 @@ class PageViewerClass():
 		postlist = []
 		for postid in get['connected'].keys():
 			if HTMLGenerator.isTree(postid):
-				postlist.append(postid)
+				if not postid in get['refer']:
+					postlist.append(postid)
 		all_length = len(postlist)
 		postlist = cutLatestPosts( sortPostsByDate(postlist),webServerPostsOnPage,shift )
 		for postid in postlist:
@@ -273,7 +274,7 @@ class PageViewerClass():
 			"took": "{TODO}"
 		}
 		form_replacements = {
-			"replyto": "nobody"
+			"replyto": "nobody",
 		}
 		output = HTMLGenerator.fromTemplate("header",header_replacements)
 		for post in postlist:
@@ -285,8 +286,15 @@ class PageViewerClass():
 
 
 class HTMLGeneratorClass():
+	def __init__(self):
+		self.additionalTagsHTML = ''
+		for tag in webServerAdditionalTags:
+			self.additionalTagsHTML+="<a target=\"_blank\" href=\"/tag/"+unicode(tag.strip())+"\" class=\"additionaltag tag\">#"+unicode(tag.strip())+"</a>"
 	def fromTemplate(self,templateName,replacements={}):
 		template = readFile(webServerTemplatestDir+templateName+".tpl","r")
+		if templateName == "form":
+			replacements['additionaltags'] = HTMLGenerator.additionalTagsHTML
+
 		for replacement in replacements:
 			try:
 				template = template.replace("%%"+replacement+"%%",replacements[replacement])
@@ -365,7 +373,7 @@ class HTMLGeneratorClass():
 				r+="</span>\n"
 				r+="</a><br>"
 				if hasattr(post_file,"md5hash") and getExt(post_file.name) in webServerSupportedImageFormats:
-					r+="			<img class=\"thumb\" src=\"/thumb/"+post_file.md5hash+".jpg\">\n"
+					r+="			<img class=\"thumb\" onclick=\"thumbExpand(this);\" src=\"/thumb/"+post_file.md5hash+".jpg\">\n"
 			r+= "		</span>\n"
 		r+= "	</div>"
 		return r
@@ -380,7 +388,7 @@ class HTMLGeneratorClass():
 		for language in post.languages:
 			output+="<img class=\"language\" src=\"/static/flags/"+escapeHTML( language )+".png\" title=\""+escapeHTML( language)+"\">"
 		output += "</span>"
-		return output
+		return output		
 	def getReplyCount(self,post):
 		global get
 		if post.id in get['connected']:
@@ -624,9 +632,10 @@ class myHandler(BaseHTTPRequestHandler):
 							proceed = False
 							errMessage += "file "+filename+" is too big ["+str(filesize)+"] limit: "+str(webServerPostingMaxFileSize)+"<br>"
 					else:
-						proceed = False
-						errMessage += "Filename is empty"
-				tags = webServerAdditionalTags
+						pass
+#						proceed = False
+#						errMessage += "Filename is empty"
+				tags = webServerAdditionalTags+removeEmptyItems( self.getParamFromForm(form,"tags").split("#") )
 				languages = webServerAdditionalLanguages
 				self.send_response(200)
 				self.send_header('Content-type','text/html')
@@ -649,11 +658,10 @@ def createPost(name,subject,text,refer,files,tags,languages):
 		fo.md5hash = md5source( fileentry['source'] )
 		fo.source = fileentry['source']
 		print fo.md5hash
-	tag_list = string2list(unicode(tags))
 	languages_list = string2list(unicode(languages))
-	for tag in tag_list:
-		if valid.tag(tag):
-			to = post.tags.append(tag)
+	for tag in tags:
+		if valid.tag(unicode(tag.strip())):
+			to = post.tags.append(unicode(tag.strip()))
 	for lang in languages_list:
 		if valid.lang(lang):
 			lo = post.languages.append(lang)

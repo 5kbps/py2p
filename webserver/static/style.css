@@ -5,6 +5,9 @@ body{
 *:focus{
 	outline: none;
 }
+a{
+	color:#33F;
+}
 .post{
 	border-radius: 14px;
 	overflow: hidden;
@@ -57,6 +60,10 @@ hr{
 .file{
 	display:inline-block;
 	vertical-align: top;
+	margin: 8px;
+}
+.filelink{
+	margin-left: 18px;
 }
 .pagelist{
 	font-weight: bold;
@@ -66,6 +73,7 @@ hr{
 .thumb{
 	float: left;
 	outline: none;
+	cursor: pointer;
 }
 .thread_replies{
 	margin-left: 40px;
@@ -115,7 +123,7 @@ hr{
 	margin: 7px;
 }
 .currentpage{
-	border-radius: 50px;
+	border-radius: 5px;
 	overflow: hidden;
 	font-family: monospace;
 	background-color: white;
@@ -124,10 +132,8 @@ hr{
 	margin-bottom: 10px;
 }
 .currentpagenum{
-	border-radius: 90px;
 	margin: 2px;
-	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
-	border: 1px solid rgba(0,0,0,0.1);
+	color: #CCF;
 }
 .postform{
 	min-width: 600px;
@@ -149,10 +155,21 @@ hr{
 	float: right;
 }
 .filethumb{
-	max-width: 50px;
-	max-height: 50px;
+	max-width: 150px;
+	max-height: 150px;
 	display: inline;
 }
 .fileentry{
 	display: inline;
+}
+.additionaltag{
+	color: #3A8;
+}
+.usertag{
+	display: inline-block;
+	color: #33F;
+	cursor: pointer;
+}
+#taginput{
+	width: 100px;
 }

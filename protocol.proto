@@ -15,6 +15,16 @@ message Post{
 	repeated string tags = 9;
 	repeated string languages = 10;
 }
+message ProtectedPosts{
+	message ProtectedPost{
+		required string id = 1;
+		optional int64 timebonus = 2;
+		optional string modhtml = 3;
+		optional string modname = 4;
+		optional bool sticked = 5;
+	}
+	repeated ProtectedPost list = 1;
+}
 message ServersList{
 	message ServerEntry{
 		optional string address = 1;

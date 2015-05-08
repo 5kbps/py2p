@@ -32,9 +32,12 @@
 			</tr>
 			<tr>
 				<td class="posttags">
-					<input name="tags">
+					<input name="tags" autocomplete="off" id="tags" type="hidden">
 					<span class="posttaglist">
-						<span class="requiredtags">
+						<span class="additionaltags" title="These tags are required to post on this server.">%%additionaltags%%</span>
+						<span class="usertags" id="usertags">
+						</span>
+						<input id="taginput" placeholder="Enter new tag" onkeypress="appendTag(event)">
 				</td>
 			</tr>
 		</table>
