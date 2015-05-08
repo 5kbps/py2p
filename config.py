@@ -7,10 +7,11 @@ postsFileDir = "webserver/file/"
 attachmentsDir = "attachments/"
 deletedPostsDir = "moved/"
 outdatedPostsDir = "old/"
-webserverDir = "webserver/"
-webserverPostsDir = "webserver/posts/"
-webserverThreadsDir = "webserver/threads/"
-webserverImageThumbDir = "webserver/thumb/"
+webServerDir = "webserver/"
+webServerPostsDir = "webserver/posts/"
+webServerThreadsDir = "webserver/threads/"
+webServerImageThumbDir = "webserver/thumb/"
+webServerTemplatestDir = "webserver/templates/"
 serversListFile = "meta/servers"
 defaultServersListFile = "meta/servers-default"
 protectedPostsFile = "meta/protected_posts"
@@ -54,24 +55,24 @@ serverMaxPOWTimeShift = 10
 #[WEBSERVER SETTINGS]
 webServerPort = 5440 # server listent on this port
 webServerPostingEnabled = True # Разрешить постить через веб-морду, а не с помощью скрипта
-webServerPostReflistHidden = True # Скрывать ссылки на другие посты
-webServerPostingSignatureLength = 1 # Длина подписи, которую генерирует сервер при постинге через веб-морду
 webServerEnableThumbnails = True # Генерировать превью
 webServerThumbnailSize = 200,200
 webServerThumbnailQuality = 50
-webserverPostsOnPage = 3
+webServerPostsOnPage = 50
 
-webserverTreeViewRecursionLevel = 3 # Глубина рекурсии
-webserverTreeViewCutOn = 4 # 
+webServerPostingPOW = 10
 
-webserverAdditionalTags = "py2p,additional"
-webserverAdditionalLanguages = "ru,en"
-webserverPostingMaxFileCount = 1
+webServerTreeViewRecursionLevel = 3 # Глубина рекурсии
+webServerTreeViewCutOn = 4 # 
+
+webServerPageListSplitNum = 25
+webServerAdditionalTags = "py2p,кириллица,⠝"
+webServerAdditionalLanguages = "ru,en"
+webServerPostingMaxFileCount = 2
+webServerPostingMaxFileSize = 5242880
 loggingEnabled = False #TODO
-logFileName = "log.txt"
-logMaxSize = 52428800 #50 MB
-webserverPostingPOW = 2
-webserverSupportedImageFormats = ['jpg','gif','png','jpeg']
-webserverPostingFileFormats = webserverSupportedImageFormats + ['tar','gz','rar']
+
+webServerSupportedImageFormats = ['jpg','gif','png','jpeg']
+webServerPostingFileFormats = webServerSupportedImageFormats + ['tar','gz','rar']
 
 defaultAdminSign = "<span style=\"color:red\">Admin</span>"

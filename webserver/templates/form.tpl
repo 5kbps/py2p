@@ -26,14 +26,15 @@
 				</td>
 			</tr>
 			<tr>
-				<td colspan=2>
-					<input id="imageselect1" type="file" name="file">
+				<td id="filelist" colspan=2>
+				<input id="fileselect"  autocomplete="off"  type="file" multiple onchange="handleSelect(event);">
 				</td>
 			</tr>
 			<tr>
-				<td colspan=2>
-					<span id="refer"></span>
-					<input id="hrefer" type="hidden" autocomplete="off" value="" name="refer">
+				<td class="posttags">
+					<input name="tags">
+					<span class="posttaglist">
+						<span class="requiredtags">
 				</td>
 			</tr>
 		</table>

@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from os import curdir, sep
-import os
-import cgi
+import os, cgi, setproctitle
 import protocol_pb2
 from lib import *
 import re
 from config import *
+import bbcode
 from xml.sax.saxutils import escape, unescape
 import time, datetime
 checkDirs()
-
+setproctitle.setproctitle("py2pserver")
 mimetypes = {
 	"html": "text/html",
 	"css": "text/css",
@@ -31,7 +31,8 @@ def unescapeHTML(text):
 def escapeHTML(text):
 	html_escape_table = {
 	    '"': "&quot;",
-	    "'": "&apos;"
+	    "'": "&apos;",
+	    "\n":"<br>"
 	}
 	return escape(text, html_escape_table)
 
@@ -46,9 +47,11 @@ def sortPostsByDate(postlist,newOnTop = True):
 def cutLatestPosts(postlist,number,shift=0):
 	post_d = sortPostsByDate(postlist)
 	return list(postlist)[shift:number+shift]
+
+#thumbs
 class ThumbCreatorClass():
 	def __init__(self):
-		to = "do"
+		pass
 	def genThumbs(self):
 		print ":genThumbs"
 		for post in get['received']:
@@ -58,13 +61,13 @@ class ThumbCreatorClass():
 			post = readPost(post)
 		size = webServerThumbnailSize
 		for img_file in post.files:
-			if hasattr(img_file,"name") and hasattr(img_file,"source") and hasattr(img_file,"md5hash") and getExt(img_file.name) in webserverSupportedImageFormats:
+			if hasattr(img_file,"name") and hasattr(img_file,"source") and hasattr(img_file,"md5hash") and getExt(img_file.name) in webServerSupportedImageFormats:
 				filename = postsFileDir+img_file.md5hash+"."+getExt(img_file.name)
-				if not fileExists(webserverImageThumbDir+img_file.md5hash+".jpg"):
+				if not fileExists(webServerImageThumbDir+img_file.md5hash+".jpg"):
 					try:
 						im = Image.open(filename).convert('RGB')
 						im.thumbnail(size)
-						im.save(webserverImageThumbDir+img_file.md5hash+".jpg", "JPEG",quality=webServerThumbnailQuality)
+						im.save(webServerImageThumbDir+img_file.md5hash+".jpg", "JPEG",quality=webServerThumbnailQuality)
 					except IOError as e:
 						print "cannot create thumbnail for", post.id, e
 			else:
@@ -76,22 +79,26 @@ class PageViewerClass():
 			"post_404": "<h1>404</h1><br><hr> Post not found"
 		}
 	def rawPostHTML(self,postid):
-		if fileExists(webserverPostsDir+postid) and postid in get['received']:
-			return readFile(webserverPostsDir+postid)
+		if fileExists(webServerPostsDir+postid) and postid in get['received']:
+			return readFile(webServerPostsDir+postid)
 		else:
 			HTMLGenerator.updatePostHTML(postid)
-			return HTMLGenerator.genPostHTML(postid)
+			return readFile(webServerPostsDir+postid) 
 	def showPost(self,postid):
-		if fileExists(webserverPostsDir+postid):
+		if fileExists(webServerPostsDir+postid):
 			header_replacements = {
 				"title": "Post "+postid+" - py2p",
 				"head": "<script src=\"/static/postView.js\"></script>" 
+			}
+			form_replacements = {
+				"replyto": postid
 			}
 			footer_replacements = {
 				"took": "{TODO}"
 			}
 			output = HTMLGenerator.fromTemplate("header",header_replacements)
 			output+= self.rawPostHTML(postid)
+			output+= HTMLGenerator.fromTemplate("form",form_replacements)
 			output+= HTMLGenerator.fromTemplate("footer",footer_replacements)
 			return output
 		else:
@@ -113,10 +120,10 @@ class PageViewerClass():
 		output += HTMLGenerator.fromTemplate("form",form_replacements)
 		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
 		return output
-	def rawTreeHTML(self,postid,reqLevel=0,cutOn=webserverTreeViewCutOn):
+	def rawTreeHTML(self,postid,reqLevel=0,cutOn=webServerTreeViewCutOn):
 		if postid in get['received']:
 			output = self.rawPostHTML(postid)
-			if reqLevel < webserverTreeViewRecursionLevel:
+			if reqLevel < webServerTreeViewRecursionLevel:
 				if postid in get['connected']:
 					sortedList = []	
 					for reply in get['connected'][postid]:
@@ -144,7 +151,7 @@ class PageViewerClass():
 	def showTrees(self,shift=0):
 		global get
 
-		shift = shift*webserverPostsOnPage
+		shift = shift*webServerPostsOnPage
 
 		header_replacements = {
 			"title":"Trees list",
@@ -162,10 +169,10 @@ class PageViewerClass():
 			if HTMLGenerator.isTree(postid):
 				postlist.append(postid)
 		all_length = len(postlist)
-		postlist = cutLatestPosts( sortPostsByDate(postlist),webserverPostsOnPage,shift )
+		postlist = cutLatestPosts( sortPostsByDate(postlist),webServerPostsOnPage,shift )
 		for postid in postlist:
 			output += self.rawPostHTML(postid)
-		output += HTMLGenerator.getPageListHTML(all_length,webserverPostsOnPage,shift,"trees/")
+		output += HTMLGenerator.getPageListHTML(all_length,webServerPostsOnPage,shift,"trees/")
 		output+= HTMLGenerator.fromTemplate("form",form_replacements)
 		output+= HTMLGenerator.fromTemplate("footer",footer_replacements)
 		return output
@@ -181,7 +188,7 @@ class PageViewerClass():
 		return output
 	def showThread(self,postid,shift=0):
 		global get			
-		shift = shift*webserverPostsOnPage
+		shift = shift*webServerPostsOnPage
 		header_replacements = {
 				"title": "Thread "+postid+" - py2p",
 				"head": "<script src=\"/static/threadView.js\"></script>" 
@@ -199,11 +206,11 @@ class PageViewerClass():
 			for reply in get['connected'][postid]:
 				postlist.append(reply)
 		all_length = len(postlist)
-		postlist = cutLatestPosts(postlist,webserverPostsOnPage,shift)
+		postlist = cutLatestPosts(postlist,webServerPostsOnPage,shift)
 		output += "<div class=\"thread_replies\">"
 		output += self.rawThreadHTML(postid)
 		output += "</div>"
-		output += HTMLGenerator.getPageListHTML(all_length,webserverPostsOnPage,shift,"thread/"+postid)
+		output += HTMLGenerator.getPageListHTML(all_length,webServerPostsOnPage,shift,"thread/"+postid)
 		output += HTMLGenerator.fromTemplate("form",form_replacements)
 		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
 		return output
@@ -230,8 +237,8 @@ class PageViewerClass():
 		return output
 	def showAll(self,shift=0):
 		global get
-		shift=shift*webserverPostsOnPage
-		postlist = cutLatestPosts( sortPostsByDate(get['received']),webserverPostsOnPage,shift )
+		shift=shift*webServerPostsOnPage
+		postlist = cutLatestPosts( sortPostsByDate(get['received']),webServerPostsOnPage,shift )
 		header_replacements = {
 			"title":"Latest posts",
 			"head":""
@@ -245,19 +252,41 @@ class PageViewerClass():
 		output = HTMLGenerator.fromTemplate("header",header_replacements)
 		for post in postlist:
 			output += self.rawPostHTML(post)
-		output += HTMLGenerator.getPageListHTML(len(get['received']),webserverPostsOnPage,shift,"all")
+		output += HTMLGenerator.getPageListHTML(len(get['received']),webServerPostsOnPage,shift,"all")
 		output += HTMLGenerator.fromTemplate("form",form_replacements)
 		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
 		return output
-class HTMLGeneratorClass():
-	def updateAll(self,postid):
+
+	def showTag(self,tag,shift=0):
 		global get
-		self.updatePostHTML(postid)
-		ThumbCreator.genPostThumbs(postid)
-		if postid in get['refer']:
-			self.updatePostHTML(get['refer'][postid])
-	def fromTemplate(self,template,replacements={}):
-		template = readFile(webserverDir+"templates/"+ template+".tpl","r")
+		shift=shift*webServerPostsOnPage
+		if tag in get['bytag']:
+			postlist = cutLatestPosts( sortPostsByDate(get['bytag'][tag]),webServerPostsOnPage,shift )
+		else:
+			postlist = []
+
+		header_replacements = {
+			"title":"Tag search: #"+tag,
+			"head":""
+		}
+		footer_replacements = {
+			"took": "{TODO}"
+		}
+		form_replacements = {
+			"replyto": "nobody"
+		}
+		output = HTMLGenerator.fromTemplate("header",header_replacements)
+		for post in postlist:
+			output += self.rawPostHTML(post)
+		output += HTMLGenerator.getPageListHTML(len(get['received']),webServerPostsOnPage,shift,"tag/"+tag)
+		output += HTMLGenerator.fromTemplate("form",form_replacements)
+		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
+		return output
+
+
+class HTMLGeneratorClass():
+	def fromTemplate(self,templateName,replacements={}):
+		template = readFile(webServerTemplatestDir+templateName+".tpl","r")
 		for replacement in replacements:
 			try:
 				template = template.replace("%%"+replacement+"%%",replacements[replacement])
@@ -265,20 +294,21 @@ class HTMLGeneratorClass():
 				print "		:fromTemplate:",e
 		return template
 	def updatePostHTML(self,postid):
-		writeFile(webserverPostsDir+postid,self.genPostHTML(postid),"w")
+		writeFile(webServerPostsDir+postid,self.genPostHTML(postid),"w")
 		if postid in get['refer']:
 			self.updatePostHTML(get['refer'][postid])
 		print ":updatePostHTML updated ",postid
 	def makePosts(self):
 		for post_file in get['received']:
-			writeFile(webserverPostsDir+post_file,self.genPostHTML(post_file),"w")
+		#	if not fileExists(webServerPostsDir+post_file):
+			writeFile(webServerPostsDir+post_file,self.genPostHTML(post_file),"w")
 	def genPostHTML(self,post_file):
 		if post_file in get['received']:
 			post = readPost(post_file)
 			replacements = {
 				"name": escapeHTML( post.name),
 				"subject": escapeHTML( post.subject),
-				"text": escapeHTML(post.text),
+				"text": BBCodeParser.format(post.text),
 				"id": escapeHTML(post.id),
 				"filelist":  self.getFileListHTML(post),
 				"taglist":  self.getTagListHTML(post),
@@ -293,7 +323,22 @@ class HTMLGeneratorClass():
 			return self.fromTemplate("post",replacements)
 		else:
 			print "missed:"+ post_file
-			return ""# 
+			return ""
+	def newPostHTML(self,post):
+		header_replacements = {
+			"title":"Post created!",
+			"head":""
+		}
+		newpost_replacements = {
+			"id":  post.id
+		}
+		footer_replacements = {
+			"took": "{TODO}"
+		}
+		output = HTMLGenerator.fromTemplate("header",header_replacements)
+		output += HTMLGenerator.fromTemplate("newpost",newpost_replacements)
+		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
+		return output
 	def getHumanReadableTime(self,postid):
 		global get
 		if postid in get['timestamp']:
@@ -319,7 +364,7 @@ class HTMLGeneratorClass():
 				r+= escapeHTML( post_file.name )
 				r+="</span>\n"
 				r+="</a><br>"
-				if hasattr(post_file,"md5hash") and getExt(post_file.name) in webserverSupportedImageFormats:
+				if hasattr(post_file,"md5hash") and getExt(post_file.name) in webServerSupportedImageFormats:
 					r+="			<img class=\"thumb\" src=\"/thumb/"+post_file.md5hash+".jpg\">\n"
 			r+= "		</span>\n"
 		r+= "	</div>"
@@ -417,16 +462,23 @@ class HTMLGeneratorClass():
 	def getPageListHTML(self,listlength,pagesize,shift,prefix):
 		cur_page_num = shift/pagesize
 		page_count = listlength/pagesize
+		if listlength%pagesize == 0:
+			page_count -= 1
 		output = "<div class=\"pagelist\">"
 		if cur_page_num != 0:
-			output += "<span class=\"firstpage\"><a class=\"pagelink\" href=\"/"+str(prefix)+"/"+str(cur_page_num-1)+"\">[<-]</a></span>"
+			output += "<span class=\"firstpage\">"
+			output += "<a class=\"pagelink\" href=\"/"+str(prefix)+"/"+str(cur_page_num-1)+"\"><</a></span>"
 		for page_num in range(0,page_count+1):
+			
 			if page_num == cur_page_num:
-				output += "<span class=\"currentpage\">["+str(page_num)+"]</span>"
+				output += "<span class=\"currentpage\"><span class=\"currentpagenum\">"+str(page_num)+"</span></span>"
 			else:
-				output += "<span class=\"pageitem\"><a class=\"pagelink\" href=\"/"+str(prefix)+"/"+str(page_num)+"\">["+str(page_num)+"]</a></span>"
+				output += "<span class=\"pageitem\"><a class=\"pagelink\" href=\"/"+str(prefix)+"/"+str(page_num)+"\">"+str(page_num)+"</a></span>"
+			if page_num % webServerPageListSplitNum == webServerPageListSplitNum-1:
+				output +="</div>"
+				output += "<div class=\"pagelist\">"
 		if cur_page_num < page_count:
-			output += "<span class=\"lastpage\"><a class=\"pagelink\" href=\"/"+str(prefix)+"/"+str(cur_page_num+1)+"\">[->]</a></span>"
+			output += "<span class=\"lastpage\"><a class=\"pagelink\" href=\"/"+str(prefix)+"/"+str(cur_page_num+1)+"\">></a></span>"
 		output += "</div>"
 		return output
 
@@ -435,7 +487,7 @@ class myHandler(BaseHTTPRequestHandler):
 	def send_static(self,path = 0):
 		if path == 0:
 			path = self.path
-			filepath = webserverDir+path
+			filepath = webServerDir+path
 		else:
 			path = self.path
 			filepath = path
@@ -477,15 +529,15 @@ class myHandler(BaseHTTPRequestHandler):
 		]
 		output = ""
 		starttime = time.time()
-		path_list = removeEmptyItems( self.path.split("/"))
+
+		print urllib.unquote(self.path).decode('utf8')
+		path_list = removeEmptyItems( urllib.unquote(self.path).decode('utf8').split("/"))
 		path_length = len(path_list)
 		if self.path.split(".")[len(self.path.split("."))-1] in mimetypes.keys():
 			if path_list[1]=="file":
 				self.send_static(path_list[2])
 			else:
 				self.send_static()
-
-		updateDB(HTMLGenerator.updateAll)
 		if path_length == 0:
 			output = PageViewer.showAll()	
 
@@ -500,12 +552,10 @@ class myHandler(BaseHTTPRequestHandler):
 		if path_length == 2:
 			if path_list[0]=="rawpost":
 				output = PageViewer.rawPostHTML(path_list[1])
-			if path_list[0]=="post" :
+			if path_list[0]=="post":
 				output = PageViewer.showPost(path_list[1])
-				self.send(output)
 			if path_list[0]=="rawthread" :
 				output = PageViewer.rawThreadHTML(path_list[1])
-				self.send(output)
 			if path_list[0]=="thread" :
 				if len(path_list) > 2:
 					shift = toInt(path_list[2])
@@ -520,6 +570,12 @@ class myHandler(BaseHTTPRequestHandler):
 				output = PageViewer.showAll(toInt(path_list[1],0))
 			if path_list[0]=="trees":
 				output = PageViewer.showTrees(toInt(path_list[1],0))
+			if path_list[0]=="tag":
+				output = PageViewer.showTag(path_list[1],0)
+
+		if path_length == 3:
+			if path_list[0]=="tag":
+				output = PageViewer.showTag(path_list[1],toInt(path_list[2],0))
 
 		if output != "":
 			self.send(output)
@@ -539,30 +595,49 @@ class myHandler(BaseHTTPRequestHandler):
 				environ={'REQUEST_METHOD':'POST',
 				'CONTENT_TYPE':self.headers['Content-Type'],
 			})
-			self.send_response(200)
-			self.end_headers()
+
+			'''
 			self.wfile.write('Client: %s\n' % str(self.client_address))
 			self.wfile.write('User-agent: %s\n' % str(self.headers['user-agent']))
 			self.wfile.write('Path: %s\n' % self.path)
 			self.wfile.write('Form data:\n')
+			'''
 			proceed = True
-			name = self.getParamFromForm(form,"name")
-			subject = self.getParamFromForm(form,"subject")
-			text = self.getParamFromForm(form,"text")
-			refer = self.getParamFromForm(form,"refer")
-			files = set()
-			tags = webserverAdditionalTags
-			languages = webserverAdditionalLanguages
-			createPost(name,subject,text,refer,files,tags,languages)
-			self.send_response(200)
-			self.send_header('Content-type','text/html')
-#				self.send_header('Location',"http://"+host+'/post/'+id)
-			self.end_headers()
-			self.wfile.write(str(len(files))+";")
-
+			errMessage = ''
+			if proceed:
+				name = self.getParamFromForm(form,"name")
+				subject = self.getParamFromForm(form,"subject")
+				text = self.getParamFromForm(form,"text")
+				refer = self.getParamFromForm(form,"refer")
+				files = []
+				for i in range(1,webServerPostingMaxFileCount+1):
+					filename = self.getParamFromForm(form,"filename_"+str(i))
+					filesource = valid.base64URL( self.getParamFromForm(form,"source_"+str(i)))
+					filesize = len(filesource)
+					if filename and filesource:
+						if filesize <= webServerPostingMaxFileSize:
+							files.append({
+							"name": filename,
+							"source":filesource
+							})
+						else:
+							proceed = False
+							errMessage += "file "+filename+" is too big ["+str(filesize)+"] limit: "+str(webServerPostingMaxFileSize)+"<br>"
+					else:
+						proceed = False
+						errMessage += "Filename is empty"
+				tags = webServerAdditionalTags
+				languages = webServerAdditionalLanguages
+				self.send_response(200)
+				self.send_header('Content-type','text/html')
+	#				self.send_header('Location',"http://"+host+'/post/'+id)
+				self.end_headers()
+				if proceed:
+					self.wfile.write(createPost(name,subject,text,refer,files,tags,languages))
+				else:
+					self.wfile.write(errMessage)
 def createPost(name,subject,text,refer,files,tags,languages):
 	current_time = int(time.time()*10000)
-	
 	post = protocol_pb2.Post()
 	post.name = unicode(name.strip())
 	post.subject = unicode(subject.strip())
@@ -571,7 +646,7 @@ def createPost(name,subject,text,refer,files,tags,languages):
 	for fileentry in files:
 		fo = post.files.add()
 		fo.name = fileentry['name']
-		fo.md5hash = fileentry['md5']
+		fo.md5hash = md5source( fileentry['source'] )
 		fo.source = fileentry['source']
 		print fo.md5hash
 	tag_list = string2list(unicode(tags))
@@ -587,25 +662,37 @@ def createPost(name,subject,text,refer,files,tags,languages):
 	post_content = stringifyPost(post)
 	pow_shift = 0
 	while True:
-		id = md5(post_content+str(pow_shift)).hexdigest()[2:]
-		tid =md5(str(pow_shift)+post_content).hexdigest()[2:]
-		id2 = hex2bin(id)
-		tid2= hex2bin(tid)
-		if str(id2)[:webserverPostingPOW] == str(tid2)[:webserverPostingPOW]:
+		postid1 = md5(post_content+str(pow_shift)).hexdigest()[2:]
+		postid2 =md5(str(pow_shift)+post_content).hexdigest()[2:]
+		tid1 = hex2bin(postid1)
+		tid2= hex2bin(postid2)
+		if str(tid1)[:webServerPostingPOW] == str(tid2)[:webServerPostingPOW]:
 			break
 		else:
 			pow_shift+=1
 	post.pow = pow_shift
-	post.id = int36(int(id,16))
+	post.id = int36(int(postid1,16))
 	postFileText = post.SerializeToString()
-	#writing to file
-	fd = open(postsDir+str(int36(int(id,16))),'wb')
-	fd.write(postFileText)
-	fd.close()
-	add2DB(post.id)
+	if post.ByteSize() <= maxPostSize:
+		fd = open(postsDir+post.id,'wb')
+		fd.write(postFileText)
+		fd.close()
+		add2DB(post.id)
+		HTMLGenerator.updatePostHTML(post.id)
+		ThumbCreator.genPostThumbs(post)
+		return HTMLGenerator.newPostHTML(post)
+	else:
+		return "Post is too large, max post size = "+maxPostSize
 
 global get
 initDB()
+BBCodeParser = bbcode.Parser()
+BBCodeParser.add_simple_formatter('hr', '<hr>')
+BBCodeParser.add_simple_formatter('sub', '<sub>%(value)s</sub>')
+BBCodeParser.add_simple_formatter('sup', '<sup>%(value)s</sup>')
+BBCodeParser.add_simple_formatter('b', '<b>%(value)s</b>')
+BBCodeParser.add_simple_formatter('s', '<s>%(value)s</s>')
+BBCodeParser.add_simple_formatter('u', '<span class="underlined">%(value)s</span>')
 HTMLGenerator = HTMLGeneratorClass()
 HTMLGenerator.makePosts()
 PageViewer = PageViewerClass()

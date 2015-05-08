@@ -36,7 +36,7 @@ class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 		print "[Server started]"
 if __name__ == "__main__":
 	global server
-	server = serverClass(("127.0.0.1", serverPort), Handler)
+	server = serverClass(("", serverPort), Handler)
 	# terminate with Ctrl-C
 	server.allow_reuse_address = True
 	try:

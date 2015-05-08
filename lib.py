@@ -72,10 +72,10 @@ def checkDirs():
 	createDirIfNotExists(postsDir)
 	createDirIfNotExists(postsFileDir)
 	createDirIfNotExists(attachmentsDir)
-	createDirIfNotExists(webserverDir)
-	createDirIfNotExists(webserverPostsDir)
-	createDirIfNotExists(webserverThreadsDir)
-	createDirIfNotExists(webserverImageThumbDir)
+	createDirIfNotExists(webServerDir)
+	createDirIfNotExists(webServerPostsDir)
+	createDirIfNotExists(webServerThreadsDir)
+	createDirIfNotExists(webServerImageThumbDir)
 	createDirIfNotExists("meta")
 
 def readFile(filename,mode="rb"):
@@ -103,19 +103,35 @@ def getFileSize(filename):
 		return os.stat(filename).st_size
 	else:
 		return 0
+
 def md5File(filename, blocksize=2**20):
 	m = hashlib.md5()
 	with open( os.path.join(filename) , "rb" ) as f:
 		while True:
 			buf = f.read(blocksize)
 			if not buf:
+				f.close()
 				break
 			m.update( buf )
 	return m.hexdigest()
-def md5(string):
-	return hashlib.md5(string.encode("utf-8"))
+def md5(string,noUTF=False):
+	if not noUTF:
+		return hashlib.md5(string.encode("utf-8"))
+	else:
+		return hashlib.md5(string)
+def md5source(source):
+	m = hashlib.md5()
+	i = 0
+	l = 2**20
+	cl = len(source)
+	while  True:
+		m.update(source[i*l:][:l])
+		if l*i>=cl:
+			break
+		else:
+			i+=1
+	return m.hexdigest()
 #posts
-
 def isReceived(postid):
 	return fileExists(postsDir+postid)
 def isDeleted(postid):
@@ -240,17 +256,17 @@ def getServerList():
 			r.append(s.address)
 	return r
 def updateDB(callback = 0):
-	global get, languagesList
+	global get
 	startTime = time.time()
-	post_files = os.listdir(postsDir)
-	for post in get['received']:
-		if not post in post_files:
-			purgePost(post)
-	for post_file in post_files:
-		if not post_file in get['received']:
-			add2DB(post_file)
-			if callback != 0:
-				callback(post_file)
+	post_files = set(os.listdir(postsDir))
+	known_posts =get['received']
+	new_posts 		= post_files - known_posts
+	removed_posts   = known_posts- post_files
+
+	for postid in new_posts:
+		add2DB(postid)
+	for postid in removed_posts:
+		purgePost(postid)
 	endTime = time.time()
 	loadProtectedPosts()
 	print "Post parsing took ", float(endTime - startTime )
@@ -385,8 +401,8 @@ def deletePost(postid):
 							deleteFile(postsFileDir+file_name)
 							print "removed attached file: " + file_name+" - "+post.id
 						#remove thumbnail
-						if fileExists(webserverImageThumbDir+post_file.md5hash+".jpg"):
-							deleteFile(webserverImageThumbDir+post_file.md5hash+".jpg")
+						if fileExists(webServerImageThumbDir+post_file.md5hash+".jpg"):
+							deleteFile(webServerImageThumbDir+post_file.md5hash+".jpg")
 						else:
 							print "cannot remove attached file: "+file_name+" - "+post.id
 		os.remove(postsDir+postid)
@@ -490,6 +506,8 @@ class ValidatorClass():
 		return True
 	def lang(self,lang):
 		return lang in languagesList
+	def base64URL(self,url):
+		return b64decode(url[url.find("base64,")+7:])
 """
 class Server():
 	def __init__(self,host="",port=0,ctype="client"):

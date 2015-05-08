@@ -76,8 +76,7 @@ hr{
 	border-radius: 90px;
 	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
 	border: 1px solid rgba(0,0,0,0.1);
-	margin: 5px;
-}
+	margin: 5px;}
 .small_reply_counter{
 	font-size: 16px;
 	font-weight: bold;
@@ -101,12 +100,59 @@ hr{
 	color:white;
 	text-shadow: 0 0 1px #555;
 }
+
+.pagelist{
+	margin-bottom: 10px;
+}
+.pagelink, .currentpage{
+	font-size: 22px;
+	font-weight: bold;
+	font-family: monospace;
+	padding: 3px;
+	color:white;
+	border-radius: 50px;
+	text-shadow: 0 0 1px #555;
+	margin: 7px;
+}
+.currentpage{
+	border-radius: 50px;
+	overflow: hidden;
+	font-family: monospace;
+	background-color: white;
+	border-bottom: 1px solid rgba(0,0,0,0.3);
+	border-right: 1px solid rgba(0,0,0,0.3);
+	margin-bottom: 10px;
+}
+.currentpagenum{
+	border-radius: 90px;
+	margin: 2px;
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
+	border: 1px solid rgba(0,0,0,0.1);
+}
+.postform{
+	min-width: 600px;
+	min-height: 300px;
+	display: inline-block;
+	border-radius: 14px;
+	font-family: monospace;
+	background-color: white;
+	border-bottom: 1px solid rgba(0,0,0,0.3);
+	border-right: 1px solid rgba(0,0,0,0.3);
+}
 .postformname, .postformsubject,.postformtext{
-	width: 400px;
+	width: 500px;
 }
 .postformtext{
 	height: 200px;
 }
 .postformsubmit{
 	float: right;
+}
+.filethumb{
+	max-width: 50px;
+	max-height: 50px;
+	display: inline;
+}
+.fileentry{
+	display: inline;
 }

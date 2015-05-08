@@ -11,4 +11,5 @@
 		<div class="headercontent">
 			<a class="link" href="/all">[all]</a>
 			<a class="link" href="/threads">[threads]</a>
+			<a class="link" href="/trees">[trees]</a>
 		</div>

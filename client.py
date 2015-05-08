@@ -109,12 +109,5 @@ class ClientClass:
 			sock.close()
 			return server
 client = ClientClass()
-client.startCycle()
-client.startCycle()
-client.startCycle()
-client.startCycle()
-client.startCycle()
-client.startCycle()
-client.startCycle()
-client.startCycle()
-client.startCycle()
+while True:
+	client.startCycle()
