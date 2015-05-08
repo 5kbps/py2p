@@ -99,11 +99,11 @@ def fileExists(filename):
 	return os.path.isfile(filename)
 def deleteFile(filename):
 	os.remove(filename)
-def getFileSize(filename):
+def getFileSize(filename,dv=0):
 	if fileExists(filename):
 		return os.stat(filename).st_size
 	else:
-		return 0
+		return dv
 
 def md5File(filename, blocksize=2**20):
 	m = hashlib.md5()
@@ -144,7 +144,10 @@ def isLocal(postid):
 def isPostId(postid):
 	return True
 def getPostSize(postid):
-	return getFileSize(postsDir+postid)
+	global get
+	if not postid in get['postsize']:
+		get['postsize'][postid] = getFileSize(postsDir+postid)
+	return get['postsize'][postid]
 def readPost(postid):
 	post = protocol_pb2.Post()
 	if isReceived(postid):
@@ -205,6 +208,7 @@ def initDB():
 	get['requesting'] = {}
 	get['pow'] = {}
 	#peering
+	get['postsize'] = {}
 	get['clients'] = {}
 	#postmap
 	get['received'] = set()

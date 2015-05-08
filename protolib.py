@@ -35,7 +35,7 @@ def getFirstRequestData():
 	global get
 	data = protocol_pb2.Data()
 	data = attachMeta(data)
-	data = attachKnownPosts(data)
+	data = attachKnownPosts(data,0)
 	return data.SerializeToString()
 
 def processData(received_data):
@@ -57,7 +57,7 @@ def processData(received_data):
 	data=protocol_pb2.Data()
 	data = attachMeta(data)
 #	if len(data.requesting)==0:
-	data = attachKnownPosts(data)
+	data = attachKnownPosts(data,rd)
 	data, result['requesting'] = requestPosts(data,rd)
 #	if maxRequestPOW >= rd.meta.requestPOW:
 	data,result['sending'] = sendPosts(data,rd)
@@ -95,23 +95,23 @@ def attachMeta(data):
 	return data
 
 #posts
-def attachKnownPosts(data):
+def attachKnownPosts(data,rd):
 	print ":attachKnownPosts"
-	nd = deepcopy(data)
+	avaliableBytes = maxRequestSize - data.ByteSize()
 	for post in get['received']:
-		cur_post = nd.known.add()
-		cur_post.id = post
-		cur_post.size = getPostSize(post)
-		if post in get['pow']:
-			cur_post.pow = get['pow'][post]
-		for tag in get["tags"][post]:
-			cur_post.tags.append(tag)
-		for language in get["languages"][post]:
-			cur_post.languages.append(language)
-			pass
-		if checkLimits(nd):
-			data = deepcopy(nd)
-#			print "		[+]",post,": ",cur_post.ByteSize()
+		if avaliableBytes > 1024:
+			cur_post = data.known.add()
+			cur_post.id = post
+			cur_post.size = getPostSize(post)
+			if post in get['pow']:
+				cur_post.pow = get['pow'][post]
+			for tag in get["tags"][post]:
+				cur_post.tags.append(tag)
+			for language in get["languages"][post]:
+				cur_post.languages.append(language)
+				pass
+			avaliableBytes -= cur_post.ByteSize()
+#				print "		[+]",post,": ",cur_post.ByteSize()
 		else:
 			break
 	print "		[",len(data.known),"/",len(get['received']),"]"
@@ -122,22 +122,21 @@ def requestPosts(data,rd):
 	global get
 	print ":requestPosts"
 	counter = 0
-	nd = deepcopy(data)
+	avaliableBytes = maxRequestSize - data.ByteSize()
 	for post in rd.known:
-		if not isReceived(post.id) and not isDeleted(post.id) and isGood(post):
-			requesting_post = nd.requesting.add()
-			requesting_post.id = post.id
-			requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requestPOW)
-			counter+=1
-			if checkLimits(nd):
-				data = deepcopy(nd)
+		if avaliableBytes > 1024:
+			if not isReceived(post.id) and not isDeleted(post.id) and isGood(post):
+				requesting_post = data.requesting.add()
+				requesting_post.id = post.id
+				requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requestPOW)
+				avaliableBytes -= requesting_post.ByteSize()
+				counter+=1
 #				print "		[+]",post.id
 			else:
-#				print "		[-]",post.id
-				break
+				pass
+#				print "		[--]",post.id
 		else:
-			pass
-#			print "		[--]",post.id
+			break
 	print "		[",len(data.requesting),"/",len(rd.known),"]"
 	return data, counter
 
@@ -145,13 +144,15 @@ def sendPosts(data,rd):
 	print ":sendPosts"
 	counter = 0
 	for requesting_post in rd.requesting:
+		avaliableBytes = maxRequestSize - data.ByteSize() 
 		if checkRequestPOW(requesting_post,rd.meta.requestPOW):
 			if isAvaliable(requesting_post.id):
-				if checkLimits(data,maxRequestSize,getFileSize(postsDir+ requesting_post.id)*3):	
+				if avaliableBytes > getFileSize(postsDir+ requesting_post.id,maxPostSize)*3:	
 					sbs = data.ByteSize()
 					post = data.sending.append( readFile(postsDir+ requesting_post.id))	
 					ebs = data.ByteSize()
 					rfs = getFileSize(postsDir+ requesting_post.id)
+					avaliableBytes -= getFileSize(postsDir+ requesting_post.id)
 					print ":	>",sbs,ebs,"(",maxRequestSize,")",rfs,ebs-sbs<rfs*3
 					counter += 1
 				else:

@@ -73,7 +73,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 
 if "--test" in sys.argv:
 	for i in range(1,2000):
-		np = CreatePost("name","subject","text","test.jpg","o,tag,test","1fth8tdm4ef7dlvlyl8fsmwy","en,ru",3)
+		np = CreatePost("name","subject","text","test.jpg","o,tag,test","","en,ru",3)
 else:
 	name = raw_input("Name: ")
 	subject = raw_input("Subject: ")

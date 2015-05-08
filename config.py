@@ -30,7 +30,7 @@ newPostDefaultPOW = 1;
 newPostDefaultName = "Anonymous"
 newPostDefaultSubject = ""
 newPostDefaultTags = ["tag","test","py2p"]
-newPostDefaultFiles = "test.gif,test.jpg"
+newPostDefaultFiles = ["test.gif","test.jpg"]
 newPostDefaultLanguages = "en,ru"
 
 #[CLIENT SETTINGS]
