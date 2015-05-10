@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from config import *
 from lib import *
-from copy import deepcopy
 import time
 import sys
 import struct
@@ -16,7 +15,7 @@ def send_msg(sock, msg):
 
 def recv_msg(sock):
 	raw_msglen = recvall(sock, 4)
-	if not raw_msglen:
+	if not raw_msglen or len(raw_msglen)>maxRequestSize:
 		return None
 	msglen = struct.unpack('>I', raw_msglen)[0]
 	# Read the message data
@@ -56,10 +55,9 @@ def processData(received_data):
 	getServers(rd)
 	data=protocol_pb2.Data()
 	data = attachMeta(data)
-#	if len(data.requesting)==0:
-	data = attachKnownPosts(data,rd)
+	if len(data.requesting)==0:
+		data = attachKnownPosts(data,rd)
 	data, result['requesting'] = requestPosts(data,rd)
-#	if maxRequestPOW >= rd.meta.requestPOW:
 	data,result['sending'] = sendPosts(data,rd)
 	result['flagToBreak'] = bool(len(data.requesting) + len(data.sending)) == False
 	if data.ByteSize()>maxRequestSize:
@@ -79,14 +77,10 @@ def processData(received_data):
 
 def normalizeData(rd):
 	print "		:normalizeData"
-	if not hasattr(rd.meta,"requestPOW"):
-		rd.meta.requestPOW = 0
-	print "			]req",len(rd.requesting)
 	return rd
 def attachMeta(data):
 	global get
 	print ":attachMeta"
-	data.meta.requestPOW 	= requestPOW
 	data.meta.version 		= py2pVersion
 	for c in get['servers'].list:
 		#if not c.address.startswith( "127." ) and not c.address.startswith("localhost"):	
@@ -102,14 +96,6 @@ def attachKnownPosts(data,rd):
 		if avaliableBytes > 1024:
 			cur_post = data.known.add()
 			cur_post.id = post
-			cur_post.size = getPostSize(post)
-			if post in get['pow']:
-				cur_post.pow = get['pow'][post]
-			for tag in get["tags"][post]:
-				cur_post.tags.append(tag)
-			for language in get["languages"][post]:
-				cur_post.languages.append(language)
-				pass
 			avaliableBytes -= cur_post.ByteSize()
 #				print "		[+]",post,": ",cur_post.ByteSize()
 		else:
@@ -128,7 +114,6 @@ def requestPosts(data,rd):
 			if not isReceived(post.id) and not isDeleted(post.id) and isGood(post):
 				requesting_post = data.requesting.add()
 				requesting_post.id = post.id
-				requesting_post.pow, requesting_post.time = getRequestPOW(post,rd.meta.requestPOW)
 				avaliableBytes -= requesting_post.ByteSize()
 				counter+=1
 #				print "		[+]",post.id
@@ -144,25 +129,22 @@ def sendPosts(data,rd):
 	print ":sendPosts"
 	counter = 0
 	for requesting_post in rd.requesting:
-		avaliableBytes = maxRequestSize - data.ByteSize() 
-		if checkRequestPOW(requesting_post,rd.meta.requestPOW):
-			if isAvaliable(requesting_post.id):
-				if avaliableBytes > getFileSize(postsDir+ requesting_post.id,maxPostSize)*3:	
-					sbs = data.ByteSize()
-					post = data.sending.append( readFile(postsDir+ requesting_post.id))	
-					ebs = data.ByteSize()
-					rfs = getFileSize(postsDir+ requesting_post.id)
-					avaliableBytes -= getFileSize(postsDir+ requesting_post.id)
-					print ":	>",sbs,ebs,"(",maxRequestSize,")",rfs,ebs-sbs<rfs*3
-					counter += 1
-				else:
-					break
+		avaliableBytes = maxRequestSize - data.ByteSize()
+		if isAvaliable(requesting_post.id):
+			if avaliableBytes > getFileSize(postsDir+ requesting_post.id,maxPostSize)*3:	
+				sbs = data.ByteSize()
+				post = data.sending.append( readFile(postsDir+ requesting_post.id))	
+				ebs = data.ByteSize()
+				rfs = getFileSize(postsDir+ requesting_post.id)
+				avaliableBytes -= getFileSize(postsDir+ requesting_post.id)
+				print ":	>",sbs,ebs,"(",maxRequestSize,")",rfs,ebs-sbs<rfs*3
+				counter += 1
+			else:
+				print "----",requesting_post.id
 #					print "		[+]:",requesting_post.id,"(",nd.ByteSize(),")"
 #				break
-			else:
-				print "post not avaliable", requesting_post.id
 		else:
-			print "POW check failed, post was not sent",requesting_post.id
+			print "post not avaliable", requesting_post.id
 	print "		[",len(data.sending),"/",len(rd.requesting),"]"
 	return data, counter
 def getServers(data):
@@ -195,36 +177,6 @@ def receivePosts(rd):
 	print ":receivePosts [",counter,"]"
 	return counter
 #POW
-def checkRequestPOW(requesting_post,requiredPOW):
-	if requiredPOW != 0:
-		if abs(time.time() - requesting_post.time )< clientMaxPOWTimeShift:
-			t_pow_1 = hex2bin(md5(requesting_post.id+str(requesting_post.time)+str(requesting_post.pow)))
-			t_pow_2 = hex2bin(md5(str(requesting_post.pow)+requesting_post.id+str(requesting_post.time)))
-			if t_pow_1[:clientRequiredPOW] == t_pow_2[:clientRequiredPOW]:
-				return True
-			else:
-				return False
-		else:
-			return False
-	else:
-		return True
-def getRequestPOW(post,requiredPOW):
-	if requiredPOW != 0:
-		powValue = 1
-		timeNow = int(time.time())
-		strTimeNow = str(timeNow)
-		while True:
-			strPowValue = str(powValue)
-			t_pow_1 = hex2bin(md5(post.id+strTimeNow+strPowValue))
-			t_pow_2 = hex2bin(md5(strPowValue+post.id+strTimeNow))
-			if t_pow_1[:requiredPOW] == t_pow_2[:requiredPOW]:
-				break
-			else:
-				powValue += 1
-	else:
-		powValue = 0;
-		timeNow = 0;
-	return powValue, timeNow
 def checkLimits(data,limit=maxRequestSize,increment=0):
 	#print "		:checkLimits:",data.ByteSize(),"?",limit+increment
 	return data.ByteSize() < limit+increment

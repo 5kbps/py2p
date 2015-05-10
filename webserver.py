@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
 from os import curdir, sep
 import os, cgi, setproctitle
@@ -19,7 +21,8 @@ mimetypes = {
 	"jpeg": "image/jpg",
 	"png": 	"image/png",
 	"svg": "image/svg+xml",
-	"gif": "image/gif"
+	"gif": "image/gif",
+	"webm": "video/webm"
 }
 def unescapeHTML(text):
 	html_escape_table = {
@@ -71,7 +74,7 @@ class ThumbCreatorClass():
 					except IOError as e:
 						print "cannot create thumbnail for", post.id, e
 			else:
-				print "		cannot create thumbnail"
+				print "		Not an image file:",img_file.name
 class PageViewerClass():
 	def __init__(self):
 		to = "do"
@@ -261,10 +264,7 @@ class PageViewerClass():
 	def showTag(self,tag,shift=0):
 		global get
 		shift=shift*webServerPostsOnPage
-		if tag in get['bytag']:
-			postlist = cutLatestPosts( sortPostsByDate(get['bytag'][tag]),webServerPostsOnPage,shift )
-		else:
-			postlist = []
+
 
 		header_replacements = {
 			"title":"Tag search: #"+tag,
@@ -274,14 +274,21 @@ class PageViewerClass():
 			"took": "{TODO}"
 		}
 		form_replacements = {
-			"replyto": "nobody",
+			"replyto": "nobody"
 		}
-		output = HTMLGenerator.fromTemplate("header",header_replacements)
-		for post in postlist:
-			output += self.rawPostHTML(post)
-		output += HTMLGenerator.getPageListHTML(len(get['received']),webServerPostsOnPage,shift,"tag/"+tag)
-		output += HTMLGenerator.fromTemplate("form",form_replacements)
-		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
+		if tag in get['bytag']:
+			postlist = cutLatestPosts( sortPostsByDate(get['bytag'][tag]),webServerPostsOnPage,shift )
+			output = HTMLGenerator.fromTemplate("header",header_replacements)
+			for post in postlist:
+				output += self.rawPostHTML(post)
+			output += HTMLGenerator.getPageListHTML(len(get['bytag'][tag]),webServerPostsOnPage,shift,"tag/"+tag)
+			output += HTMLGenerator.fromTemplate("form",form_replacements)
+			output += HTMLGenerator.fromTemplate("footer",footer_replacements)
+		else:
+			output = HTMLGenerator.fromTemplate("header",header_replacements)
+			output += HTMLGenerator.fromTemplate("error",{ "errortitle":"No posts found by tag #"+escapeHTML(tag),"errortext":" "})
+			output += HTMLGenerator.fromTemplate("form",form_replacements)
+			output += HTMLGenerator.fromTemplate("footer",footer_replacements)
 		return output
 
 
@@ -349,12 +356,12 @@ class HTMLGeneratorClass():
 		return output
 	def getHumanReadableTime(self,postid):
 		global get
-		if postid in get['timestamp']:
-			timestamp = float(get['timestamp'][postid])/10000
-			timestamp = datetime.datetime.fromtimestamp(timestamp)
-			timestr = timestamp.strftime('<span class=\"date\">%d.%m.%Y </span><span class=\"time\">%H:%M:%S</span>')
-		else:
-			timestr = "UNKNOWN TIME"
+		if not postid in get['timestamp']:
+			add2DB(postid)
+
+		timestamp = float(get['timestamp'][postid])/10000
+		timestamp = datetime.datetime.fromtimestamp(timestamp)
+		timestr = timestamp.strftime('<span class=\"date\">%d.%m.%Y </span><span class=\"time\">%H:%M:%S</span>')
 		return timestr
 	def getModSignHTML(self,postid):
 		global get
@@ -449,22 +456,22 @@ class HTMLGeneratorClass():
 			return ""
 		output = "<span class=\"powcounter "
 		if r >= 40:
-			output += "pow_40\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">POW: <span class=\"pow\">"+str(r)+"</span></a></span>"
+			output += "pow_40\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
 		if r >= 35:
-			output += "pow_35\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">POW: <span class=\"pow\">"+str(r)+"</span></a></span>"
+			output += "pow_35\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
 		if r >= 30:
-			output += "pow_30\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">POW: <span class=\"pow\">"+str(r)+"</span></a></span>"
+			output += "pow_30\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
 		if r >= 25:
-			output += "pow_25\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">POW: <span class=\"pow\">"+str(r)+"</span></a></span>"
+			output += "pow_25\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
 		if r >= 20:
-			output += "pow_20\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">POW: <span class=\"pow\">"+str(r)+"</span></a></span>"
+			output += "pow_20\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
 		else:
-			output += "pow_0\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">POW: <span class=\"pow\">"+str(r)+"</span></a></span>"
+			output += "pow_0\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
 
 	def getPageListHTML(self,listlength,pagesize,shift,prefix):
@@ -537,8 +544,6 @@ class myHandler(BaseHTTPRequestHandler):
 		]
 		output = ""
 		starttime = time.time()
-
-		print urllib.unquote(self.path).decode('utf8')
 		path_list = removeEmptyItems( urllib.unquote(self.path).decode('utf8').split("/"))
 		path_length = len(path_list)
 		if self.path.split(".")[len(self.path.split("."))-1] in mimetypes.keys():
@@ -593,6 +598,9 @@ class myHandler(BaseHTTPRequestHandler):
 			return form[param].value
 		else:
 			return ""
+	if not webServerloggingEnabled:
+		def log_message(self,a1=0,a2=0,a3=0,a4=0,a5=0,a6=0):
+			pass
 
 	def do_POST(self):
 		if self.path=="/send":
@@ -661,7 +669,7 @@ def createPost(name,subject,text,refer,files,tags,languages):
 	languages_list = string2list(unicode(languages))
 	for tag in tags:
 		if valid.tag(unicode(tag.strip())):
-			to = post.tags.append(unicode(tag.strip()))
+			to = post.tags.append(valid.tag(unicode(tag.strip())))
 	for lang in languages_list:
 		if valid.lang(lang):
 			lo = post.languages.append(lang)
@@ -706,11 +714,15 @@ HTMLGenerator.makePosts()
 PageViewer = PageViewerClass()
 ThumbCreator = ThumbCreatorClass()
 ThumbCreator.genThumbs()
+
 try:
 	#Create a web server and define the handler to manage the
 	#incoming request
 	server = HTTPServer(('', webServerPort), myHandler)
-	print 'Started httpserver on port ' , webServerPort
+	print '[Webserver started succesfully!]'
+	print '[Open http://127.0.0.1:'+str(webServerPort)+'/ in your browser to explore the local copy of py2p board]'
+	print '[Posts avaliable: '+str(len(get['received']))+']'
+	print '[Public servers : '+str(len(get['servers'].list))+']'
 	#Wait forever for incoming htto requests
 	server.serve_forever()
 

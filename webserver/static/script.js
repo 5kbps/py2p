@@ -1,5 +1,5 @@
 function hasValue(arr,value) {
-    return (arr.indexOf(value) != -1);
+	return (arr.indexOf(value) != -1);
 }
 
 function id(id){
@@ -8,6 +8,23 @@ function id(id){
 function replyTo(elem){
 	id('refer_id').value = elem.textContent.trim()
 	id('replyto_id').textContent = elem.textContent.trim()
+}
+function removeEmptyItems(list){
+	r = []
+	for(i in list){
+		if(list[i] || list[i] === 0){
+			r.push(list[i])
+		}
+	}
+	return r
+}
+function inList(item,list){
+	for(i in list){
+		if(list[i]==item){
+			return true
+		}
+	}
+	return false
 }
 function handleSelect(evt){
 	supported_image_fromats = ['jpg','png','gif']
@@ -72,26 +89,36 @@ function thumbExpand(elem){
 }
 
 function appendTag(e) {
-    if (e.keyCode == 13 || e.charCode == 35) {
-		id("tags").value += "#"+id("taginput").value+"#"
-		newtag = document.createElement("a")
-		newtag.onclick=function(){
-			removeTag(this)
+	cancelBubble = false
+	if(e.charCode == 47 || e.charCode == 32){
+		cancelBubble = true
+	}
+	if( e.keyCode == 13 || e.charCode == 35){
+		list = removeEmptyItems( id("tags").value.split("#"))
+		if(id("taginput").value.trim() !="" && !inList(id("taginput").value.trim(),list) ){
+			id("tags").value += "#"+id("taginput").value.trim()+"#"
+			newtag = document.createElement("a")
+			newtag.onclick=function(){
+				removeTag(this)
+			}
+			newtag.className = "usertag tag"
+			newtag.textContent = '#'+id("taginput").value
+			id("usertags").appendChild(newtag)
+			id("taginput").value = ""
 		}
-		newtag.className = "usertag tag"
-		newtag.textContent = '#'+id("taginput").value
-		id("usertags").appendChild(newtag)
-		id("taginput").value = ""
-        var src = e.srcElement || e.target;
-        if (src.tagName.toLowerCase() != "textarea") {
-            if (e.preventDefault) {
-                e.preventDefault();
-                e.cancelBubble = true;
-            } else {
-                e.returnValue = false;
-            }
-        }
-    }
+		cancelBubble = true
+	}
+
+	var src = e.srcElement || e.target;
+	if (src.tagName.toLowerCase() != "textarea" && cancelBubble == true) {
+		if (e.preventDefault) {
+			e.preventDefault();
+			e.cancelBubble = true;
+		} else {
+			e.returnValue = false;
+		}
+	}
+
 }
 function removeTag(elem){
 	id("tags").value = id("tags").value.replace(elem.textContent+"#",'')

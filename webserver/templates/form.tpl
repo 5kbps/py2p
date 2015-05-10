@@ -1,6 +1,6 @@
-<center>
+
 	<form method="POST" action="/send" class="postform">
-		<table>
+		<table class="postformtable">
 			<tr>
 				<td>
 					<input type="hidden" name="refer" id="refer_id" value="%%replyto%%">
@@ -31,7 +31,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="posttags">
+				<td colspan=2 class="posttags">
 					<input name="tags" autocomplete="off" id="tags" type="hidden">
 					<span class="posttaglist">
 						<span class="additionaltags" title="These tags are required to post on this server.">%%additionaltags%%</span>
@@ -40,7 +40,11 @@
 						<input id="taginput" placeholder="Enter new tag" onkeypress="appendTag(event)">
 				</td>
 			</tr>
+			<tr>
+				<td colspan=2>
+						<span class="boardinfo">◦ bbcode: [b],[s],[i],[u]</li> 
+				</td>
+			</tr>
 		</table>
 	</form>
  
-</center>

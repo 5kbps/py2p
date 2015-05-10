@@ -17,15 +17,18 @@ class Handler(SocketServer.BaseRequestHandler):
 		print "		:hadle ",self.client_address
 		received_data = recv_msg(self.request)
 		client_address = self.client_address
-		reply, result = processData(received_data)
-#		get['companions'][client_address[0]] = client
+		address = client_address[0]
+		
+		if not address in get['shared_keys']:
+			reply = genKeys2(received_data, address)
+			print ">>>",len(reply)
+		else:
+			reply, result = processData(received_data)
 		if reply is not None and reply is not "":
 			print "			Sending a reply", len(reply)
 			send_msg(self.request,reply)
-#			self.request.send(reply)
 		self.request.close()
 
-#class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
 	def __init__(self, server_address, RequestHandlerClass):
 		SocketServer.TCPServer.allow_reuse_address = True

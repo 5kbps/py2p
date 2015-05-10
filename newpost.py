@@ -25,7 +25,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	post.text = unicode(text.strip())
 	post.time = str(current_time)
 	if files != "":
-		file_list = string2list(files)	
+		file_list = files
 		for f in file_list:
 			if fileExists(attachmentsDir+ f):
 				fo = post.files.add()
@@ -72,7 +72,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 
 
 if "--test" in sys.argv:
-	for i in range(1,2000):
+	for i in range(1,20):
 		np = CreatePost("name","subject","text","test.jpg","o,tag,test","","en,ru",3)
 else:
 	name = raw_input("Name: ")

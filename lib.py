@@ -6,21 +6,41 @@ import sys
 import html
 import urllib
 import re
-from config import *
-from base64 import b64decode
 import time
 import resource
-from PIL import Image
 import string
 import protocol_pb2
-reload(sys)  
+import key_exchange_pb2
+from PIL import Image
+from config import *
+from base64 import b64decode
+from Crypto.Cipher import AES
+
+reload(sys) 
 sys.setdefaultencoding('utf8')
 
 #constants
 languagesList = ["en","ru","pol","uk","fr","de","fi","ja","lv","pol","es","sv"]
 py2pVersion = 0
+#logging
 def R():
 	print "--------------------------------------"
+def log(message,level=1,indent=''):
+	if indent == '':
+		indent = {
+			1:0,
+			2:0,
+			3:1,
+			4:1,
+			5:0
+		}[level]
+	indent = "										"[:indent]
+	if level == 2:
+		message = ":"+message
+	if level in logSettings:
+		print indent+message
+
+
 #lists
 def get_class_members(klass):
     ret = dir(klass)
@@ -93,8 +113,7 @@ def writeFile(filename,content,mode="wb"):
 		fd.write(content)
 		fd.close()
 	except BaseException as e:
-		print "		:writeFile failed", e
-		pass
+		log("writeFile failed: "+filename, 5)
 def fileExists(filename):
 	return os.path.isfile(filename)
 def deleteFile(filename):
@@ -104,6 +123,43 @@ def getFileSize(filename,dv=0):
 		return os.stat(filename).st_size
 	else:
 		return dv
+
+# cryptography
+def padAES(data):
+	return data + (32 - len(data) % 32) * " "
+def EncodeAES(data,key):
+	cipher = AES.new(padAES(key))
+	return cipher.encrypt(padAES(data))
+def DecodeAES(data,key):
+	cipher = AES.new(padAES(key))
+	return cipher.decrypt(padAES(data)).rstrip(" ")
+def genKey():
+	return str(int(os.urandom(keyLength/3).encode('hex'),16))
+	return r
+def genKeys1(address):
+	global get
+	kd = key_exchange_pb2.KeyExchange()
+	kd.clientPublic = get['public_key']
+	kd.serverPublic = get['public_keys'][address] = genKey()
+	kd.clientSending = str(pow(int(kd.serverPublic),int(get['private_key']),int(kd.clientPublic)))
+	return kd.SerializeToString()
+
+def genKeys2(data,address):
+	global get
+	rd = key_exchange_pb2.KeyExchange()
+	rd.ParseFromString(data)
+	get['shared_keys'][address] = str(pow(int(rd.clientSending),int(get['private_key']),int(rd.clientPublic)))
+	print "SHARED KEY = ",get['shared_keys'][address]
+	kd = key_exchange_pb2.KeyExchange()
+	kd.serverSending = str(pow(int(rd.serverPublic),int(get['private_key']),int(rd.clientPublic))%int(rd.clientPublic))
+	return kd.SerializeToString()
+
+def genKeys3(data,address):
+	global get
+	rd = key_exchange_pb2.KeyExchange()
+	rd.ParseFromString(data)
+	get['shared_keys'][address] = str(pow(int(rd.serverSending),int(get['private_key']),int(get['public_key'])))
+	print "SHARED KEY = ",get['shared_keys'][address]
 
 def md5File(filename, blocksize=2**20):
 	m = hashlib.md5()
@@ -132,6 +188,7 @@ def md5source(source):
 		else:
 			i+=1
 	return m.hexdigest()
+
 #posts
 def isReceived(postid):
 	return fileExists(postsDir+postid)
@@ -143,7 +200,7 @@ def isLocal(postid):
 	return False
 def isPostId(postid):
 	return True
-def getPostSize(postid):
+def getPostSize(postid,dr = maxPostSize):
 	global get
 	if not postid in get['postsize']:
 		get['postsize'][postid] = getFileSize(postsDir+postid)
@@ -209,7 +266,12 @@ def initDB():
 	get['pow'] = {}
 	#peering
 	get['postsize'] = {}
+	get['filecache'] = {}
 	get['clients'] = {}
+	get['public_key'] = genKey()
+	get['private_key'] = genKey()
+	get['public_keys'] = {}
+	get['shared_keys'] = {}
 	#postmap
 	get['received'] = set()
 	get['deleted'] = set()
@@ -231,23 +293,22 @@ def addServer(address):
 
 def loadServers():
 	global get
-	print "		:loadServers"
+	log( "loadServers",2)
 	get['servers'] = protocol_pb2.ServersList()
 	try:
 		get['servers'].ParseFromString(readFile(serversListFile))
 	except BaseException:
-		print "		:loadServers: [warning] cannot load servers list! ("+serversListFile+") (using default one)"
+		log(":loadServers: [warning] cannot load servers list! ("+serversListFile+") (using default one)",4)
 		try:
 			get['servers'].ParseFromString(readFile(defaultServersListFile))
 		except BaseException:
-			print "		:loadServers: [error] cannot load default servers list! ("+defaultServersListFile+") (exiting)"
+			log(":loadServers: [error] cannot load default servers list! ("+defaultServersListFile+") (exiting)",5)
 			sys.exit(0)
 	for server in get['servers'].list:
+		log("Adress: "+server.address+" received posts:"+str(server.received),3)
 		server.rejected = 0
 		if not hasattr(server,"address"):
 			server.address = "127.0.0.1;5441"
-		if not hasattr(server,"received"):
-			server.received = 0
 		if not hasattr(server,"received"):
 			server.received = 0
 def saveServers():
@@ -273,12 +334,12 @@ def updateDB(callback = 0):
 		purgePost(postid)
 	endTime = time.time()
 	loadProtectedPosts()
-	print "Post parsing took ", float(endTime - startTime )
-	print "Memory:",getMemUsage()
+	log("Post parsing took "+str(float(endTime - startTime )),1)
+	log("Memory:"+str(getMemUsage()),1)
 
 def loadProtectedPosts():
 	global get
-#	print ":loadProtectedPosts"
+	log("loadProtectedPosts",2)
 	protected = protocol_pb2.ProtectedPosts() 
 	protected.ParseFromString(readFile(protectedPostsFile,"r"))
 	get['protected'] = protected.list
@@ -289,9 +350,16 @@ def saveProtectedPosts():
 	protected.list = get['protected']
 	writeFile(protectedPostsFile,protected.SerializeToString(),'w')
 
+def isProtected(postid):
+	for post in get['protected']:
+		if post.id == postid:
+			return True
+	return False
+
 def addProtectedPost(postid,timebonus=-1,modhtml=defaultAdminSign,modname=defaultAdminName, sticked=False,callback=0):
 	if isReceived(postid):
 		p = get['protected'].add()
+		p.id = postid
 		p.timebonus = timebonus
 		p.modhtml = modhtml
 		p.modname = modname
@@ -343,7 +411,7 @@ def add2DB(postid):
 			fd = open(file_name,'wb')
 			fd.write(post_file.source)
 			fd.close()
-			#print post.id ,"-> ", post_file.name
+			log(post.id +" -> "+ post_file.name,2)
 		else:
 			do = "nothing"
 			#print post.id ,"-[exitsts] ", post_file.name
@@ -416,9 +484,27 @@ def purgePost(postid):
 	if postid in get['protected']:
 		del get['protected'][postid]
 
-def cutPosts():
+def hashesCount(POW):
+	return 2**POW
+def POWBonus(postid):
+	return get['pow'][postid]*hashesCount(get['pow'][postid])
+def cutOutdatedPosts():
+	post_d = {}
+	to_delete = []
+	'''
+	for post in list(get['received']):
+		if post in get['timestamp']:
+			post_d[post] = get['timestamp'][post] + get['pow'][post])*powC
+		else
+
+	sorted_d = sorted(post_d, key=post_d.__getitem__,reverse=newOnTop)
+	return sorted_d
+
 	# to delete posts if their count is more than maximum
+	for post in get['received']
 	pass
+	'''
+
 #math
 def toInt(string,default=0):
 	try:
@@ -456,13 +542,6 @@ def getApproxTimeBySignatureLength(length):
 
 def getMemUsage():
 	return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-def log(text):
-	if loggingEnabled:
-		if getFileSize(logFileName) < logMaxSize:
-			fd = open(logFileName,"wa")
-			fd.write(text)
-			fd.close()
-		print text
 #classes
 
 class ValidatorClass():
@@ -476,7 +555,9 @@ class ValidatorClass():
 	def postid(self,postid):
 		return True
 	def tag(self,tag):
-		return True
+		tag = tag.replace("/","").replace("#","").replace(",","")
+		tag = tag.strip()
+		return tag
 	def lang(self,lang):
 		return lang in languagesList
 	def base64URL(self,url):

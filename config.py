@@ -2,6 +2,17 @@
 # -*- coding: utf-8 -*-
 
 #[GLOBAL SETTINGS]
+logSettings = set([1,2,3,4,5])
+'''
+1 - human-readable messages
+2 - functions called
+3 - what functions do
+4 - warnings
+5 - errors and reasons
+'''
+keyLength = 200
+
+#[DIRS]
 postsDir = "posts/"
 postsFileDir = "webserver/file/"
 attachmentsDir = "attachments/"
@@ -15,15 +26,15 @@ webServerTemplatestDir = "webserver/templates/"
 serversListFile = "meta/servers"
 defaultServersListFile = "meta/servers-default"
 protectedPostsFile = "meta/protected-posts"
+
+#[POSTS]
 maxPostsCount = 1000 #0 to disable TODO
 enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
-
-maxPostSize = 5242880		# Максимальный размер поста
-maxRequestSize = 524288 	# Максимальный размер запроса
-acceptFiles = True 				# Принимает посты с файлами
-requestPOW = 0 				# POW, требуемый для запроса поста поста
-maxRequestPOW = 30 				# Максимальный POW, который клиент будет вычислять для запроса постов
+maxPostSize = 5242880		# do not change!
+maxRequestSize = 524288000 	# do not change!
+powInfluence = 1000 #The more this value is the more extra time to live gets the message with bigger POW
+# every hash calculated when post was created gives additional time equal to this value
 
 #[POSTING SETTINGS]
 newPostDefaultPOW = 1;
@@ -34,10 +45,8 @@ newPostDefaultFiles = ["test.gif","test.jpg"]
 newPostDefaultLanguages = "en,ru"
 
 #[CLIENT SETTINGS]
-clientRequestsInterval = 1			# Интервал между запросами к разным серверам
+clientRequestsInterval = 1			# Интервал между запросами
 clientMaxIterationCount = 100 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
-clientMaxPOWTimeShift = 10 				# срок жизни POW для запроса поста.
-										# Если прописанное в запросе время отличается от текущего на большее число секунд, POW считается недействительным
 clientRejectedConnectionsLimit = 3	# Количество отклоненных подряд запросов
 clientBehaviorAfterReachingRejectedConnectionsLimit = "remove" 		# 
 clientRejectedConnectionsSmartModeLimit = 100
@@ -70,7 +79,7 @@ webServerAdditionalTags = ["py2p","кириллица","⠝"]
 webServerAdditionalLanguages = "ru,en"
 webServerPostingMaxFileCount = 2
 webServerPostingMaxFileSize = 5242880
-loggingEnabled = False #TODO
+webServerloggingEnabled = False #TODO
 
 webServerSupportedImageFormats = ['jpg','gif','png','jpeg']
 webServerPostingFileFormats = webServerSupportedImageFormats + ['tar','gz','rar']

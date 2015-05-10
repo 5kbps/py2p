@@ -84,7 +84,8 @@ hr{
 	border-radius: 90px;
 	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
 	border: 1px solid rgba(0,0,0,0.1);
-	margin: 5px;}
+	margin: 5px;
+}
 .small_reply_counter{
 	font-size: 16px;
 	font-weight: bold;
@@ -92,6 +93,22 @@ hr{
 	margin: 3px;
 	color:white;
 	text-shadow: 0 0 1px #555;
+}
+.powcounter{
+	padding-top: 20px;
+	padding-bottom: 2px;
+	border-radius: 0 0 4px 4px;
+	border: 1px solid rgba(100,100,100,0.1);
+}
+.small_pow_counter{
+	font-size: 25px;
+	font-weight: bold;
+	padding: 6px;
+	margin: 3px;
+	color:blue;
+}
+.pow{
+	font-size: 16px;
 }
 .posttreelink{	
 	float: right;
@@ -135,10 +152,9 @@ hr{
 	margin: 2px;
 	color: #CCF;
 }
-.postform{
-	min-width: 600px;
-	min-height: 300px;
-	display: inline-block;
+.postformtable{
+	width: 50%; 
+	margin: 0 auto; 
 	border-radius: 14px;
 	font-family: monospace;
 	background-color: white;
@@ -146,10 +162,9 @@ hr{
 	border-right: 1px solid rgba(0,0,0,0.3);
 }
 .postformname, .postformsubject,.postformtext{
-	width: 500px;
+	width: 95%;
 }
 .postformtext{
-	height: 200px;
 }
 .postformsubmit{
 	float: right;
@@ -171,5 +186,5 @@ hr{
 	cursor: pointer;
 }
 #taginput{
-	width: 100px;
+	width: 130px;
 }
