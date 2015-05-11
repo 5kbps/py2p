@@ -207,6 +207,7 @@ def decodeAES(data,key):
 	return plaintext
 
 def string2key16(string):
+	
 	r = bytes(md5digest(string))[:16]
 	return r
 def genKey():
