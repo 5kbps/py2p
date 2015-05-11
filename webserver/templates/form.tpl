@@ -12,22 +12,26 @@
 			</tr>
 			<tr>
 				<td colspan=2>
-					<input type="text" name="name" class="postformname" autocomplete="off" placeholder="Name">
+					<input type="text" name="name" class="postformname" id="post_name" autocomplete="off" placeholder="Name">
 				</td>
 			</tr>
 			<tr>
 				<td colspan=2>
-					<input type="text" name="subject" class="postformsubject" autocomplete="off" placeholder="Subject">
+					<input type="text" id="post_subject" name="subject" class="postformsubject" autocomplete="off" placeholder="Subject">
 				</td>
 			</tr>
 			<tr>
 				<td colspan=2>
-					<textarea name="text" class="postformtext" placeholder="Message" autocomplete="off"></textarea>
+					<textarea name="text" id="post_text" class="postformtext" placeholder="Message" autocomplete="off"></textarea>
 				</td>
 			</tr>
 			<tr>
-				<td id="filelist" colspan=2>
-				<input id="fileselect"  autocomplete="off"  type="file" multiple onchange="handleSelect(event);">
+				<td>
+					<input id="fileselect"  autocomplete="off"  type="file" multiple onchange="handleSelect(event);">
+				</td>
+			</tr>
+			<tr>
+				<td id="filelist">
 				</td>
 			</tr>
 			<tr>

@@ -42,7 +42,7 @@ newPostDefaultName = "Anonymous"
 newPostDefaultSubject = ""
 newPostDefaultTags = ["tag","test","py2p"]
 newPostDefaultFiles = ["test.gif","test.jpg"]
-newPostDefaultLanguages = "en,ru"
+newPostDefaultLanguages = "ru,en"
 
 #[CLIENT SETTINGS]
 clientRequestsInterval = 1			# Интервал между запросами

@@ -296,7 +296,7 @@ class HTMLGeneratorClass():
 	def __init__(self):
 		self.additionalTagsHTML = ''
 		for tag in webServerAdditionalTags:
-			self.additionalTagsHTML+="<a target=\"_blank\" href=\"/tag/"+unicode(tag.strip())+"\" class=\"additionaltag tag\">#"+unicode(tag.strip())+"</a>"
+			self.additionalTagsHTML+="<a target=\"_blank\" href=\"/tag/"+unicode(tag.strip())+"\" class=\"additionaltag posttag tag\">#"+unicode(tag.strip())+"</a>"
 	def fromTemplate(self,templateName,replacements={}):
 		template = readFile(webServerTemplatestDir+templateName+".tpl","r")
 		if templateName == "form":

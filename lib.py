@@ -207,7 +207,6 @@ def decodeAES(data,key):
 	return plaintext
 
 def string2key16(string):
-	
 	r = bytes(md5digest(string))[:16]
 	return r
 def genKey():
@@ -282,6 +281,8 @@ def getPostPow(post):
 
 def stringifyPost(post):
 	string = ""
+	if hasattr(post, "refer"):
+		string += str(post.refer)
 	if hasattr(post, "name"):
 		string += str(post.name)
 	if hasattr(post, "subject"):
