@@ -528,6 +528,7 @@ class myHandler(BaseHTTPRequestHandler):
 		self.wfile.write(output)
 
 	def do_GET(self):
+		updateDB(HTMLGenerator.genPostHTML)
 		starttime = int(time.time()*1000000)
 		message_parts = [
 			'CLIENT VALUES:',

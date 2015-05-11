@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import hashlib
+import random
+import math
 import os
 import sys
 import html
@@ -10,11 +12,14 @@ import time
 import resource
 import string
 import protocol_pb2
-import key_exchange_pb2
+import protocol_pb2
+import random
+import math
 from PIL import Image
 from config import *
 from base64 import b64decode
 from Crypto.Cipher import AES
+from Crypto import Random
 
 reload(sys) 
 sys.setdefaultencoding('utf8')
@@ -43,30 +48,30 @@ def log(message,level=1,indent=''):
 
 #lists
 def get_class_members(klass):
-    ret = dir(klass)
-    if hasattr(klass,'__bases__'):
-        for base in klass.__bases__:
-            ret = ret + get_class_members(base)
-    return ret
+	ret = dir(klass)
+	if hasattr(klass,'__bases__'):
+		for base in klass.__bases__:
+			ret = ret + get_class_members(base)
+	return ret
 
 
 def uniq( seq ): 
-    """ the 'set()' way ( use dict when there's no set ) """
-    return list(set(seq))
+	""" the 'set()' way ( use dict when there's no set ) """
+	return list(set(seq))
 
 def get_object_attrs( obj ):
-    # code borrowed from the rlcompleter module ( see the code for Completer::attr_matches() )
-    ret = dir( obj )
-    ## if "__builtins__" in ret:
-    ##    ret.remove("__builtins__")
+	# code borrowed from the rlcompleter module ( see the code for Completer::attr_matches() )
+	ret = dir( obj )
+	## if "__builtins__" in ret:
+	##	ret.remove("__builtins__")
 
-    if hasattr( obj, '__class__'):
-        ret.append('__class__')
-        ret.extend( get_class_members(obj.__class__) )
+	if hasattr( obj, '__class__'):
+		ret.append('__class__')
+		ret.extend( get_class_members(obj.__class__) )
 
-        ret = uniq( ret )
+		ret = uniq( ret )
 
-    return ret
+	return ret
 
 def trimStringAsList(string):
 	string = removeEmptyItems( string.split(","))
@@ -125,42 +130,88 @@ def getFileSize(filename,dv=0):
 		return dv
 
 # cryptography
-def padAES(data):
-	return data + (32 - len(data) % 32) * " "
-def EncodeAES(data,key):
-	cipher = AES.new(padAES(key))
-	return cipher.encrypt(padAES(data))
-def DecodeAES(data,key):
-	cipher = AES.new(padAES(key))
-	return cipher.decrypt(padAES(data)).rstrip(" ")
-def genKey():
-	return str(int(os.urandom(keyLength/3).encode('hex'),16))
-	return r
+'''
+padAESChar = ' '
+
+
+from Crypto.Cipher import AES
+
+def padAES(message):
+	counter = 0
+	while len(message)%32 != 0:
+		counter+=1
+		message += " "
+	print "paes",len(message)%32
+	return message,counter
+def encryptAES( message, key ):
+	BS = 16
+	iv = Random.new().read( AES.block_size )
+	cipher = AES.new( key, AES.MODE_CBC, iv )
+	return  iv + cipher.encrypt( message )
+def decryptAES( message, key ):
+	BS = 16
+	iv = message[:16]
+	print len(message)
+	cipher = AES.new(key, AES.MODE_CBC, iv )
+	return cipher.decrypt( message[:16] )
+
+print padAES("asdasd")
+sys.exit(0)
+'''
 def genKeys1(address):
 	global get
-	kd = key_exchange_pb2.KeyExchange()
+	kd = protocol_pb2.KeyExchange()
 	kd.clientPublic = get['public_key']
 	kd.serverPublic = get['public_keys'][address] = genKey()
 	kd.clientSending = str(pow(int(kd.serverPublic),int(get['private_key']),int(kd.clientPublic)))
-	return kd.SerializeToString()
+	return kd.SerializeToString()+keyExchangeMessageDetector
 
 def genKeys2(data,address):
 	global get
-	rd = key_exchange_pb2.KeyExchange()
+	rd = protocol_pb2.KeyExchange()
 	rd.ParseFromString(data)
-	get['shared_keys'][address] = str(pow(int(rd.clientSending),int(get['private_key']),int(rd.clientPublic)))
+	get['shared_keys'][address] = string2key16(str(pow(int(rd.clientSending),int(get['private_key']),int(rd.clientPublic))))
 	print "SHARED KEY = ",get['shared_keys'][address]
-	kd = key_exchange_pb2.KeyExchange()
+	kd = protocol_pb2.KeyExchange()
 	kd.serverSending = str(pow(int(rd.serverPublic),int(get['private_key']),int(rd.clientPublic))%int(rd.clientPublic))
 	return kd.SerializeToString()
 
 def genKeys3(data,address):
 	global get
-	rd = key_exchange_pb2.KeyExchange()
+	rd = protocol_pb2.KeyExchange()
 	rd.ParseFromString(data)
-	get['shared_keys'][address] = str(pow(int(rd.serverSending),int(get['private_key']),int(get['public_key'])))
+	get['shared_keys'][address] = string2key16(str(pow(int(rd.serverSending),int(get['private_key']),int(get['public_key']))))
 	print "SHARED KEY = ",get['shared_keys'][address]
 
+def padAES(s):
+	numpads = 16 - (len(s)%16)
+	return s + numpads*chr(numpads)
+
+def stripAES(s):
+	if len(s)%16 or not s:
+		raise ValueError("String of len %d can't be PCKS7-padded" % len(s))
+	numpads = ord(s[-1])
+	if numpads > 16:
+		raise ValueError("String ending with %r can't be PCKS7-padded" % s[-1])
+	return s[:-numpads]
+
+def encodeAES(data,key):
+	encobj = AES.new(key, AES.MODE_ECB)
+	data = padAES(data)
+	ciphertext = encobj.encrypt(data)
+	return ciphertext
+def decodeAES(data,key):
+	decobj = AES.new(key, AES.MODE_ECB)
+	plaintext = decobj.decrypt(data)
+	plaintext = stripAES(plaintext)
+	return plaintext
+
+def string2key16(string):
+	r = bytes(md5digest(string))[:16]
+	return r
+def genKey():
+	a = int(os.urandom(keyLength/8).encode('hex'),16)
+	return str(a)
 def md5File(filename, blocksize=2**20):
 	m = hashlib.md5()
 	with open( os.path.join(filename) , "rb" ) as f:
@@ -188,7 +239,8 @@ def md5source(source):
 		else:
 			i+=1
 	return m.hexdigest()
-
+def md5digest(source):
+	return hashlib.md5(source).hexdigest()
 #posts
 def isReceived(postid):
 	return fileExists(postsDir+postid)
@@ -349,12 +401,6 @@ def saveProtectedPosts():
 	protected = protocol_pb2.ProtectedPosts()
 	protected.list = get['protected']
 	writeFile(protectedPostsFile,protected.SerializeToString(),'w')
-
-def isProtected(postid):
-	for post in get['protected']:
-		if post.id == postid:
-			return True
-	return False
 
 def addProtectedPost(postid,timebonus=-1,modhtml=defaultAdminSign,modname=defaultAdminName, sticked=False,callback=0):
 	if isReceived(postid):
@@ -603,3 +649,5 @@ valid = ValidatorClass()
 #initDB()
 #updateDB()
 #print get
+
+string2key16('asd')

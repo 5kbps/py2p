@@ -18,15 +18,14 @@ class Handler(SocketServer.BaseRequestHandler):
 		received_data = recv_msg(self.request)
 		client_address = self.client_address
 		address = client_address[0]
-		
-		if not address in get['shared_keys']:
-			reply = genKeys2(received_data, address)
-			print ">>>",len(reply)
+
+		if received_data.endswith(keyExchangeMessageDetector):
+			reply = genKeys2(received_data[:-len(keyExchangeMessageDetector)], address)
 		else:
-			reply, result = processData(received_data)
+			reply, result = processData(received_data,address)
 		if reply is not None and reply is not "":
 			print "			Sending a reply", len(reply)
-			send_msg(self.request,reply)
+			send_msg(self.request, reply)
 		self.request.close()
 
 class serverClass(SocketServer.ThreadingMixIn, SocketServer.TCPServer):

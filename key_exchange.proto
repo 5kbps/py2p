@@ -1,6 +1,0 @@
-message KeyExchange{
-	optional string clientPublic = 1;
-	optional string serverPublic = 2;
-	optional string clientSending = 3;
-	optional string serverSending = 4;
-}

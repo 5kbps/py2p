@@ -25,6 +25,12 @@ message ProtectedPosts{
 	}
 	repeated ProtectedPost list = 1;
 }
+message KeyExchange{
+	optional string clientPublic = 1;
+	optional string serverPublic = 2;
+	optional string clientSending = 3;
+	optional string serverSending = 4;
+}
 message ServersList{
 	message ServerEntry{
 		optional string address = 1;

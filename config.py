@@ -10,8 +10,8 @@ logSettings = set([1,2,3,4,5])
 4 - warnings
 5 - errors and reasons
 '''
-keyLength = 200
-
+keyLength = 1024 #bits
+keyExchangeMessageDetector = '\''
 #[DIRS]
 postsDir = "posts/"
 postsFileDir = "webserver/file/"
@@ -32,7 +32,7 @@ maxPostsCount = 1000 #0 to disable TODO
 enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
 maxPostSize = 5242880		# do not change!
-maxRequestSize = 524288000 	# do not change!
+maxRequestSize = 524288000	# do not change!
 powInfluence = 1000 #The more this value is the more extra time to live gets the message with bigger POW
 # every hash calculated when post was created gives additional time equal to this value
 

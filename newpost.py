@@ -16,7 +16,7 @@ import sys
 reload(sys)  
 sys.setdefaultencoding('utf8')
 
-def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",files=newPostDefaultFiles,tags=newPostDefaultTags,refersto=0,languages=newPostDefaultLanguages,minimumPow=newPostDefaultPOW):
+def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",files='',tags='',refersto=0,languages=newPostDefaultLanguages,minimumPow=newPostDefaultPOW):
 	###
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
@@ -24,8 +24,10 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	post.subject = unicode(subject.strip())
 	post.text = unicode(text.strip())
 	post.time = str(current_time)
-	if files != "":
-		file_list = files
+	if files == '':
+		file_list = newPostDefaultFiles
+	else:
+		file_list = string2list(files)
 		for f in file_list:
 			if fileExists(attachmentsDir+ f):
 				fo = post.files.add()
@@ -87,9 +89,5 @@ else:
 		POW = newPostDefaultPOW
 	else:
 		POW = int(POW)
-	if files=="":
-		files = newPostDefaultFiles
-	if tags=="":
-		tags = newPostDefaultTags
 
 	np = CreatePost(name,subject,text,files,tags,refersto,"en,ru",POW)

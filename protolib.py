@@ -30,26 +30,26 @@ def recvall(sock, n):
 		data += packet
 	return data
 # data
-def getFirstRequestData():
+def getFirstRequestData(key):
 	global get
 	data = protocol_pb2.Data()
 	data = attachMeta(data)
 	data = attachKnownPosts(data,0)
-	return data.SerializeToString()
+	return encodeAES( data.SerializeToString(),key )
 
-def processData(received_data):
+def processData(received_data,address):
 	global get, valid
-
+	updateDB()
+	key = get['shared_keys'][address]
 	result = {
 		"sending":0,
 		"requesting":0,
 		"flagToBreak":False,
 		"received":0
 	}
-	updateDB()
+	received_data = decodeAES(received_data,key)
 	rd = protocol_pb2.Data()
 	rd.ParseFromString(received_data)
-	print " [received] byte length:",rd.ByteSize()
 	rd = normalizeData(rd)
 	result['received'] = receivePosts(rd)
 	getServers(rd)
@@ -62,8 +62,6 @@ def processData(received_data):
 	result['flagToBreak'] = bool(len(data.requesting) + len(data.sending)) == False
 	if data.ByteSize()>maxRequestSize:
 		result['flagToBreak'] = True
-		sys.excad()
-		print data.ByteSize() , "< ",maxRequestSize
 		sys.exit(0)
 	test = protocol_pb2.Data()
 	try:
@@ -71,9 +69,7 @@ def processData(received_data):
 	except BaseException as e:
 		print e
 		result['flagToBreak'] = True
-#	print "->[s] source length",len(data.SerializeToString())
-#	print "->[s] byte length",data.ByteSize()
-	return data.SerializeToString(),result
+	return encodeAES( data.SerializeToString(), key),result
 
 def normalizeData(rd):
 	print "		:normalizeData"

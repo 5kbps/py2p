@@ -90,17 +90,17 @@ class ClientClass:
 				#step 2
 				genKeys3(received,address)
 
-			data2send = getFirstRequestData()
+			data2send = getFirstRequestData(get['shared_keys'][address])
 			while flagToBreak == False:
 				if data2send != "":
 					sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 					sock.connect((host, port))
-					send_msg(sock,data2send)
+					send_msg(sock, data2send)
 					received = recv_msg(sock)
 					if received:
 						print "iteration",iteration
 						try:
-							data2send , result = processData(received)
+							data2send , result = processData(received,address)
 						except BaseException as e:
 							print e
 							server.rejected+=1
