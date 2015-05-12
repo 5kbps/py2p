@@ -94,7 +94,7 @@ function stringifyPost(){
 		i++
 	}
 	for(var i = 0; i < byc('posttag').length; i++){
-		string += byc('posttag'])[i].textContent
+		string += byc('posttag')[i].textContent
 	}
 	string += "ruen"
 	return string

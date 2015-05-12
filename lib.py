@@ -130,34 +130,7 @@ def getFileSize(filename,dv=0):
 		return dv
 
 # cryptography
-'''
-padAESChar = ' '
 
-
-from Crypto.Cipher import AES
-
-def padAES(message):
-	counter = 0
-	while len(message)%32 != 0:
-		counter+=1
-		message += " "
-	print "paes",len(message)%32
-	return message,counter
-def encryptAES( message, key ):
-	BS = 16
-	iv = Random.new().read( AES.block_size )
-	cipher = AES.new( key, AES.MODE_CBC, iv )
-	return  iv + cipher.encrypt( message )
-def decryptAES( message, key ):
-	BS = 16
-	iv = message[:16]
-	print len(message)
-	cipher = AES.new(key, AES.MODE_CBC, iv )
-	return cipher.decrypt( message[:16] )
-
-print padAES("asdasd")
-sys.exit(0)
-'''
 def genKeys1(address):
 	global get
 	kd = protocol_pb2.KeyExchange()
@@ -205,10 +178,9 @@ def decodeAES(data,key):
 	plaintext = decobj.decrypt(data)
 	plaintext = stripAES(plaintext)
 	return plaintext
-
 def string2key16(string):
-	r = bytes(md5digest(string))[:16]
-	return r
+	s = bytes(md5digest(string))[:16]
+	return s
 def genKey():
 	a = int(os.urandom(keyLength/8).encode('hex'),16)
 	return str(a)
@@ -240,7 +212,7 @@ def md5source(source):
 			i+=1
 	return m.hexdigest()
 def md5digest(source):
-	return hashlib.md5(source).hexdigest()
+	return hashlib.md5(source.encode("utf-8")).hexdigest()
 #posts
 def isReceived(postid):
 	return fileExists(postsDir+postid)

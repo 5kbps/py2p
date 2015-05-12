@@ -5,7 +5,7 @@ import time
 import sys
 import struct
 import protocol_pb2
-reload(sys)  
+reload(sys)
 sys.setdefaultencoding('utf8')
 
 #networking
