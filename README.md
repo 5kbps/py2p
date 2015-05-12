@@ -2,7 +2,6 @@
 Installing:
 ```sh
 sudo apt-get install python python-dev python-pip
-pip install protobuf
 pip install html
 pip install struct
 pip install hashlib

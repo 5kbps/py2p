@@ -55,11 +55,11 @@ class ClientClass:
 					print ":startCycle ",server.address
 					#print server.host
 					if self.whether2Connect2Server(server):
-						#try:
-						server = self.connect(server)
-						#except BaseException as e:
-						#	server.rejected += 1
-						#	print "		cannot connect to server:",server.address,"[",server.rejected,"/",clientRejectedConnectionsLimit,"]",e
+						try:
+							server = self.connect(server)
+						except BaseException as e:
+							server.rejected += 1
+							print "		cannot connect to server:",server.address,"[",server.rejected,"/",clientRejectedConnectionsLimit,"]",e
 					print "		[waiting...]"
 					time.sleep(clientRequestsInterval)
 				print "cycle ended"
