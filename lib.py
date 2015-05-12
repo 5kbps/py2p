@@ -346,23 +346,6 @@ def getServerList():
 		if hasattr(s,"address"):
 			r.append(s.address)
 	return r
-def updateDB(callback = 0):
-	global get
-	startTime = time.time()
-	post_files = set(os.listdir(postsDir))
-	known_posts =get['received']
-	new_posts 		= post_files - known_posts
-	removed_posts   = known_posts- post_files
-
-	for postid in new_posts:
-		add2DB(postid)
-	for postid in removed_posts:
-		purgePost(postid)
-	endTime = time.time()
-	loadProtectedPosts()
-	log("Post parsing took "+str(float(endTime - startTime )),1)
-	log("Memory:"+str(getMemUsage()),1)
-
 def loadProtectedPosts():
 	global get
 	log("loadProtectedPosts",2)
@@ -385,6 +368,25 @@ def addProtectedPost(postid,timebonus=-1,modhtml=defaultAdminSign,modname=defaul
 		p.modname = modname
 		p.sticked = sticked
 		saveProtectedPosts()
+
+def updateDB(callback = 0):
+	global get
+	startTime = time.time()
+	post_files = set(os.listdir(postsDir))
+	known_posts =get['received']
+	new_posts 		= post_files - known_posts
+	removed_posts   = known_posts- post_files
+
+	for postid in new_posts:
+		if callback != 0:
+			callback(postid)
+		add2DB(postid)
+	for postid in removed_posts:
+		purgePost(postid)
+	endTime = time.time()
+	loadProtectedPosts()
+	log("Post parsing took "+str(float(endTime - startTime )),1)
+	log("Memory:"+str(getMemUsage()),1)
 
 def add2DB(postid):
 	post = readPost(postid)

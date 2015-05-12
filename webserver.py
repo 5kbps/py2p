@@ -528,7 +528,7 @@ class myHandler(BaseHTTPRequestHandler):
 		self.wfile.write(output)
 
 	def do_GET(self):
-		updateDB(HTMLGenerator.genPostHTML)
+		updateDB(ThumbCreator.genPostThumbs)
 		starttime = int(time.time()*1000000)
 		message_parts = [
 			'CLIENT VALUES:',
@@ -696,7 +696,7 @@ def createPost(name,subject,text,refer,files,tags,languages):
 		fd.close()
 		add2DB(post.id)
 		HTMLGenerator.updatePostHTML(post.id)
-		ThumbCreator.genPostThumbs(post)
+		ThumbCreator.genPostThumbs(post.id)
 		return HTMLGenerator.newPostHTML(post)
 	else:
 		return "Post is too large, max post size = "+maxPostSize
