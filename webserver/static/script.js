@@ -139,6 +139,7 @@ function calcPOW(value,maxTime){
 	}
 }
 function calcPOWandSend(){
+	id("fileselect").value=""
 	calcPOW(vid('pow_value_select')*1,10)
 	id('post_form').submit()
 }
