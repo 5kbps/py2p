@@ -55,10 +55,14 @@ def cutLatestPosts(postlist,number,shift=0):
 class ThumbCreatorClass():
 	def __init__(self):
 		pass
-	def genThumbs(self):
+	def genThumbs(self,list_of=0):
 		print ":genThumbs"
-		for post in get['received']:
-			self.genPostThumbs(readPost(post))
+		if list_of == 0:
+			for post in get['received']:
+				self.genPostThumbs(readPost(post))
+		else:
+			for post in list_of:
+				self.genPostThumbs(readPost(post))				
 	def genPostThumbs(self,post):
 		if not hasattr(post,"id"):
 			post = readPost(post)
@@ -473,7 +477,6 @@ class HTMLGeneratorClass():
 		else:
 			output += "pow_0\"><a class=\"small_pow_counter\" href=\"/thread/"+post.id+"\">★<span class=\"pow\">"+str(r)+"</span></a></span>"
 			return output
-
 	def getPageListHTML(self,listlength,pagesize,shift,prefix):
 		cur_page_num = shift/pagesize
 		page_count = listlength/pagesize
@@ -528,7 +531,10 @@ class myHandler(BaseHTTPRequestHandler):
 		self.wfile.write(output)
 
 	def do_GET(self):
-		updateDB(ThumbCreator.genPostThumbs)
+		new_posts, removed_posts = updateDB()
+		if len(new_posts):
+			#generating thumbs for new posts, that are just added 
+			ThumbCreator.genThumbs(new_posts)
 		starttime = int(time.time()*1000000)
 		message_parts = [
 			'CLIENT VALUES:',
@@ -593,7 +599,7 @@ class myHandler(BaseHTTPRequestHandler):
 
 		if output != "":
 			self.send(output)
-		print time.time()-starttime
+		#print time.time()-starttime
 	def getParamFromForm(self,form,param):
 		if param in form and hasattr(form[param],"value"):
 			return form[param].value

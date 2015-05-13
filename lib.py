@@ -143,7 +143,7 @@ def genKeys2(data,address):
 	global get
 	rd = protocol_pb2.KeyExchange()
 	rd.ParseFromString(data)
-	get['shared_keys'][address] = string2key16(str(pow(int(rd.clientSending),int(get['private_key']),int(rd.clientPublic))))
+	get['shared_keys'][address] = string2key(str(pow(int(rd.clientSending),int(get['private_key']),int(rd.clientPublic))))
 	print "SHARED KEY = ",get['shared_keys'][address]
 	kd = protocol_pb2.KeyExchange()
 	kd.serverSending = str(pow(int(rd.serverPublic),int(get['private_key']),int(rd.clientPublic))%int(rd.clientPublic))
@@ -153,7 +153,7 @@ def genKeys3(data,address):
 	global get
 	rd = protocol_pb2.KeyExchange()
 	rd.ParseFromString(data)
-	get['shared_keys'][address] = string2key16(str(pow(int(rd.serverSending),int(get['private_key']),int(get['public_key']))))
+	get['shared_keys'][address] = string2key(str(pow(int(rd.serverSending),int(get['private_key']),int(get['public_key']))))
 	print "SHARED KEY = ",get['shared_keys'][address]
 
 def padAES(s):
@@ -178,9 +178,19 @@ def decodeAES(data,key):
 	plaintext = decobj.decrypt(data)
 	plaintext = stripAES(plaintext)
 	return plaintext
-def string2key16(string):
-	s = bytes(md5digest(string))[:16]
-	return s
+def string2key(string):
+	r = ''
+	s = md5digest(string)[:16]
+	s+= md5digest(string+s+r)[:16]
+	s+= md5digest(string+s+r)[:16]
+	s+= md5digest(string+s+r)[:16]
+	print len(s), s
+	i = 0
+	while i < 64:
+		r += chr(int(s[i:][:2],16))
+		i+=2
+	print r,len(r)
+	return r
 def genKey():
 	a = int(os.urandom(keyLength/8).encode('hex'),16)
 	return str(a)
@@ -348,7 +358,7 @@ def getServerList():
 	return r
 def loadProtectedPosts():
 	global get
-	log("loadProtectedPosts",2)
+	#log("loadProtectedPosts",2)
 	protected = protocol_pb2.ProtectedPosts() 
 	protected.ParseFromString(readFile(protectedPostsFile,"r"))
 	get['protected'] = protected.list
@@ -369,7 +379,7 @@ def addProtectedPost(postid,timebonus=-1,modhtml=defaultAdminSign,modname=defaul
 		p.sticked = sticked
 		saveProtectedPosts()
 
-def updateDB(callback = 0):
+def updateDB():
 	global get
 	startTime = time.time()
 	post_files = set(os.listdir(postsDir))
@@ -378,8 +388,6 @@ def updateDB(callback = 0):
 	removed_posts   = known_posts- post_files
 
 	for postid in new_posts:
-		if callback != 0:
-			callback(postid)
 		add2DB(postid)
 	for postid in removed_posts:
 		purgePost(postid)
@@ -387,7 +395,7 @@ def updateDB(callback = 0):
 	loadProtectedPosts()
 	log("Post parsing took "+str(float(endTime - startTime )),1)
 	log("Memory:"+str(getMemUsage()),1)
-
+	return new_posts,removed_posts
 def add2DB(postid):
 	post = readPost(postid)
 	# referrers
@@ -622,8 +630,5 @@ get = {}
 
 valid = ValidatorClass()
 
-#initDB()
-#updateDB()
-#print get
 
-string2key16('asd')
+string2key('asd')
