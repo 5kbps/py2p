@@ -12,6 +12,11 @@ function vid(eid){
 function byc(className){
 	return document.getElementsByClassName(className)
 }
+//math
+function hex2base36(hexint){
+	return parseInt(hexint, 16).toString(36);
+}
+
 function replyTo(elem){
 	id('refer_id').value = elem.textContent.trim()
 	id('replyto_id').textContent = elem.textContent.trim()
@@ -80,29 +85,63 @@ function removeTag(elem){
 
 function stringifyPost(){
 	string = ""
-	string += vid('refer_id')
-	string += vid('post_name')
-	string += vid('post_subject')
-	string += vid('post_text')
-	string += Date.now()
+	posttime = Date.now()
+	referid	 = vid('refer_id')
+	postname = vid('post_name')
+	postsubj = vid('post_subject')
+	posttext = vid('post_text')
+	id('post_time').value = posttime
+	string  = referid+postname+postsubj+posttext+posttime
 	i = 1
 	while(id('filesource_'+i) != null){
 		filehash = id('filehash_'+i).value
-		filehash = id('filename_'+i).value
+		filename = id('filename_'+i).value
 		string += filehash
 		string += filename
 		i++
 	}
 	for(var i = 0; i < byc('posttag').length; i++){
-		string += byc('posttag')[i].textContent
+		string += byc('posttag')[i].textContent.substr(1)
 	}
+	//TODO
 	string += "ruen"
 	return string
 }
 function calcPOW(value,maxTime){
-	
+	timestamp = Date.now()
+	post_content = stringifyPost()
+	console.log("md5 pc = "+md5(post_content))
+	if(value > 50){
+		value = 50
+	}
+	pow_shift = 0
+	while( true ){
+		pow_shift++
+		pid1 = md5(post_content+pow_shift)
+		pid2 = md5(pow_shift+post_content)
+		tid1 = parseInt(pid1, 16).toString(2)
+		tid2 = parseInt(pid2, 16).toString(2)
+		if(tid1.substr(0,value)==tid2.substr(0,value)){
+			console.log(tid1+"("+pid1+")")
+			console.log(tid2+"("+pid2+")")
+			break
+		}
+		if(!pow_shift%1000){
+			if(Date.now()-timestamp>maxTime){
+				console.log("exiting...")
+				break
+			}
+		}
+	}
+	if(pow_shift){
+		id("post_pow_shift").value = pow_shift
+		console.log("pid="+hex2base36( pid1 )+"("+pid1+")"+":"+pow_shift)
+	}
 }
-
+function calcPOWandSend(){
+	calcPOW(vid('pow_value_select')*1,10)
+	id('post_form').submit()
+}
 
 function handleSelect(evt){
 	supported_image_fromats = ['jpg','png','gif']

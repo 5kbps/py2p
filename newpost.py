@@ -50,8 +50,8 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	post_content = stringifyPost(post)
 	pow_shift = 0
 	while True:
-		id = md5(post_content+str(pow_shift)).hexdigest()[2:]
-		tid =md5(str(pow_shift)+post_content).hexdigest()[2:]
+		id = md5digest(post_content+str(pow_shift))
+		tid =md5digest(str(pow_shift)+post_content)
 		id2 = hex2bin(id)
 		tid2= hex2bin(tid)
 		if str(id2)[:minimumPow] == str(tid2)[:minimumPow]:

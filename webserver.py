@@ -312,10 +312,10 @@ class HTMLGeneratorClass():
 			except BaseException as e:
 				print "		:fromTemplate:",e
 		return template
-	def updatePostHTML(self,postid):
+	def updatePostHTML(self,postid,reqLevel = 0):
 		writeFile(webServerPostsDir+postid,self.genPostHTML(postid),"w")
-		if postid in get['refer']:
-			self.updatePostHTML(get['refer'][postid])
+		if postid in get['refer'] and reqLevel < 3:
+			self.updatePostHTML(get['refer'][postid],reqLevel+1)
 		print ":updatePostHTML updated ",postid
 	def makePosts(self):
 		for post_file in get['received']:
@@ -531,10 +531,6 @@ class myHandler(BaseHTTPRequestHandler):
 		self.wfile.write(output)
 
 	def do_GET(self):
-		new_posts, removed_posts = updateDB()
-		if len(new_posts):
-			#generating thumbs for new posts, that are just added 
-			ThumbCreator.genThumbs(new_posts)
 		starttime = int(time.time()*1000000)
 		message_parts = [
 			'CLIENT VALUES:',
@@ -558,6 +554,12 @@ class myHandler(BaseHTTPRequestHandler):
 				self.send_static(path_list[2])
 			else:
 				self.send_static()
+		else:
+			new_posts, removed_posts = updateDB()
+			if len(new_posts):
+				#generating thumbs for new posts, that are just added 
+				ThumbCreator.genThumbs(new_posts)
+
 		if path_length == 0:
 			output = PageViewer.showAll()	
 
@@ -632,6 +634,8 @@ class myHandler(BaseHTTPRequestHandler):
 				subject = self.getParamFromForm(form,"subject")
 				text = self.getParamFromForm(form,"text")
 				refer = self.getParamFromForm(form,"refer")
+				posttime = toInt( self.getParamFromForm(form,"posttime"),0)
+				postpowshift = toInt( self.getParamFromForm(form,"postpowshift"),None)
 				files = []
 				for i in range(1,webServerPostingMaxFileCount+1):
 					filename = self.getParamFromForm(form,"filename_"+str(i))
@@ -657,16 +661,19 @@ class myHandler(BaseHTTPRequestHandler):
 	#				self.send_header('Location',"http://"+host+'/post/'+id)
 				self.end_headers()
 				if proceed:
-					self.wfile.write(createPost(name,subject,text,refer,files,tags,languages))
+					self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
 				else:
 					self.wfile.write(errMessage)
-def createPost(name,subject,text,refer,files,tags,languages):
+def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowshift=None):
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
 	post.name = unicode(name.strip())
 	post.subject = unicode(subject.strip())
 	post.text = unicode(text.strip())
-	post.time = str(current_time)
+	if posttime == 0:
+		post.time = str(current_time)
+	else:
+		post.time = str(posttime)
 	for fileentry in files:
 		fo = post.files.add()
 		fo.name = fileentry['name']
@@ -683,16 +690,21 @@ def createPost(name,subject,text,refer,files,tags,languages):
 	if isReceived(refer.strip()): 	
 		post.refer = refer.strip()
 	post_content = stringifyPost(post)
-	pow_shift = 0
-	while True:
-		postid1 = md5(post_content+str(pow_shift)).hexdigest()[2:]
-		postid2 =md5(str(pow_shift)+post_content).hexdigest()[2:]
-		tid1 = hex2bin(postid1)
-		tid2= hex2bin(postid2)
-		if str(tid1)[:webServerPostingPOW] == str(tid2)[:webServerPostingPOW]:
-			break
-		else:
-			pow_shift+=1
+	if not postpowshift==None:
+		pow_shift = int(postpowshift)
+#		print "md5 pc = ",md5digest(post_content)
+		postid1 = md5digest(post_content+str(pow_shift))
+	else:
+		pow_shift = 0
+		while True:
+			postid1 = md5digest(post_content+str(pow_shift))
+			postid2 = md5digest(str(pow_shift)+post_content)
+			tid1 = hex2bin(postid1)
+			tid2 = hex2bin(postid2)
+			if str(tid1)[:webServerPostingPOW] == str(tid2)[:webServerPostingPOW]:
+				break
+			else:
+				pow_shift+=1
 	post.pow = pow_shift
 	post.id = int36(int(postid1,16))
 	postFileText = post.SerializeToString()

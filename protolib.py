@@ -175,4 +175,4 @@ def receivePosts(rd):
 #POW
 def checkLimits(data,limit=maxRequestSize,increment=0):
 	#print "		:checkLimits:",data.ByteSize(),"?",limit+increment
-	return data.ByteSize() < limit+increment
+	return data.ByteSize() +32 < limit+increment

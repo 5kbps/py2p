@@ -144,7 +144,7 @@ def genKeys2(data,address):
 	rd = protocol_pb2.KeyExchange()
 	rd.ParseFromString(data)
 	get['shared_keys'][address] = string2key(str(pow(int(rd.clientSending),int(get['private_key']),int(rd.clientPublic))))
-	print "SHARED KEY = ",get['shared_keys'][address]
+#	print "SHARED KEY = ",get['shared_keys'][address]
 	kd = protocol_pb2.KeyExchange()
 	kd.serverSending = str(pow(int(rd.serverPublic),int(get['private_key']),int(rd.clientPublic))%int(rd.clientPublic))
 	return kd.SerializeToString()
@@ -154,7 +154,7 @@ def genKeys3(data,address):
 	rd = protocol_pb2.KeyExchange()
 	rd.ParseFromString(data)
 	get['shared_keys'][address] = string2key(str(pow(int(rd.serverSending),int(get['private_key']),int(get['public_key']))))
-	print "SHARED KEY = ",get['shared_keys'][address]
+#	print "SHARED KEY = ",get['shared_keys'][address]
 
 def padAES(s):
 	numpads = 16 - (len(s)%16)
@@ -184,12 +184,12 @@ def string2key(string):
 	s+= md5digest(string+s+r)[:16]
 	s+= md5digest(string+s+r)[:16]
 	s+= md5digest(string+s+r)[:16]
-	print len(s), s
+#	print len(s), s
 	i = 0
 	while i < 64:
 		r += chr(int(s[i:][:2],16))
 		i+=2
-	print r,len(r)
+#	print r,len(r)
 	return r
 def genKey():
 	a = int(os.urandom(keyLength/8).encode('hex'),16)
@@ -251,11 +251,15 @@ def writePost(post):
 		fd.close()
 def getFilePow(postid):
 	post = readPost(postid)
-	return getPostPow(post)
-def getPostPow(post):
-	post_content = stringifyPost(post)
-	pid1 = str(hex2bin(md5(post_content+str(post.pow)).hexdigest()[2:]))
-	pid2 = str(hex2bin(md5(str(post.pow)+post_content).hexdigest()[2:]))
+	return getPostPOW(post)
+def getPostPOW(post):
+	if hasattr(post,'id'):
+		post_content = stringifyPost(post)
+	else:
+		post = readPost(post)
+		post_content = stringifyPost( post)
+	pid1 = str(hex2bin(md5digest(post_content+str(post.pow))))
+	pid2 = str(hex2bin(md5digest(str(post.pow)+post_content)))
 	POW = 0
 	while pid1[:POW] == pid2[:POW] and POW < 1000:
 		POW+=1
@@ -447,7 +451,7 @@ def add2DB(postid):
 			#print post.id ,"-[exitsts] ", post_file.name
 
 	get['timestamp'][post.id] = post.time
-	get['pow'][post.id] = getPostPow(post)
+	get['pow'][post.id] = getPostPOW(post)
 	get['received'].add(post.id)
 
 def deletePost(postid):
