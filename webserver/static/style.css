@@ -1,11 +1,13 @@
 body{
 	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
+	font-family: monospace;
 }
 
 *:focus{
 	outline: none;
 }
 a{
+	text-decoration: none;
 	color:#33F;
 }
 .post{
@@ -187,4 +189,15 @@ hr{
 }
 #taginput{
 	width: 130px;
+}
+.replyitem{
+	font-size: 10px;
+	color: #555;
+	font-weight: normal;
+	text-shadow: none;
+}
+.popup{
+	background-color: white;
+	border-radius: 0 0 4px 4px;
+	border: 1px solid #CCF;
 }

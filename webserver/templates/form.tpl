@@ -3,11 +3,11 @@
 		<table class="postformtable">
 			<tr>
 				<td>
-					<input type="hidden" name="refer" id="refer_id" value="%%replyto%%">
-					<input type="hidden" name="posttime" id="post_time" value="0">
-					<input type="hidden" name="postpowshift" id="post_pow_shift" value="0">
-					<input type="hidden" name="postlanguagess" id="post_languages" value="ruen">
-					<span class="replyto">Reply to: <span id="replyto_id">%%replyto%%</span></span>
+					<input type="hidden" autocomplete="off" name="refer" id="refer_id" value="%%replyto%%">
+					<input type="hidden" autocomplete="off" name="posttime" id="post_time" value="0">
+					<input type="hidden" autocomplete="off" name="postpowshift" id="post_pow_shift" value="0">
+					<input type="hidden" autocomplete="off" name="postlanguagess" id="post_languages" value="ruen">
+					<span class="replyto"><span id="postingmode">%%postingmode%%</span> <span id="replyto_id">%%replyto%%</span></span>
 				</td>
 				<td>
 					browser may freeze -> 
@@ -65,7 +65,8 @@
 			</tr>
 			<tr>
 				<td colspan=2>
-						<span class="boardinfo">◦ bbcode: [b],[s],[i],[u]</li> 
+						<div class="boardinfo">bbcode: [b],[s],[i],[u]</div> 
+						<div class="boardinfo">Maximum files attached to one post: %%maxfiles%%</div>
 				</td>
 			</tr>
 		</table>

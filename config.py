@@ -74,10 +74,13 @@ webServerPostingPOW = 10
 webServerTreeViewRecursionLevel = 3 # Глубина рекурсии
 webServerTreeViewCutOn = 4 # 
 
+
 webServerPageListSplitNum = 25
+webServerPostFileNameMaxLength = 12
+webServerPostLongFileNameSeparator = ".."
 webServerAdditionalTags = ["py2p","кириллица","⠝"]
 webServerAdditionalLanguages = "ru,en"
-webServerPostingMaxFileCount = 2
+webServerPostingMaxFileCount = 4
 webServerPostingMaxFileSize = 5242880
 webServerloggingEnabled = False #TODO
 

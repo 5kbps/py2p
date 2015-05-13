@@ -1,5 +1,6 @@
 <div class="post" id="post_%%id%%">
 	<div class="postinfo">
+		<input type="hidden" value="%%replieslist">
 		<span class="username">%%name%%</span>
 		<span class="subject">%%subject%%</span>
 		<span class="id" onclick="replyTo(this)">%%id%%</span>

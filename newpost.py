@@ -70,7 +70,7 @@ def CreatePost(name=newPostDefaultName,subject=newPostDefaultSubject,text="",fil
 	# adding connectedto links
 	#for postid in refersto_list:
 	#	lib.addPostConnectedTo(postid,id)
-	print("Post with id "+id+" created. [POW: "+str(getFilePow(post.id))+" = "+str(getPostPow(post))+", time: "+str((endtime-start_time)/1000)+"ms, hashes: "+str(pow_shift*2)+"] ")
+	print("Post with id "+id+" created. [POW: "+str(getFilePOW(post.id))+" = "+str(getPostPOW(post))+", time: "+str((endtime-start_time)/1000)+"ms, hashes: "+str(pow_shift*2)+"] ")
 
 
 if "--test" in sys.argv:

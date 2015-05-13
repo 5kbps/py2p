@@ -305,7 +305,15 @@ class HTMLGeneratorClass():
 		template = readFile(webServerTemplatestDir+templateName+".tpl","r")
 		if templateName == "form":
 			replacements['additionaltags'] = HTMLGenerator.additionalTagsHTML
-
+			replacements['maxfiles'] = str(webServerPostingMaxFileCount)
+			if 'replyto' in replacements:
+				if replacements['replyto'] == '':
+					replacements['postingmode'] = "New post"
+				else:
+					replacements['postingmode'] = "Reply to:"
+			else:
+				replacements['replyto'] = ''
+				replacements['postingmode'] = "New post"
 		for replacement in replacements:
 			try:
 				template = template.replace("%%"+replacement+"%%",replacements[replacement])
@@ -337,7 +345,7 @@ class HTMLGeneratorClass():
 				"time":self.getHumanReadableTime(post.id),
 				"treelink":self.treeLink(post.id),
 				"uplink":self.upLink(post.id),
-				"modsign":self.getModSignHTML(post.id)
+				"modsign":self.getModSignHTML(post.id),
 			}
 			return self.fromTemplate("post",replacements)
 		else:
@@ -378,9 +386,13 @@ class HTMLGeneratorClass():
 		for post_file in post.files:
 			r += "		<span class=\"file\">\n"
 			if hasattr(post_file,"name"):
+				if len(post_file.name) > webServerPostFileNameMaxLength+len(webServerPostLongFileNameSeparator):
+					name = escapeHTML( post_file.name[:webServerPostFileNameMaxLength/2]+webServerPostLongFileNameSeparator+post_file.name[-webServerPostFileNameMaxLength:])
+				else:
+					name = escapeHTML(post_file.name)
 				r+="			<a class=\"filelink\" target=\"_blank\" href=\"/file/"+post_file.md5hash+"."+escapeHTML( getExt(post_file.name))+"\">"
-				r+="<span class=\"filename\">"
-				r+= escapeHTML( post_file.name )
+				r+="<span title=\""+escapeHTML(post_file.name)+"\" class=\"filename\">"
+				r+= name
 				r+="</span>\n"
 				r+="</a><br>"
 				if hasattr(post_file,"md5hash") and getExt(post_file.name) in webServerSupportedImageFormats:
@@ -404,32 +416,37 @@ class HTMLGeneratorClass():
 		global get
 		if post.id in get['connected']:
 			r = len(get['connected'][post.id])
-		else:
-			return ""
-		output = "<span class=\"replycounter "
-		if r >= 1000:
-			output += "m1000\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
-			return output
-		if r >= 500:
-			output += "m500\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
-			return output
-		if r >= 100:
-			output += "m100\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
-			return output
-		if r >= 50:
-			output += "m50\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
-			return output
-		if r >= 10:
-			output += "m10\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
-			return output
-		if r >= 5:
-			output += "m5\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
-			return output
-		if r >= 1:
-			output += "m1\"><a class=\"small_reply_counter\" href=\"/thread/"+post.id+"\">Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
+			rh = "m1"
+			if r >= 3:
+				rh = "m3"
+			if r >= 5:
+				rh = "m3"
+			if r >= 10:
+				rh = "m3"
+			if r >= 20:
+				rh = "m3"
+			if r >= 50:
+				rh = "m3"
+			if r >= 100:
+				rh = "m3"
+			if r >= 200:
+				rh = "m3"
+			if r >= 500:
+				rh = "m3"
+			if r >= 1000:
+				rh = "m3"
+			output = "<span class=\"replycounter "+rh+"\">"
+			output += "<a onmouseenter=\"showReplies(this);\" class=\"small_reply_counter\" href=\"/thread/"+post.id+"\"><input type=\"hidden\" class=\"post_replies_list\" autocomplete=\"off\" value=\""+self.getRepliesListHTML(post.id)+"\"> Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
 			return output
 		else:
 			return ""
+	def getRepliesListHTML(self,postid):
+		r = ''
+		if postid in get['connected']:
+			for connected in get['connected'][postid]:
+				r += connected+","
+			r=r[:-1]
+		return r
 	def isTree(self,postid):
 		r = False
 		if postid in get['connected']:
@@ -559,6 +576,8 @@ class myHandler(BaseHTTPRequestHandler):
 			if len(new_posts):
 				#generating thumbs for new posts, that are just added 
 				ThumbCreator.genThumbs(new_posts)
+			for new_post in new_posts:
+				HTMLGenerator.updatePostHTML(new_post)
 
 		if path_length == 0:
 			output = PageViewer.showAll()	

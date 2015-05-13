@@ -249,7 +249,7 @@ def writePost(post):
 		fd = open(postsDir+post.id,'w')
 		fd.write(post.SerializeToString())
 		fd.close()
-def getFilePow(postid):
+def getFilePOW(postid):
 	post = readPost(postid)
 	return getPostPOW(post)
 def getPostPOW(post):

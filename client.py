@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import socket
-import base64
 import re
 import os
 import time
@@ -17,6 +16,7 @@ from protolib import *
 reload(sys)
 sys.setdefaultencoding('utf8')
 setproctitle.setproctitle("py2pclient")
+
 checkDirs()
 initDB()
 class ClientClass:

@@ -19,6 +19,7 @@ function hex2base36(hexint){
 
 function replyTo(elem){
 	id('refer_id').value = elem.textContent.trim()
+	id('postingmode').textContent = "Reply to:"
 	id('replyto_id').textContent = elem.textContent.trim()
 }
 function removeEmptyItems(list){
@@ -238,5 +239,46 @@ function handleSelect(evt){
 			fileReader.readAsArrayBuffer(blobSlice.call(f, start, end));
 		};
 		loadNext();
+	}
+}
+
+function getPosition(element) {
+	var r = element.getBoundingClientRect();
+	return { x: r.left + window.pageXOffset, y: r.top + window.pageYOffset };
+}
+
+function removePopupMenus(){
+	for(var i = 0; i < document.getElementsByClassName('popup').length; i++){
+		document.getElementsByClassName('popup')[i].remove()
+	}
+}
+function cutPostId(postid,cutAt){
+	cutAt = cutAt || 10
+	return postid.substr(0,cutAt)
+}
+function showReplies(elem){
+	repliesList = removeEmptyItems(elem.getElementsByClassName("post_replies_list")[0].value.split(","))
+	if(repliesList.length){
+		var position = getPosition(elem);
+		position.h = window.getComputedStyle(elem)['height'].split('px')[0]*1;
+		position.w = window.getComputedStyle(elem)['width'].split('px')[0]*1;
+		var p = document.createElement('div');
+		p.style['position']= 'absolute';
+		p.style['top'] = (position.y) + position.h+1 + 'px';
+		p.style['left'] = (position.x) + 5+'px';
+		p.className = 'popup menu';
+		elem.appendChild(p);
+		elem.style['z-index'] = 10
+		p.style['z-index'] = 9
+		elem.onmouseleave = function(){
+			removePopupMenus();
+		}
+		for(r in repliesList){
+			reply = repliesList[r]
+			pe = document.createElement('div')
+			pe.innerHTML = cutPostId(reply,17)
+			pe.className = "item replyitem"
+			p.appendChild(pe)
+		}
 	}
 }
