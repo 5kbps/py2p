@@ -165,7 +165,7 @@ class PageViewerClass():
 			"head":""
 		}
 		form_replacements = {
-			"replyto": "nobody"
+			"replyto": ""
 		}
 		footer_replacements = {
 			"took": "{TODO}"
@@ -229,7 +229,7 @@ class PageViewerClass():
 			"head":""
 		}
 		form_replacements = {
-			"replyto": "nobody"
+			"replyto": ""
 		}
 		footer_replacements = {
 			"took": "{TODO}"
@@ -255,7 +255,7 @@ class PageViewerClass():
 			"took": "{TODO}"
 		}
 		form_replacements = {
-			"replyto": "nobody"
+			"replyto": ""
 		}
 		output = HTMLGenerator.fromTemplate("header",header_replacements)
 		for post in postlist:
@@ -278,7 +278,7 @@ class PageViewerClass():
 			"took": "{TODO}"
 		}
 		form_replacements = {
-			"replyto": "nobody"
+			"replyto": ""
 		}
 		if tag in get['bytag']:
 			postlist = cutLatestPosts( sortPostsByDate(get['bytag'][tag]),webServerPostsOnPage,shift )
@@ -634,6 +634,8 @@ class myHandler(BaseHTTPRequestHandler):
 				subject = self.getParamFromForm(form,"subject")
 				text = self.getParamFromForm(form,"text")
 				refer = self.getParamFromForm(form,"refer")
+				print "R:",refer,len(refer)
+
 				posttime = toInt( self.getParamFromForm(form,"posttime"),0)
 				postpowshift = toInt( self.getParamFromForm(form,"postpowshift"),None)
 				files = []
