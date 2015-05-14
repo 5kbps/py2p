@@ -370,10 +370,12 @@ class HTMLGeneratorClass():
 		global get
 		if not postid in get['timestamp']:
 			add2DB(postid)
-
-		timestamp = float(get['timestamp'][postid])/10000
-		timestamp = datetime.datetime.fromtimestamp(timestamp)
-		timestr = timestamp.strftime('<span class=\"date\">%d.%m.%Y </span><span class=\"time\">%H:%M:%S</span>')
+		if postid in get['timestamp']:
+			timestamp = float(get['timestamp'][postid])/10000
+			timestamp = datetime.datetime.fromtimestamp(timestamp)
+			timestr = timestamp.strftime('<span class=\"date\">%d.%m.%Y </span><span class=\"time\">%H:%M:%S</span>')
+		else:
+			timestr = "Unknown time"
 		return timestr
 	def getModSignHTML(self,postid):
 		global get
@@ -436,7 +438,7 @@ class HTMLGeneratorClass():
 			if r >= 1000:
 				rh = "m3"
 			output = "<span class=\"replycounter "+rh+"\">"
-			output += "<a onmouseenter=\"showReplies(this);\" class=\"small_reply_counter\" href=\"/thread/"+post.id+"\"><input type=\"hidden\" class=\"post_replies_list\" autocomplete=\"off\" value=\""+self.getRepliesListHTML(post.id)+"\"> Replies: <span class=\"rc\">"+str(r)+"</span></a></span>"
+			output += "<a onmouseenter=\"showReplies(this);\" class=\"small_reply_counter\" href=\"/thread/"+post.id+"\"><input type=\"hidden\" class=\"post_replies_list\" autocomplete=\"off\" value=\""+self.getRepliesListHTML(post.id)+"\"> <span class=\"replies_s\">Replies: </span><span class=\"rc\">"+str(r)+"</span></a></span>"
 			return output
 		else:
 			return ""
@@ -464,7 +466,7 @@ class HTMLGeneratorClass():
 	def upLink(self,postid):
 		if postid in get['refer']:
 			if isReceived(get['refer'][postid]):
-				return "<span class=\"posttreelink\"><a class=\"treelink\" href=\"/tree/"+get['refer'][postid]+"\">Up</a></span>"
+				return "<span class=\"postuplink\"><a class=\"uplink\" href=\"/tree/"+get['refer'][postid]+"\">Up</a></span>"
 			else:
 				return ""
 		else:

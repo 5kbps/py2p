@@ -1,3 +1,4 @@
+
 function hasValue(arr,value) {
 	return (arr.indexOf(value) != -1);
 }
@@ -111,7 +112,6 @@ function stringifyPost(){
 function calcPOW(value,maxTime){
 	timestamp = Date.now()
 	post_content = stringifyPost()
-	console.log("md5 pc = "+md5(post_content))
 	if(value > 50){
 		value = 50
 	}
@@ -123,13 +123,10 @@ function calcPOW(value,maxTime){
 		tid1 = parseInt(pid1, 16).toString(2)
 		tid2 = parseInt(pid2, 16).toString(2)
 		if(tid1.substr(0,value)==tid2.substr(0,value)){
-			console.log(tid1+"("+pid1+")")
-			console.log(tid2+"("+pid2+")")
 			break
 		}
 		if(!pow_shift%1000){
 			if(Date.now()-timestamp>maxTime){
-				console.log("exiting...")
 				break
 			}
 		}
@@ -244,13 +241,17 @@ function handleSelect(evt){
 
 function getPosition(element) {
 	var r = element.getBoundingClientRect();
-	return { x: r.left + window.pageXOffset, y: r.top + window.pageYOffset };
+	position = new Object()
+	position.x = r.left + window.pageXOffset
+	position.y = r.top + window.pageYOffset
+	position.h = window.getComputedStyle(element)['height'].split('px')[0]*1;
+	position.w = window.getComputedStyle(element)['width'].split('px')[0]*1;
+	return position	
 }
 
-function removePopupMenus(){
-	for(var i = 0; i < document.getElementsByClassName('popup').length; i++){
-		document.getElementsByClassName('popup')[i].remove()
-	}
+function removePopupMenu(elem){
+	if(elem.getElementsByClassName('popup').length)
+		elem.getElementsByClassName('popup')[0].remove()
 }
 function cutPostId(postid,cutAt){
 	cutAt = cutAt || 10
@@ -260,25 +261,54 @@ function showReplies(elem){
 	repliesList = removeEmptyItems(elem.getElementsByClassName("post_replies_list")[0].value.split(","))
 	if(repliesList.length){
 		var position = getPosition(elem);
-		position.h = window.getComputedStyle(elem)['height'].split('px')[0]*1;
-		position.w = window.getComputedStyle(elem)['width'].split('px')[0]*1;
 		var p = document.createElement('div');
-		p.style['position']= 'absolute';
-		p.style['top'] = (position.y) + position.h+1 + 'px';
-		p.style['left'] = (position.x) + 5+'px';
+		p.style['top'] = (position.y) -scrollY +25+ 'px';
+		p.style['left'] = (position.x) - scrollX +8+'px';
 		p.className = 'popup menu';
 		elem.appendChild(p);
-		elem.style['z-index'] = 10
-		p.style['z-index'] = 9
 		elem.onmouseleave = function(){
-			removePopupMenus();
+			removePopupMenu(this)
 		}
 		for(r in repliesList){
 			reply = repliesList[r]
 			pe = document.createElement('div')
-			pe.innerHTML = cutPostId(reply,17)
+			pe.innerHTML = cutPostId(reply,15)
+			pe.id = "reply_"+reply
 			pe.className = "item replyitem"
+			pe.onmouseover = function(){
+				if(this.getElementsByClassName("postpreview").length==0)
+				addPostPreview(this, this.id.split("_")[1])
+			}
+			pe.onmouseleave = function(){
+				removePostPreview(this)
+			}
 			p.appendChild(pe)
 		}
 	}
+}
+function addPostPreview(elem,postid){
+	var reqUrl = '/rawpost/'+postid
+	xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", reqUrl, true );
+	xmlHttp.send( null );
+    xmlHttp.onreadystatechange = function(){
+		if (this.readyState == 4 && this.status == 200) {
+			var position = getPosition(elem);
+			postdiv = document.createElement("div")
+			postdiv.className = "postpreview"
+			postdiv.innerHTML = this.responseText
+			postdiv.style['position'] = "absolute"
+			postdiv.style['right'] = position.w+3+scrollX+"px"
+			postdiv.style['top'] = "0px"
+			postdiv.onmouseover = function(){
+				cancelBubble = true
+				return false
+			}
+			elem.appendChild(postdiv);
+		}
+	}
+}
+function removePostPreview(elem){
+	if(elem.getElementsByClassName("postpreview").length)
+		elem.getElementsByClassName("postpreview")[0].remove()
 }

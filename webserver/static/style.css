@@ -13,6 +13,7 @@ a{
 .post{
 	border-radius: 14px;
 	overflow: hidden;
+	font-size: 14px;
 	font-family: monospace;
 	background-color: white;
 	border-bottom: 1px solid rgba(0,0,0,0.3);
@@ -112,14 +113,14 @@ hr{
 .pow{
 	font-size: 16px;
 }
-.posttreelink{	
+.posttreelink, .postuplink{	
 	float: right;
 	border-radius: 90px;
 	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAEAgMAAADUn3btAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3gQIFQEfWioE/wAAAAlQTFRF0Njc2eHl////72WY8QAAAAFiS0dEAmYLfGQAAAAQSURBVAgdY2BlEGEIYHAEAAHAAKtr/oOEAAAAAElFTkSuQmCC");
 	border: 1px solid rgba(0,0,0,0.1);
 	margin: 5px;
 }
-.treelink{
+.treelink, .uplink{
 	font-size: 16px;
 	font-weight: bold;
 	padding: 6px;
@@ -197,7 +198,29 @@ hr{
 	text-shadow: none;
 }
 .popup{
+	position: fixed;
 	background-color: white;
 	border-radius: 0 0 4px 4px;
-	border: 1px solid #CCF;
+	border: 1px solid rgba(0,0,0,0.2);
+	padding: 0;
+}
+.item{
+	padding: 2px;
+}
+.item:hover{
+	background-color: #EEF;
+}
+.postpreview{
+	position: absolute;
+	min-width: 700px;
+}
+.postpreview > .post{
+	border-radius: 10px 0 10px 10px;
+	border: 1px solid rgba(0,0,0,0.2);
+}
+.postpreview > .post > .postinfo > .replycounter > .small_reply_counter > .replies_s{
+	display: none;
+}
+.postpreview > .post > .postinfo > .postuplink, .postpreview > .post > .postinfo > .posttreelink {
+	display: none;
 }
