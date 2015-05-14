@@ -10,9 +10,8 @@
 					<span class="replyto"><span id="postingmode">%%postingmode%%</span> <span id="replyto_id">%%replyto%%</span></span>
 				</td>
 				<td>
-					browser may freeze -> 
-					<select autocomplete="off" id="pow_value_select" title="Be careful! browser may freeze!" onchange="calcPOWandSend();">
-						<option disabled>Select POW value.</option>
+					<select autocomplete="off" id="pow_value_select" title="Be careful! browser may freeze!">
+						<option disabled selected value="1">Select POW value.</option>
 						<option value="5" class="pow_value_option">5</option>
 						<option value="8" class="pow_value_option">8</option>
 						<option value="10" class="pow_value_option">10</option>
@@ -26,7 +25,7 @@
 						<option value="19" class="pow_value_option">19</option>
 						<option value="20" class="pow_value_option">20</option>
 					</select>
-					<!--<input class="postformsubmit" type="submit" value="New post">-->
+					<input type="button" id="popostformsubmit" onclick="calcPOWandSend();" value="Send post">
 				</td>
 			</tr>
 			<tr>
@@ -46,7 +45,7 @@
 			</tr>
 			<tr>
 				<td>
-					<input id="fileselect"  autocomplete="off"  type="file" multiple onchange="handleSelect(event);">
+					%%fileselectlist%%
 				</td>
 			</tr>
 			<tr>

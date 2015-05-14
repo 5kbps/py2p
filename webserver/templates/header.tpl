@@ -7,6 +7,7 @@
 		<script src="/static/spark-md5.min.js"></script>
 		<script src="/static/md5.min.js"></script>
 		<script src="/static/script.js"></script>
+		<script src="/static/config.js"></script>
 		%%head%%
 	</head>
 	<body>

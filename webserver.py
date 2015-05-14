@@ -299,13 +299,17 @@ class PageViewerClass():
 class HTMLGeneratorClass():
 	def __init__(self):
 		self.additionalTagsHTML = ''
+		self.fileSelectListHTML = ''
 		for tag in webServerAdditionalTags:
 			self.additionalTagsHTML+="<a target=\"_blank\" href=\"/tag/"+unicode(tag.strip())+"\" class=\"additionaltag posttag tag\">#"+unicode(tag.strip())+"</a>"
+		for i in range(1,webServerPostingMaxFileCount+1):
+			self.fileSelectListHTML +=" 					<input id=\"fileselect_"+str(i)+"\"  autocomplete=\"off\"  type=\"file\" onchange=\"handleSelect(this,event);\">"
 	def fromTemplate(self,templateName,replacements={}):
 		template = readFile(webServerTemplatestDir+templateName+".tpl","r")
 		if templateName == "form":
 			replacements['additionaltags'] = HTMLGenerator.additionalTagsHTML
 			replacements['maxfiles'] = str(webServerPostingMaxFileCount)
+			replacements['fileselectlist'] = self.fileSelectListHTML
 			if 'replyto' in replacements:
 				if replacements['replyto'] == '':
 					replacements['postingmode'] = "New post"
@@ -337,9 +341,9 @@ class HTMLGeneratorClass():
 				"subject": escapeHTML( post.subject),
 				"text": BBCodeParser.format(post.text),
 				"id": escapeHTML(post.id),
-				"filelist":  self.getFileListHTML(post),
-				"taglist":  self.getTagListHTML(post),
-				"langlist":  self.getLanguagesListHTML(post),
+				"filelist": self.getFileListHTML(post),
+				"taglist": self.getTagListHTML(post),
+				"langlist": self.getLanguagesListHTML(post),
 				"replycount":self.getReplyCount(post),
 				"pow":self.getPOWValue(post),
 				"time":self.getHumanReadableTime(post.id),

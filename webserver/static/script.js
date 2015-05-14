@@ -1,4 +1,7 @@
-
+var fileSelectCounter = 1
+var powWorkersActive = false
+var powThreadsCount = 2
+var powWorkers = []
 function hasValue(arr,value) {
 	return (arr.indexOf(value) != -1);
 }
@@ -81,8 +84,10 @@ function appendTag(e) {
 
 }
 function removeTag(elem){
-	id("tags").value = id("tags").value.replace(elem.textContent+"#",'')
-	elem.remove()
+	if(powWorkersActive==false){
+		id("tags").value = id("tags").value.replace(elem.textContent+"#",'')
+		elem.remove()
+	}
 }
 
 function stringifyPost(){
@@ -102,141 +107,204 @@ function stringifyPost(){
 		string += filename
 		i++
 	}
-	for(var i = 0; i < byc('posttag').length; i++){
-		string += byc('posttag')[i].textContent.substr(1)
+	for(var j = 0; j < byc('posttag').length; j++){
+		string += byc('posttag')[j].textContent.substr(1)
 	}
 	//TODO
 	string += "ruen"
 	return string
 }
-function calcPOW(value,maxTime){
+function calcPOW(value,maxTime,toSubmit){
 	timestamp = Date.now()
 	post_content = stringifyPost()
-	if(value > 50){
-		value = 50
+	if(value > 25){
+		value = 25
 	}
-	pow_shift = 0
-	while( true ){
-		pow_shift++
-		pid1 = md5(post_content+pow_shift)
-		pid2 = md5(pow_shift+post_content)
-		tid1 = parseInt(pid1, 16).toString(2)
-		tid2 = parseInt(pid2, 16).toString(2)
-		if(tid1.substr(0,value)==tid2.substr(0,value)){
-			break
+	if (!!window.Worker){
+		for(var i = 0; i < powThreadsCount; i++){
+			powWorkers[i] = new Worker('/static/cpuboiler.js');
+			function startWork(worker){
+				powWorkers[i].postMessage({'cmd': 'start', 'timestamp': timestamp,'post_content':post_content,'value':value});
+			}
+			startWork(powWorkers[i])
+			powWorkers[i].addEventListener('message', function(e) {
+				id("post_pow_shift").value = e.data*1
+				if(toSubmit){
+					prepareForm()
+					id('post_form').submit()
+				}
+			}, false);
 		}
-		if(!pow_shift%1000){
-			if(Date.now()-timestamp>maxTime){
+  	}else{
+		pow_shift = 0
+		while( true ){
+			pow_shift++
+			pid1 = md5(post_content+pow_shift)
+			pid2 = md5(pow_shift+post_content)
+			tid1 = parseInt(pid1, 16).toString(2)
+			tid2 = parseInt(pid2, 16).toString(2)
+			if(tid1.substr(0,value)==tid2.substr(0,value)){
 				break
 			}
+			if(!pow_shift%1000){
+				if(Date.now()-timestamp>maxTime){
+					break
+				}
+			}
+		}
+		if(pow_shift){
+			id("post_pow_shift").value = pow_shift
+			console.log("pid="+hex2base36( pid1 )+"("+pid1+")"+":"+pow_shift)
+		}
+		if(toSubmit){
+			prepareForm()
+			id('post_form').submit()
 		}
 	}
-	if(pow_shift){
-		id("post_pow_shift").value = pow_shift
-		console.log("pid="+hex2base36( pid1 )+"("+pid1+")"+":"+pow_shift)
+}
+
+function terminateWorkers(){
+	for(i in powWorkers){
+		 powWorkers[i].terminate()
 	}
 }
 function calcPOWandSend(){
-	id("fileselect").value=""
-	calcPOW(vid('pow_value_select')*1,10)
-	id('post_form').submit()
+	if(powWorkersActive==false){
+		powWorkersActive = true
+		id('popostformsubmit').value="Working..."
+		calcPOW(vid('pow_value_select')*1,10,true)
+		disableForm()
+	}else{
+		powWorkersActive = false
+		id('popostformsubmit').value="Send post"
+		terminateWorkers()
+		enableForm()
+	}
 }
 
-function handleSelect(evt){
-	supported_image_fromats = ['jpg','png','gif']
-	var files = evt.target.files;
-
-	var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice
-	var chunkSize = 2097152					   // read in chunks of 2MB
-	for (var i = 0, f; f = files[i]; i++) {
-		var reader = new FileReader();
-		reader.num = i+1
-		reader.fname =  files[i].name
-		reader.onload = (function(theFile) {
-			return function(e) {
-				i = this.num
-				n = this.fname
-				ext = n.split('.')[n.split('.').length-1]
-				s = e.target.result
-				if(id('fileentry_'+i) == null){
-					
-					fileentry = document.createElement('div')
-					fileentry.id = 'fileentry_'+i
-					id('filelist').appendChild(fileentry)
-
-					filesource = document.createElement('input')
-					filesource.id = 'filesource_'+i
-					filesource.name = 'source_'+i
-					filesource.type = 'hidden'
-					fileentry.appendChild(filesource)
-
-					filename = document.createElement('input')
-					filename.id = 'filename_'+i
-					filename.name = 'filename_'+i
-					filename.type = 'hidden'
-					fileentry.appendChild(filename)
-				}else{
-					fileentry = id( 'fileentry_'+i )
-					filesource= id( 'filesource_'+i )
-					filename =  id( 'filename_'+i )
-				}
-				filename.value = n
-				filesource.value = s
-				if( hasValue(supported_image_fromats, ext) ){
-					if(id('filethumb_'+i) == null){
-						filethumb = document.createElement('img')
-						filethumb.id= 'filethumb_'+i
-						filethumb.title = n
-						filethumb.className = 'filethumb'
-						fileentry.appendChild(filethumb)
-					}else{
-						filethumb = id('filethumb'+i)
-					}
-					filethumb.src= s
-				}
-			};
-		})(f);
-		reader.readAsDataURL(f);
-
-		var chunks = Math.ceil(f.size / chunkSize)
-		var currentChunk = 0
-		var spark = new SparkMD5.ArrayBuffer()
-		spark.f_i = i
-		frOnload = function(e) {
-			console.log("read chunk nr", currentChunk + 1, "of", chunks);
-			spark.append(e.target.result);				 // append array buffer
-			currentChunk++;
-
-			if (currentChunk < chunks) {
-				loadNext();
-			}
-			else {
-			   console.log("finished loading");
-			   hashval = spark.end()
-			   console.info("computed hash", hashval,i); // compute hash
-				fileentry = id('fileentry_'+i)
-				filehash = document.createElement('input')
-				filehash.name = 'filehash_'+i
-				filehash.id = 'filehash_'+i
-				filehash.type = 'hidden'
-				filehash.value = hashval
-				fileentry.appendChild(filehash)
-			}
-		},
-		frOnerror = function () {
-			console.warn("oops, something went wrong.");
-		};
-
-		function loadNext() {
-			var fileReader = new FileReader();
-			fileReader.onload = frOnload;
-			fileReader.onerror = frOnerror;
-			var start = currentChunk * chunkSize,
-				end = ((start + chunkSize) >= f.size) ? f.size : start + chunkSize;
-			fileReader.readAsArrayBuffer(blobSlice.call(f, start, end));
-		};
-		loadNext();
+function prepareForm(){
+	enableForm()
+	for(var i = 1; i <= boardConfig.webServerPostingMaxFileCount;i++){
+		id('fileselect_'+i).value = ''
 	}
+
+}
+function enableForm(){
+
+	id('pow_value_select').disabled = false
+	id('post_name').disabled = false
+	id('post_subject').disabled = false
+	id('post_text').disabled = false
+	for(var i = 1; i <= boardConfig.webServerPostingMaxFileCount;i++){
+		id('fileselect_'+i).disabled = false
+	}
+	id('taginput').disabled = false
+}
+function disableForm(){
+	id('pow_value_select').disabled = true
+	id('post_name').disabled = true
+	id('post_subject').disabled = true
+	id('post_text').disabled = true
+	for(var i = 1; i <= boardConfig.webServerPostingMaxFileCount;i++){
+	id('fileselect_'+i).disabled = true
+	}
+	id('taginput').disabled = true
+
+}
+function handleSelect(elem,evt){
+	supported_image_fromats = ['jpg','png','gif']
+	var f = evt.target.files[0];
+	//i = elem.id.split("_")[1]*1
+	i = fileSelectCounter
+	fileSelectCounter++
+	var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice
+	var chunkSize = 2097152	   // read in chunks of 2MB
+	var reader = new FileReader();
+	reader.num = i
+	reader.fname =  f.name
+	reader.onload = (function(theFile) {
+		return function(e) {
+			i = this.num
+			n = this.fname
+			ext = n.split('.')[n.split('.').length-1]
+			s = e.target.result
+			if(id('fileentry_'+i) == null){
+				
+				fileentry = document.createElement('div')
+				fileentry.id = 'fileentry_'+i
+				id('filelist').appendChild(fileentry)
+
+				filesource = document.createElement('input')
+				filesource.id = 'filesource_'+i
+				filesource.name = 'source_'+i
+				filesource.type = 'hidden'
+				fileentry.appendChild(filesource)
+
+				filename = document.createElement('input')
+				filename.id = 'filename_'+i
+				filename.name = 'filename_'+i
+				filename.type = 'hidden'
+				fileentry.appendChild(filename)
+			}else{
+				fileentry = id( 'fileentry_'+i )
+				filesource= id( 'filesource_'+i )
+				filename =  id( 'filename_'+i )
+			}
+			filename.value = n
+			filesource.value = s
+			if( hasValue(supported_image_fromats, ext) ){
+				if(id('filethumb_'+i) == null){
+					filethumb = document.createElement('img')
+					filethumb.id= 'filethumb_'+i
+					filethumb.title = n
+					filethumb.className = 'filethumb'
+					fileentry.appendChild(filethumb)
+				}else{
+					filethumb = id('filethumb'+i)
+				}
+				filethumb.src= s
+			}
+		};
+	})(f);
+	reader.readAsDataURL(f);
+
+	var chunks = Math.ceil(f.size / chunkSize)
+	var currentChunk = 0
+	var spark = new SparkMD5.ArrayBuffer()
+	frOnload = function(e) {
+		console.log("read chunk nr", currentChunk + 1, "of", chunks);
+		spark.append(e.target.result);				 // append array buffer
+		currentChunk++;
+
+		if (currentChunk < chunks) {
+			loadNext();
+		}
+		else {
+		   console.log("finished loading");
+		   hashval = spark.end()
+		   console.info("computed hash", hashval,i); // compute hash
+			fileentry = id('fileentry_'+i)
+			filehash = document.createElement('input')
+			filehash.name = 'filehash_'+i
+			filehash.id = 'filehash_'+i
+			filehash.type = 'hidden'
+			filehash.value = hashval
+			fileentry.appendChild(filehash)
+		}
+	},
+	frOnerror = function () {
+		console.warn("oops, something went wrong.");
+	};
+
+	function loadNext() {
+		var fileReader = new FileReader();
+		fileReader.onload = frOnload;
+		fileReader.onerror = frOnerror;
+		var start = currentChunk * chunkSize,
+			end = ((start + chunkSize) >= f.size) ? f.size : start + chunkSize;
+		fileReader.readAsArrayBuffer(blobSlice.call(f, start, end));
+	};
+	loadNext();
 }
 
 function getPosition(element) {
