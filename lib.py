@@ -27,6 +27,48 @@ sys.setdefaultencoding('utf8')
 #constants
 languagesList = ["en","ru","pol","uk","fr","de","fi","ja","lv","pol","es","sv"]
 py2pVersion = 0
+n2 = {
+	0:1,
+	1:2,
+	2:4,
+	3:8,
+	4:16,
+	5:32,
+	6:64,
+	7:128,
+	8:256,
+	9:512,
+	10:1024,
+	11:2048,
+	12:4096,
+	13:8192,
+	14:16384,
+	15:32768,
+	16:65536,
+	17:131072,
+	18:262144,
+	19:524288,
+	20:1048576,
+	21:2097152,
+	22:4194304,
+	23:8388608,
+	24:16777216,
+	25:33554432,
+	26:67108864,
+	27:134217728,
+	28:268435456,
+	29:536870912,
+	30:1073741824,
+	31:2147483648,
+	32:4294967296,
+	33:8589934592,
+	34:17179869184,
+	35:34359738368,
+	36:68719476736,
+	37:137438953472,
+	38:274877906944,
+	39:549755813888
+}
 #logging
 def R():
 	print "--------------------------------------"
@@ -47,32 +89,6 @@ def log(message,level=1,indent=''):
 
 
 #lists
-def get_class_members(klass):
-	ret = dir(klass)
-	if hasattr(klass,'__bases__'):
-		for base in klass.__bases__:
-			ret = ret + get_class_members(base)
-	return ret
-
-
-def uniq( seq ): 
-	""" the 'set()' way ( use dict when there's no set ) """
-	return list(set(seq))
-
-def get_object_attrs( obj ):
-	# code borrowed from the rlcompleter module ( see the code for Completer::attr_matches() )
-	ret = dir( obj )
-	## if "__builtins__" in ret:
-	##	ret.remove("__builtins__")
-
-	if hasattr( obj, '__class__'):
-		ret.append('__class__')
-		ret.extend( get_class_members(obj.__class__) )
-
-		ret = uniq( ret )
-
-	return ret
-
 def trimStringAsList(string):
 	string = removeEmptyItems( string.split(","))
 	string = removeEmptyItems(string)
@@ -228,9 +244,21 @@ def isReceived(postid):
 	return fileExists(postsDir+postid)
 def isDeleted(postid):
 	return False
+def isTree(postid):
+	if postid in get['connected']:
+		for reply in get['connected'][postid]:
+			if isThread(reply):
+				return True
+	return False
+def isThread(postid):
+	if postid in get['connected']:
+		if len(get['connected'][postid]) > 0:
+			return True
+	return False
 def isAvaliable(postid):
 	return not isDeleted(postid) and not isLocal(postid) and isReceived(postid)
 def isLocal(postid):
+	# deprecated?
 	return False
 def isPostId(postid):
 	return True
@@ -519,26 +547,39 @@ def purgePost(postid):
 		del get['protected'][postid]
 
 def hashesCount(POW):
-	return 2**POW
+	POW = toInt(POW,0)
+	if POW in n2:
+		return n2[POW]
+	else:
+		return 0
 def POWBonus(postid):
-	return get['pow'][postid]*hashesCount(get['pow'][postid])
+	if postid in get['timestamp']:
+		if postid in get['pow']:
+			return get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence
+	return 0
 def cutOutdatedPosts():
-	post_d = {}
-	to_delete = []
-	'''
-	for post in list(get['received']):
-		if post in get['timestamp']:
-			post_d[post] = get['timestamp'][post] + get['pow'][post])*powC
-		else
-
-	sorted_d = sorted(post_d, key=post_d.__getitem__,reverse=newOnTop)
-	return sorted_d
-
-	# to delete posts if their count is more than maximum
-	for post in get['received']
-	pass
-	'''
-
+	log(":cutOutdatedPosts",2)
+	if len(get['received']) > maxPostsCount:
+		post_rating = {}
+		to_delete = []
+		if webServerPostDeletingMode == "progressive":
+			for postid in get['received']:
+				if( postid in get['refer'] and not isReceived(get['refer'][postid]) ) or \
+				not postid in get['refer']:
+					if postid in get['timestamp']:
+						post_rating[postid] = toInt(get['timestamp'][postid],0)
+					else:
+						post_rating[postid] = 0
+					post_rating[postid] += POWBonus(postid)
+			sorted_post_rating = sorted(post_rating, key=post_rating.__getitem__,reverse=False)
+			deleted_counter = 0
+			delete_count = len(get['received']) - maxPostsCount
+			for postid in sorted_post_rating:
+				log("cutOutdatedPosts: "+postid+":",post_rating[postid],3)
+				deletePost(postid)
+				deleted_counter+=1
+				if deleted_counter >= delete_count:
+					break
 #math
 def toInt(string,default=0):
 	try:
@@ -563,8 +604,33 @@ def int36(n, b=36):
 	for dig in digits:
 		r_string += digit2char(dig)
 	return r_string
+def normalSize(bytesize):
+	# 1024 -> 1KB
+	pass
 
 #other
+
+def get_class_members(klass): # <- for debug
+	ret = dir(klass)
+	if hasattr(klass,'__bases__'):
+		for base in klass.__bases__:
+			ret = ret + get_class_members(base)
+	return ret
+
+
+def uniq( seq ): 
+	""" the 'set()' way ( use dict when there's no set ) """
+	return list(set(seq))
+
+def get_object_attrs( obj ):
+	ret = dir( obj )
+
+	if hasattr( obj, '__class__'):
+		ret.append('__class__')
+		ret.extend( get_class_members(obj.__class__) )
+		ret = uniq( ret )
+	return ret
+
 def getApproxTimeBySignatureLength(length):
 	r = 1
 	i = 0
@@ -606,33 +672,6 @@ class ValidatorClass():
 		allowed = re.compile("(?!-)[A-Z\d-]{1,63}(?<!-)$", re.IGNORECASE)
 		return all(allowed.match(x) for x in hostname.split("."))
 
-"""
-class Server():
-	def __init__(self,host="",port=0,ctype="client"):
-		self.host = host
-		self.port = port
-		self.publicWebserverHost = ''
-		self.total_accepted_connections = 0
-		self.total_rejected_connections = 0
-		self.failed = 0
-		self.rejected_connections = 0
-		self.received_posts_count = 0
-		self.received_posts_total_size = 0
-
-	def addHost(self,host="127.0.0.1:5441"):
-		global get
-		get['hostlist'].add(host.replace("\n",""))
-		host = host.split(":")
-		port = host[1]
-		host = host[0]
-		self.host = host
-		self.port = port
-		return self
-"""
-
 get = {}
 
 valid = ValidatorClass()
-
-
-string2key('asd')

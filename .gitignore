@@ -7,3 +7,4 @@ webserver/posts/*
 webserver/thumb/*
 webserver/file/*
 *.txt
+*.ignore.*

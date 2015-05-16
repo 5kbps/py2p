@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
-from os import curdir, sep
 import os, cgi, setproctitle
 import protocol_pb2
 from lib import *
@@ -173,7 +172,7 @@ class PageViewerClass():
 		output = HTMLGenerator.fromTemplate("header",header_replacements)
 		postlist = []
 		for postid in get['connected'].keys():
-			if HTMLGenerator.isTree(postid):
+			if isTree(postid):
 				if not postid in get['refer']:
 					postlist.append(postid)
 		all_length = len(postlist)
@@ -376,7 +375,10 @@ class HTMLGeneratorClass():
 			add2DB(postid)
 		if postid in get['timestamp']:
 			timestamp = float(get['timestamp'][postid])/10000
-			timestamp = datetime.datetime.fromtimestamp(timestamp)
+			try:
+				timestamp = datetime.datetime.fromtimestamp(timestamp)
+			except BaseException:
+				timestamp = datetime.datetime.fromtimestamp(0)
 			timestr = timestamp.strftime('<span class=\"date\">%d.%m.%Y </span><span class=\"time\">%H:%M:%S</span>')
 		else:
 			timestr = "Unknown time"
@@ -393,7 +395,7 @@ class HTMLGeneratorClass():
 			r += "		<span class=\"file\">\n"
 			if hasattr(post_file,"name"):
 				if len(post_file.name) > webServerPostFileNameMaxLength+len(webServerPostLongFileNameSeparator):
-					name = escapeHTML( post_file.name[:webServerPostFileNameMaxLength/2]+webServerPostLongFileNameSeparator+post_file.name[-webServerPostFileNameMaxLength:])
+					name = escapeHTML( post_file.name+post_file.name[-webServerPostFileNameMaxLength:])
 				else:
 					name = escapeHTML(post_file.name)
 				r+="			<a class=\"filelink\" target=\"_blank\" href=\"/file/"+post_file.md5hash+"."+escapeHTML( getExt(post_file.name))+"\">"
@@ -453,17 +455,8 @@ class HTMLGeneratorClass():
 				r += connected+","
 			r=r[:-1]
 		return r
-	def isTree(self,postid):
-		r = False
-		if postid in get['connected']:
-			for reply in get['connected'][postid]:
-				if reply in get['connected']:
-					if len(get['connected'][reply])>0:
-						r = True
-						break
-		return r
 	def treeLink(self,postid):
-		if self.isTree(postid):
+		if isTree(postid):
 			return "<span class=\"posttreelink\"><a class=\"treelink\" href=\"/tree/"+postid+"\">Tree</a></span>"
 		else:
 			return ""
@@ -744,7 +737,7 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 		ThumbCreator.genPostThumbs(post.id)
 		return HTMLGenerator.newPostHTML(post)
 	else:
-		return "Post is too large, max post size = "+maxPostSize
+		return "Post is too large, max post size = "+str(maxPostSize)
 
 global get
 initDB()
@@ -760,7 +753,7 @@ HTMLGenerator.makePosts()
 PageViewer = PageViewerClass()
 ThumbCreator = ThumbCreatorClass()
 ThumbCreator.genThumbs()
-
+cutOutdatedPosts()
 try:
 	#Create a web server and define the handler to manage the
 	#incoming request

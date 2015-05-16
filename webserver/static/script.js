@@ -90,9 +90,9 @@ function removeTag(elem){
 	}
 }
 
-function stringifyPost(){
+function stringifyPost(timestamp){
 	string = ""
-	posttime = Date.now()
+	posttime = timestamp
 	referid	 = vid('refer_id')
 	postname = vid('post_name')
 	postsubj = vid('post_subject')
@@ -114,9 +114,9 @@ function stringifyPost(){
 	string += "ruen"
 	return string
 }
-function calcPOW(value,maxTime,toSubmit){
-	timestamp = Date.now()
-	post_content = stringifyPost()
+function calcPOW(value,toSubmit){
+	timestamp = Date.now()*10
+	post_content = stringifyPost(timestamp)
 	if(value > 25){
 		value = 25
 	}
@@ -146,11 +146,6 @@ function calcPOW(value,maxTime,toSubmit){
 			if(tid1.substr(0,value)==tid2.substr(0,value)){
 				break
 			}
-			if(!pow_shift%1000){
-				if(Date.now()-timestamp>maxTime){
-					break
-				}
-			}
 		}
 		if(pow_shift){
 			id("post_pow_shift").value = pow_shift
@@ -172,7 +167,7 @@ function calcPOWandSend(){
 	if(powWorkersActive==false){
 		powWorkersActive = true
 		id('popostformsubmit').value="Working..."
-		calcPOW(vid('pow_value_select')*1,10,true)
+		calcPOW(vid('pow_value_select')*1,true)
 		disableForm()
 	}else{
 		powWorkersActive = false

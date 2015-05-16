@@ -7,5 +7,6 @@ pip install struct
 pip install hashlib
 pip install base64
 pip install pillow
+pip install setproctitle
 pip install pycrypto
 ```

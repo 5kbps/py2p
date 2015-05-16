@@ -10,14 +10,16 @@ logSettings = set([1,2,3,4,5])
 4 - warnings
 5 - errors and reasons
 '''
+
+#[CRYPTOGRAPHY]
 keyLength = 1024 #bits
-keyExchangeMessageDetector = '\''
+keyExchangeMessageDetector = '\'' # don't change
+
 #[DIRS]
 postsDir = "posts/"
 postsFileDir = "webserver/file/"
 attachmentsDir = "attachments/"
 deletedPostsDir = "moved/"
-outdatedPostsDir = "old/"
 webServerDir = "webserver/"
 webServerPostsDir = "webserver/posts/"
 webServerThreadsDir = "webserver/threads/"
@@ -28,13 +30,21 @@ defaultServersListFile = "meta/servers-default"
 protectedPostsFile = "meta/protected-posts"
 
 #[POSTS]
-maxPostsCount = 1000 #0 to disable TODO
+maxPostsCount = 10 #0 to disable TODO
 enablePostDeleting = True #TODO
 postDeletingMode = "move" #TODO
-maxPostSize = 5242880		# do not change!
-maxRequestSize = 524288000	# do not change!
-powInfluence = 1000 #The more this value is the more extra time to live gets the message with bigger POW
-# every hash calculated when post was created gives additional time equal to this value
+maxPostSize = 10485760		# do not change!
+maxRequestSize = 67108864	# do not change!
+powInfluence = 1000 #The more this value is the more
+# extra time to live gets the post with bigger POW
+# when webServerPostDeletingMode = "normal" every
+# hash calculated when post was created gives additional 
+# time (in seconds) equal to this value
+# when webServerPostDeletingMode = "progressive" 
+# Посты удаляются не по одному, а целыми деревьями
+# Ответы на главный пост дерева отдают ему свой POWBonus
+# И уничтожаются вместе с ним, когда достигается лимит
+# TODO: translate
 
 #[POSTING SETTINGS]
 newPostDefaultPOW = 1;
@@ -83,7 +93,7 @@ webServerAdditionalLanguages = "ru,en"
 webServerPostingMaxFileCount = 4
 webServerPostingMaxFileSize = 5242880
 webServerloggingEnabled = False #TODO
-
+webServerPostDeletingMode = "progressive"
 webServerSupportedImageFormats = ['jpg','gif','png','jpeg']
 webServerPostingFileFormats = webServerSupportedImageFormats + ['tar','gz','rar']
 
