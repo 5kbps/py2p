@@ -55,8 +55,8 @@ newPostDefaultFiles = ["test.gif","test.jpg"]
 newPostDefaultLanguages = "ru,en"
 
 #[CLIENT SETTINGS]
-clientRequestsInterval = 1			# Интервал между запросами
-clientMaxIterationCount = 100 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
+clientRequestsInterval = 20			# Интервал между запросами
+clientMaxIterationCount = 10 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
 clientRejectedConnectionsLimit = 3	# Количество отклоненных подряд запросов
 clientBehaviorAfterReachingRejectedConnectionsLimit = "remove" 		# 
 clientRejectedConnectionsSmartModeLimit = 100
@@ -87,7 +87,7 @@ webServerTreeViewCutOn = 4 #
 
 webServerPageListSplitNum = 25
 webServerPostFileNameMaxLength = 12
-webServerPostLongFileNameSeparator = ".."
+webServerPostLongFileNameSeparator = "[...]."
 webServerAdditionalTags = ["py2p","кириллица","⠝"]
 webServerAdditionalLanguages = "ru,en"
 webServerPostingMaxFileCount = 4

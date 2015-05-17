@@ -180,6 +180,9 @@ hr{
 .fileentry{
 	display: inline;
 }
+.filename{
+	font-size: 12px;
+}
 .additionaltag{
 	color: #3A8;
 }

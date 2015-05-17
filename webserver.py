@@ -394,8 +394,8 @@ class HTMLGeneratorClass():
 		for post_file in post.files:
 			r += "		<span class=\"file\">\n"
 			if hasattr(post_file,"name"):
-				if len(post_file.name) > webServerPostFileNameMaxLength+len(webServerPostLongFileNameSeparator):
-					name = escapeHTML( post_file.name+post_file.name[-webServerPostFileNameMaxLength:])
+				if len(post_file.name)-len(getExt(post_file.name)) > webServerPostFileNameMaxLength+len(webServerPostLongFileNameSeparator):
+					name = escapeHTML( post_file.name[:webServerPostFileNameMaxLength]+ webServerPostLongFileNameSeparator+getExt(post_file.name))
 				else:
 					name = escapeHTML(post_file.name)
 				r+="			<a class=\"filelink\" target=\"_blank\" href=\"/file/"+post_file.md5hash+"."+escapeHTML( getExt(post_file.name))+"\">"
