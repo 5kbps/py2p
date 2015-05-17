@@ -55,8 +55,9 @@ newPostDefaultFiles = ["test.gif","test.jpg"]
 newPostDefaultLanguages = "ru,en"
 
 #[CLIENT SETTINGS]
-clientRequestsInterval = 20			# Интервал между запросами
+clientRequestsInterval = 0			# Интервал между запросами
 clientMaxIterationCount = 10 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
+clientSocketTimeout = 10
 clientRejectedConnectionsLimit = 3	# Количество отклоненных подряд запросов
 clientBehaviorAfterReachingRejectedConnectionsLimit = "remove" 		# 
 clientRejectedConnectionsSmartModeLimit = 100

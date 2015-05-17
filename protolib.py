@@ -24,6 +24,7 @@ def recv_msg(sock):
 def recvall(sock, n):
 	data = ''
 	while len(data) < n:
+		sock.settimeout(clientSocketTimeout)
 		packet = sock.recv(n - len(data))
 		if not packet:
 			return None

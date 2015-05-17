@@ -82,6 +82,7 @@ class ClientClass:
 			#step 1
 			if not address in get['shared_keys']:
 				sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				sock.settimeout(clientSocketTimeout)
 				sock.connect((host, port))
 				send_msg(sock,genKeys1(address))
 				received = recv_msg(sock)
