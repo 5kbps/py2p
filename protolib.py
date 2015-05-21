@@ -165,12 +165,22 @@ def getServers(data):
 def receivePosts(rd):
 	counter = 0
 	for post_source in rd.sending:
-		post = protocol_pb2.Post()#
-		post.ParseFromString(post_source)
-		if not isDeleted(post.id) and not isReceived(post.id):
-#			print "		[new post received]:",post.id
-			writePost(post)
-			counter += 1
+		if len(post_source) < maxPostSize:
+			post = protocol_pb2.Post()#
+			post.ParseFromString(post_source)
+			if not isDeleted(post.id) and not isReceived(post.id):
+				checkStatus = checkPost(post)
+				if not checkStatus:
+					log("[new post received]:"+str(post.id),3)
+					writePost(post)
+					counter += 1
+				else:
+					if checkStatus == 1:
+						log("[post was not saved because it is truncated "+post.id+"]",4)
+					if checkStatus == 2:
+						log("[post was not saved because of small POW "+post.id+"]",4)
+					if checkStatus == 3:
+						log("[post was not saved because it includes blacklisted content "+post.id+"]",4) 
 	print ":receivePosts [",counter,"]"
 	return counter
 #POW

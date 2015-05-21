@@ -24,6 +24,11 @@
 						<option value="18" class="pow_value_option">18</option>
 						<option value="19" class="pow_value_option">19</option>
 						<option value="20" class="pow_value_option">20</option>
+						<option value="21" class="pow_value_option">21</option>
+						<option value="22" class="pow_value_option">22</option>
+						<option value="23" class="pow_value_option">23</option>
+						<option value="24" class="pow_value_option">24</option>
+						<option value="25" class="pow_value_option">25</option>
 					</select>
 					<input type="button" id="popostformsubmit" onclick="calcPOWandSend();" value="Send post">
 				</td>

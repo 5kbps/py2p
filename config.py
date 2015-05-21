@@ -1,21 +1,24 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+# py2p config
+# It's highly recommended to backup this file before 
+# making any changes.
+# Changing variables marked with `[DO NOT CHANGE]` 
+# can make py2p unsafe or useless.
 
 #[GLOBAL SETTINGS]
 logSettings = set([1,2,3,4,5])
-'''
-1 - human-readable messages
-2 - functions called
-3 - what functions do
-4 - warnings
-5 - errors and reasons
-'''
-
+# 1 - human-readable messages
+# 2 - functions called
+# 3 - what functions do
+# 4 - warnings
+# 5 - errors and reasons
+timeShift = 0
 #[CRYPTOGRAPHY]
-keyLength = 1024 #bits
-keyExchangeMessageDetector = '\'' # don't change
+keyLength = 1024 #bits [DO NOT CHANGE]
+keyExchangeMessageDetector = '\'' # [DO NOT CHANGE]
 
-#[DIRS]
+#[DIRS] 
 postsDir = "posts/"
 postsFileDir = "webserver/file/"
 attachmentsDir = "attachments/"
@@ -30,21 +33,24 @@ defaultServersListFile = "meta/servers-default"
 protectedPostsFile = "meta/protected-posts"
 
 #[POSTS]
-maxPostsCount = 10 #0 to disable TODO
+maxPostsCount = 10 # todo
 enablePostDeleting = True #TODO
-postDeletingMode = "move" #TODO
-maxPostSize = 10485760		# do not change!
-maxRequestSize = 67108864	# do not change!
+postDeletingMode = "progressive"
+# when postDeletingMode = "progressive" 
+#	Посты удаляются не по одному, а целыми деревьями
+# 	Ответы на главный пост дерева отдают ему свой POWBonus
+# 	И уничтожаются вместе с ним, когда достигается лимит
+# 	TODO: translate
+# when postDeletingMode = "agressive"
+# 	Посты удаляются по одному (дискуссии могу обрываться)
+postDeletingAction = "move" #TODO
+# move: todo
+# remove: todo
+maxPostSize = 10485760		# [DO NOT CHANGE]
+maxRequestSize = 67108864	# [DO NOT CHANGE]
+minPostPOW = 0
 powInfluence = 1000 #The more this value is the more
 # extra time to live gets the post with bigger POW
-# when webServerPostDeletingMode = "normal" every
-# hash calculated when post was created gives additional 
-# time (in seconds) equal to this value
-# when webServerPostDeletingMode = "progressive" 
-# Посты удаляются не по одному, а целыми деревьями
-# Ответы на главный пост дерева отдают ему свой POWBonus
-# И уничтожаются вместе с ним, когда достигается лимит
-# TODO: translate
 
 #[POSTING SETTINGS]
 newPostDefaultPOW = 1;
@@ -54,10 +60,14 @@ newPostDefaultTags = ["tag","test","py2p"]
 newPostDefaultFiles = ["test.gif","test.jpg"]
 newPostDefaultLanguages = "ru,en"
 
+#[MODERATION]
+bannedTags = ['somethingillegal','thatshouldnot','besaved']
+bannedWords= ['blacklistedword','onemoreblacklistedword']
+bannedFiles= ['somefilehash']
 #[CLIENT SETTINGS]
-clientRequestsInterval = 0			# Интервал между запросами
+clientRequestsInterval = 2			# Интервал между запросами
 clientMaxIterationCount = 10 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле
-clientSocketTimeout = 10
+clientSocketTimeout = 300
 clientRejectedConnectionsLimit = 3	# Количество отклоненных подряд запросов
 clientBehaviorAfterReachingRejectedConnectionsLimit = "remove" 		# 
 clientRejectedConnectionsSmartModeLimit = 100
@@ -94,7 +104,6 @@ webServerAdditionalLanguages = "ru,en"
 webServerPostingMaxFileCount = 4
 webServerPostingMaxFileSize = 5242880
 webServerloggingEnabled = False #TODO
-webServerPostDeletingMode = "progressive"
 webServerSupportedImageFormats = ['jpg','gif','png','jpeg']
 webServerPostingFileFormats = webServerSupportedImageFormats + ['tar','gz','rar']
 

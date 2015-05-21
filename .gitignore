@@ -1,10 +1,12 @@
 *.pyc
 *.shelve
+*.bak
 files/*
 posts/*
 attachments/*
 webserver/posts/*
 webserver/thumb/*
 webserver/file/*
+meta/servers
 *.txt
 *.ignore.*

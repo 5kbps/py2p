@@ -145,6 +145,35 @@ def getFileSize(filename,dv=0):
 	else:
 		return dv
 
+#math
+def toInt(string,default=0):
+	try:
+		return int(string)
+	except BaseException:
+		return default
+def digit2char(digit):
+	if digit < 10:
+		return str(digit)
+	return chr(ord('a') + digit - 10)
+
+def hex2bin(shex):
+	return bin(int(shex, 16))[2:]
+
+def int36(n, b=36):
+	digits = []
+	while n:
+		digits.append(int(n % b))
+		n /= b
+	digits = digits[::-1]
+	r_string = ""
+	for dig in digits:
+		r_string += digit2char(dig)
+	return r_string
+def normalSize(bytesize):
+	# 1024 -> 1KB
+	pass
+
+
 # cryptography
 
 def genKeys1(address):
@@ -316,78 +345,47 @@ def stringifyPost(post):
 		for lang in post.languages:
 			string += str(lang)
 	return string
-def initDB():
-	global get
-	#post index
-	get['connected'] = {}
-	get['refer'] = {}
-	get['tags'] = {}
-	get['languages'] = {}
-	get['bytag'] = {}
-	get['bylang'] = {}
-	get['timestamp'] = {}
-	get['pow'] = {}
-	get['companions'] = {}
-	get['files'] = {}
-	get['byfilemd5hash'] = {}
-	get['requesting'] = {}
-	get['pow'] = {}
-	#peering
-	get['postsize'] = {}
-	get['filecache'] = {}
-	get['clients'] = {}
-	get['public_key'] = genKey()
-	get['private_key'] = genKey()
-	get['public_keys'] = {}
-	get['shared_keys'] = {}
-	#postmap
-	get['received'] = set()
-	get['deleted'] = set()
 
-	updateDB()
-	loadServers()
-#	loadServers()
-#	addServer("127.0.0.1:5441")
-	#get['initialized'] = True
+def checkPost(post):
+	if not hasattr(post,"id") or not isPostId( post.id ):
+		return 1
+	if not hasattr(post, "time"):
+		return 1
+	if not checkTime(post.time):
+		return 1
+	if getPostPOW(post) < minPostPOW:
+		return 2
+	if hasattr(post, "tags"):
+		if not checkTags(post.tags):
+			return 3
+	if hasattr(post, "text"):
+		if not checkText(post.text):
+			return 3
+	if hasattr(post, "files"):
+		if not checkFiles(post.files):
+			return 4
+	return 0
 
-
-def addServer(address):
-	global get
-	server = get['servers'].list.add()
-	server.address = address
-	server.rejected = 0
-	server.received = 0
-	server.new = True
-
-def loadServers():
-	global get
-	log( "loadServers",2)
-	get['servers'] = protocol_pb2.ServersList()
-	try:
-		get['servers'].ParseFromString(readFile(serversListFile))
-	except BaseException:
-		log(":loadServers: [warning] cannot load servers list! ("+serversListFile+") (using default one)",4)
-		try:
-			get['servers'].ParseFromString(readFile(defaultServersListFile))
-		except BaseException:
-			log(":loadServers: [error] cannot load default servers list! ("+defaultServersListFile+") (exiting)",5)
-			sys.exit(0)
-	for server in get['servers'].list:
-		log("Adress: "+server.address+" received posts:"+str(server.received),3)
-		server.rejected = 0
-		if not hasattr(server,"address"):
-			server.address = "127.0.0.1;5441"
-		if not hasattr(server,"received"):
-			server.received = 0
-def saveServers():
-	writeFile(serversListFile,get['servers'].SerializeToString())
-def getServerList():
-	global get
-	r = []
-	for s in get['servers'].list:
-		if hasattr(s,"address"):
-			r.append(s.address)
-	return r
+def checkTime(posttime):
+	return toInt(posttime,0) < time.time()*10000 + timeShift
+def checkTags(posttags):
+	for tag in posttags:
+		if tag in bannedTags:
+			return False
+	return True
+def checkText(posttext):
+	for banned in bannedWords:
+		if posttext.find(banned) != -1:
+			return False
+	return True
+def checkFiles(postfiles):
+	for file_entry in postfiles:
+		if hasattr(file_entry,"name") and \
+			hasattr(file_entry,"source") and \
+			hasattr(file_entry,"md5hash"):
+			if md5source( file_entry.source ) != file_entry.md5hash:
+				return False
+	return True
 def loadProtectedPosts():
 	global get
 	#log("loadProtectedPosts",2)
@@ -552,62 +550,113 @@ def hashesCount(POW):
 		return n2[POW]
 	else:
 		return 0
-def POWBonus(postid):
-	if postid in get['timestamp']:
-		if postid in get['pow']:
-			return get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence
-	return 0
+def POWBonus(postid,recursionValue=0):
+	r = 0
+	if postDeletingMode == "progressive":
+		if recursionValue >= 10:
+			return 0
+		if postid in get['timestamp']:
+			if postid in get['pow']:
+				if postid in get['connected']:
+					r += get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence + POWBonus(get['connected'][postid], recursionValue +1)
+				else:
+					r = get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence
+	return r
 def cutOutdatedPosts():
 	log(":cutOutdatedPosts",2)
-	if len(get['received']) > maxPostsCount:
-		post_rating = {}
-		to_delete = []
-		if webServerPostDeletingMode == "progressive":
-			for postid in get['received']:
-				if( postid in get['refer'] and not isReceived(get['refer'][postid]) ) or \
-				not postid in get['refer']:
-					if postid in get['timestamp']:
+	if maxPostsCount != 0:
+		if len(get['received']) > maxPostsCount:
+			post_rating = {}
+			to_delete = []
+			if postDeletingMode == "progressive":
+				for postid in get['received']:
+					if( postid in get['refer'] and not isReceived(get['refer'][postid]) ) or \
+					not postid in get['refer']:
 						post_rating[postid] = toInt(get['timestamp'][postid],0)
-					else:
-						post_rating[postid] = 0
-					post_rating[postid] += POWBonus(postid)
-			sorted_post_rating = sorted(post_rating, key=post_rating.__getitem__,reverse=False)
-			deleted_counter = 0
-			delete_count = len(get['received']) - maxPostsCount
-			for postid in sorted_post_rating:
-				log("cutOutdatedPosts: "+postid+":",post_rating[postid],3)
-				deletePost(postid)
-				deleted_counter+=1
-				if deleted_counter >= delete_count:
-					break
-#math
-def toInt(string,default=0):
+						post_rating[postid] += POWBonus(postid)
+				sorted_post_rating = sorted(post_rating, key=post_rating.__getitem__,reverse=False)
+				deleted_counter = 0
+				delete_count = len(get['received']) - maxPostsCount
+				for postid in sorted_post_rating:
+					log("cutOutdatedPosts: "+postid+":",post_rating[postid],3)
+					deletePost(postid)
+					deleted_counter+=1
+					if deleted_counter >= delete_count:
+						break
+
+
+def initDB():
+	global get
+	#post index
+	get['connected'] = {}
+	get['refer'] = {}
+	get['tags'] = {}
+	get['languages'] = {}
+	get['bytag'] = {}
+	get['bylang'] = {}
+	get['timestamp'] = {}
+	get['pow'] = {}
+	get['companions'] = {}
+	get['files'] = {}
+	get['byfilemd5hash'] = {}
+	get['requesting'] = {}
+	get['pow'] = {}
+	#peering
+	get['postsize'] = {}
+	get['filecache'] = {}
+	get['clients'] = {}
+	get['public_key'] = genKey()
+	get['private_key'] = genKey()
+	get['public_keys'] = {}
+	get['shared_keys'] = {}
+	#postmap
+	get['received'] = set()
+	get['deleted'] = set()
+
+	updateDB()
+	loadServers()
+#	loadServers()
+#	addServer("127.0.0.1:5441")
+	#get['initialized'] = True
+
+
+def addServer(address):
+	global get
+	server = get['servers'].list.add()
+	server.address = address
+	server.rejected = 0
+	server.received = 0
+	server.new = True
+
+def loadServers():
+	global get
+	log( "loadServers",2)
+	get['servers'] = protocol_pb2.ServersList()
 	try:
-		return int(string)
+		get['servers'].ParseFromString(readFile(serversListFile))
 	except BaseException:
-		return default
-def digit2char(digit):
-	if digit < 10:
-		return str(digit)
-	return chr(ord('a') + digit - 10)
-
-def hex2bin(shex):
-	return bin(int(shex, 16))[2:]
-
-def int36(n, b=36):
-	digits = []
-	while n:
-		digits.append(int(n % b))
-		n /= b
-	digits = digits[::-1]
-	r_string = ""
-	for dig in digits:
-		r_string += digit2char(dig)
-	return r_string
-def normalSize(bytesize):
-	# 1024 -> 1KB
-	pass
-
+		log(":loadServers: [warning] cannot load servers list! ("+serversListFile+") (using default one)",4)
+		try:
+			get['servers'].ParseFromString(readFile(defaultServersListFile))
+		except BaseException:
+			log(":loadServers: [error] cannot load default servers list! ("+defaultServersListFile+") (exiting)",5)
+			sys.exit(0)
+	for server in get['servers'].list:
+		log("Adress: "+server.address+" received posts:"+str(server.received),3)
+		server.rejected = 0
+		if not hasattr(server,"address"):
+			server.address = "127.0.0.1;5441"
+		if not hasattr(server,"received"):
+			server.received = 0
+def saveServers():
+	writeFile(serversListFile,get['servers'].SerializeToString())
+def getServerList():
+	global get
+	r = []
+	for s in get['servers'].list:
+		if hasattr(s,"address"):
+			r.append(s.address)
+	return r
 #other
 
 def get_class_members(klass): # <- for debug
@@ -673,5 +722,4 @@ class ValidatorClass():
 		return all(allowed.match(x) for x in hostname.split("."))
 
 get = {}
-
 valid = ValidatorClass()
