@@ -617,6 +617,7 @@ class myHandler(BaseHTTPRequestHandler):
 		else:
 			new_posts, removed_posts = updateDB()
 			if len(new_posts):
+				cutOutdatedPosts()
 				#generating thumbs for new posts, that are just added 
 				ThumbCreator.genThumbs(new_posts)
 			for new_post in new_posts:
@@ -751,10 +752,13 @@ class myHandler(BaseHTTPRequestHandler):
 				self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
 			else:
 				self.wfile.write(errMessage)
-def deletingActions(need_update):
+def deletingActions(need_update, recursionValue=0):
 	for postid in need_update:
 		log("	deleting action: updated"+postid,3)
 		HTMLGenerator.updatePostHTML(postid)
+		if postid in get['connected'] and recursionValue < 3:
+			deletingActions(get['connected'][postid],recursionValue+1)
+
 def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowshift=None):
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
