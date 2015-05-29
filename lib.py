@@ -398,15 +398,19 @@ def loadAdministration():
 	if fileExists(administrationFile):
 		admins = protocol_pb2.BoardAdministration()
 		admins.ParseFromString(readFile(administrationFile))
-		log("Administration: ")
-		for admin in admins.list:
-			log("	- "+admin.name)
-			get['admins'][admin.name] = {
-				"passwordmd5": admin.passwordmd5,
-				"modsigning": admin.modsigning,
-				"modsign": admin.modsign,
-				"deleting": admin.deleting
-			}
+		if len(admins.list):
+			log("Administration: ")
+			for admin in admins.list:
+				log("	- "+admin.name)
+				get['admins'][admin.name] = {
+					"passwordmd5": admin.passwordmd5,
+					"modsigning": admin.modsigning,
+					"modsign": admin.modsign,
+					"deleting": admin.deleting
+				}
+		else:
+			log("[WARNING] no administrator profile set",4)
+			log("Use adduser.py to add administrators and moderators",4)
 def loadProtectedPosts():
 	global get
 	#log("loadProtectedPosts",2)
@@ -531,6 +535,8 @@ def deletePost(postid):
 		get['deleted'].add(postid)
 	else:
 		print "cannot delete post: ",postid,"file not exists!"
+	if fileExists(webServerPostsDir+postid):
+		os.remove(webServerPostsDir+postid)
 	purgePost(postid)
 
 def purgePost(postid):

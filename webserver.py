@@ -370,6 +370,19 @@ class HTMLGeneratorClass():
 		output += HTMLGenerator.fromTemplate("newpost",newpost_replacements)
 		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
 		return output
+	def postDeleting(self,errors):
+		header_replacements = {
+			"title":"Manage board",
+			"head":""
+		}
+		footer_replacements = {
+			"took": "{TODO}"
+		}
+		output = HTMLGenerator.fromTemplate("header",header_replacements)
+		output = errors
+		output += HTMLGenerator.fromTemplate("footer",footer_replacements)
+		return output
+
 	def getHumanReadableTime(self,postid):
 		global get
 		if not postid in get['timestamp']:
@@ -650,11 +663,19 @@ class myHandler(BaseHTTPRequestHandler):
 			if name in get['admins']:
 				if md5source( password )==get['admins'][name]['passwordmd5']:
 					for item in to_delete:
-						deletePost(item)
+						if isReceived(item):
+							deletePost(item)
+							errMessage += "Deleted: "+item+"<br>"
+						else:
+							errMessage += "Post "+item+" does not exist.<br>"
 				else:
-					errMessage += "Password or username is not correct"
+					errMessage += "Password or username is not correct<br>"
 			else:
-				errMessage += "Password or username is not correct"
+				errMessage += "Password or username is not correct<br>"
+			self.send_response(200)
+			self.send_header('Content-type','text/html')
+			self.end_headers()
+			self.wfile.write(HTMLGenerator.postDeleting(errMessage))
 		if path_list[0]=="send":
 
 			'''
