@@ -520,21 +520,21 @@ def deletePost(postid):
 				if post.id in get['byfilemd5hash'][post_file.md5hash]:
 					get['byfilemd5hash'][post_file.md5hash].remove(post.id)
 					if len(get['byfilemd5hash'][post_file.md5hash]) == 0:
-						print "Deleting:", post.id
+						log( "Deleting:"+ post.id,3)
 						del get['byfilemd5hash'][post_file.md5hash]
 						#remove main file
 						if fileExists(postsFileDir+file_name):
 							deleteFile(postsFileDir+file_name)
-							print "removed attached file: " + file_name+" - "+post.id
+							log( "removed attached file: " + file_name+" - "+post.id,3)
 						#remove thumbnail
 						if fileExists(webServerImageThumbDir+post_file.md5hash+".jpg"):
 							deleteFile(webServerImageThumbDir+post_file.md5hash+".jpg")
 						else:
-							print "cannot remove attached file: "+file_name+" - "+post.id
+							log("cannot remove attached file: "+file_name+" - "+post.id,3)
 		os.remove(postsDir+postid)
 		get['deleted'].add(postid)
 	else:
-		print "cannot delete post: ",postid,"file not exists!"
+		log("cannot delete post: "+postid+"file not exists!",4)
 	if fileExists(webServerPostsDir+postid):
 		os.remove(webServerPostsDir+postid)
 	purgePost(postid)
@@ -556,20 +556,22 @@ def purgePost(postid):
 			if postid in get['bylang'][lang]:
 				get['bylang'][lang].remove(postid)
 				if len(get['bylang'][lang])==0:
-					del get['bylang'][lang]
-		del get['languages'][postid]
+					get['bylang'].pop(lang)
+		get['languages'].pop(postid)
 	if postid in get['connected']:
-		del get['connected'][postid]
+		get['connected'].pop(postid)
 	if postid in get['refer']:
-		del get['refer'][postid]
+		get['refer'].pop(postid)
 	if postid in get['timestamp']:
-		del get['timestamp'][postid]
+		get['timestamp'].pop(postid)
 	if postid in get['pow']:
-		del get['pow'][postid]
+		get['pow'].pop(postid)
 	if postid in get['files']:
-		del get['files'][postid]
+		get['files'].pop(postid)
 	if postid in get['protected']:
-		del get['protected'][postid]
+		get['protected'].pop(postid)
+	if postid in get['received']:
+		get['received'].remove(postid)
 
 def hashesCount(POW):
 	POW = toInt(POW,0)
@@ -590,29 +592,40 @@ def POWBonus(postid,recursionValue=0):
 				else:
 					r = get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence
 	return r
-def cutOutdatedPosts():
+def cutOutdatedPosts(callback = 0 ):
 	log(":cutOutdatedPosts",2)
+	deleted = set()
+	need_update = set()
+
 	if maxPostsCount != 0:
 		if len(get['received']) > maxPostsCount:
 			post_rating = {}
 			to_delete = []
 			if postDeletingMode == "progressive":
 				for postid in get['received']:
-					if( postid in get['refer'] and not isReceived(get['refer'][postid]) ) or \
+					if( postid in get['refer']  and not isReceived(get['refer'][postid]) ) or \
 					not postid in get['refer']:
-						post_rating[postid] = toInt(get['timestamp'][postid],0)
-						post_rating[postid] += POWBonus(postid)
+						if postid in get['timestamp']:
+							post_rating[postid] = toInt(get['timestamp'][postid],0)
+							post_rating[postid] += POWBonus(postid)
 				sorted_post_rating = sorted(post_rating, key=post_rating.__getitem__,reverse=False)
 				deleted_counter = 0
 				delete_count = len(get['received']) - maxPostsCount
 				for postid in sorted_post_rating:
 					log("cutOutdatedPosts: "+postid+":",post_rating[postid],3)
+					if postid in get['connected']:
+						need_update = set(list(need_update)+ list(get['connected'][postid]))
+					if postid in get['refer']:
+						need_update.add( get['refer'][postid])
 					deletePost(postid)
+					deleted.add(postid)
 					log("Deleted: "+postid,3)
 					deleted_counter+=1
 					if deleted_counter >= delete_count:
 						break
-
+	if callback != 0 :
+		callback(need_update)
+	return deleted
 
 def initDB():
 	global get

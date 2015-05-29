@@ -55,7 +55,7 @@ class ThumbCreatorClass():
 	def __init__(self):
 		pass
 	def genThumbs(self,list_of=0):
-		print ":genThumbs"
+		log( ":genThumbs",2)
 		if list_of == 0:
 			for post in get['received']:
 				self.genPostThumbs(readPost(post))
@@ -75,9 +75,9 @@ class ThumbCreatorClass():
 						im.thumbnail(size)
 						im.save(webServerImageThumbDir+img_file.md5hash+".jpg", "JPEG",quality=webServerThumbnailQuality)
 					except IOError as e:
-						print "cannot create thumbnail for", post.id, e
+						log("cannot create thumbnail for"+ post.id+e,4)
 			else:
-				print "		Not an image file:",img_file.name
+				log("		Not an image file:"+img_file.name,4)
 class PageViewerClass():
 	def __init__(self):
 		to = "do"
@@ -326,14 +326,14 @@ class HTMLGeneratorClass():
 			try:
 				template = template.replace("%%"+replacement+"%%",replacements[replacement])
 			except BaseException as e:
-				print "		:fromTemplate:",e
+				log( "		:fromTemplate:"+e,5)
 		return template
 	def updatePostHTML(self,postid,reqLevel = 0):
 		if postid in get['received']:
 			writeFile(webServerPostsDir+postid,self.genPostHTML(postid),"w")
 			if postid in get['refer'] and reqLevel < 3:
 				self.updatePostHTML(get['refer'][postid],reqLevel+1)
-			print ":updatePostHTML updated ",postid
+			log( ":updatePostHTML updated "+postid,3)
 	def makePosts(self):
 		for post_file in get['received']:
 		#	if not fileExists(webServerPostsDir+post_file):
@@ -358,7 +358,7 @@ class HTMLGeneratorClass():
 			}
 			return self.fromTemplate("post",replacements)
 		else:
-			print "missed:"+ post_file
+			log( "missed:"+ post_file,5)
 			return ""
 	def newPostHTML(self,post):
 		header_replacements = {
@@ -498,11 +498,14 @@ class HTMLGeneratorClass():
 		else:
 			return ""
 	def getTreeCounter(self):		
-		postlist = []
+		postlist = set()
 		for postid in get['connected'].keys():
 			if isTree(postid):
 				if not postid in get['refer']:
-					postlist.append(postid)
+					postlist.add(postid)
+				else:
+					if not isReceived(get['refer'][postid]):
+						postlist.add(postid)
 		length = len(postlist)
 		if length:
 			return "<span class=\"counter\" id=\"allcounter\">"+str(length)+"</span>"
@@ -717,7 +720,6 @@ class myHandler(BaseHTTPRequestHandler):
 			subject = self.getParamFromForm(form,"subject")
 			text = self.getParamFromForm(form,"text")
 			refer = self.getParamFromForm(form,"refer")
-			print "R:",refer,len(refer)
 
 			posttime = toInt( self.getParamFromForm(form,"posttime"),0)
 			postpowshift = toInt( self.getParamFromForm(form,"postpowshift"),None)
@@ -749,6 +751,10 @@ class myHandler(BaseHTTPRequestHandler):
 				self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
 			else:
 				self.wfile.write(errMessage)
+def deletingActions(need_update):
+	for postid in need_update:
+		log("	deleting action: updated"+postid,3)
+		HTMLGenerator.updatePostHTML(postid)
 def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowshift=None):
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
@@ -764,7 +770,7 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 		fo.name = fileentry['name']
 		fo.md5hash = md5source( fileentry['source'] )
 		fo.source = fileentry['source']
-		print fo.md5hash
+#		print fo.md5hash
 	languages_list = string2list(unicode(languages))
 	for tag in tags:
 		if valid.tag(unicode(tag.strip())):
@@ -800,6 +806,7 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 		add2DB(post.id)
 		HTMLGenerator.updatePostHTML(post.id)
 		ThumbCreator.genPostThumbs(post.id)
+		cutOutdatedPosts(deletingActions)
 		return HTMLGenerator.newPostHTML(post)
 	else:
 		return "Post is too large, max post size = "+str(maxPostSize)
@@ -824,13 +831,13 @@ try:
 	#Create a web server and define the handler to manage the
 	#incoming request
 	server = HTTPServer(('', webServerPort), myHandler)
-	print '[Webserver started succesfully!]'
-	print '[Open http://127.0.0.1:'+str(webServerPort)+'/ in your browser to explore the local copy of py2p board]'
-	print '[Posts avaliable: '+str(len(get['received']))+']'
-	print '[Public servers : '+str(len(get['servers'].list))+']'
+	log( '[Webserver started succesfully!]')
+	log('[Open http://127.0.0.1:'+str(webServerPort)+'/ in your browser to explore the local copy of py2p board]')
+	log('[Posts avaliable: '+str(len(get['received']))+']')
+	log('[Public servers : '+str(len(get['servers'].list))+']')
 	#Wait forever for incoming htto requests
 	server.serve_forever()
 
 except KeyboardInterrupt:
-	print '^C received, shutting down the web server'
+	log( '^C received, shutting down the web server')
 	server.socket.close()
