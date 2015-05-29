@@ -373,10 +373,17 @@ def checkTags(posttags):
 		if tag in bannedTags:
 			return False
 	return True
-def checkText(posttext):
+def checkText(post):
 	for banned in bannedWords:
-		if posttext.find(banned) != -1:
-			return False
+		if hasattr(post,"text"):
+			if post.text.find(banned) != -1:
+				return False
+		if hasattr(post,"name"):
+			if post.name.find(banned) != -1:
+				return False
+		if hasattr(post, "subject"):
+			if post.subject.find(banned) != -1:
+				return False
 	return True
 def checkFiles(postfiles):
 	for file_entry in postfiles:

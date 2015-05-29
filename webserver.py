@@ -687,9 +687,9 @@ class myHandler(BaseHTTPRequestHandler):
 def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowshift=None):
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
-	post.name = unicode(name.strip())
-	post.subject = unicode(subject.strip())
-	post.text = unicode(text.strip())
+	post.name = unicode(name)
+	post.subject = unicode(subject)
+	post.text = unicode(text)
 	if posttime == 0:
 		post.time = str(current_time)
 	else:
@@ -703,12 +703,12 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 	languages_list = string2list(unicode(languages))
 	for tag in tags:
 		if valid.tag(unicode(tag.strip())):
-			to = post.tags.append(valid.tag(unicode(tag.strip())))
+			to = post.tags.append(valid.tag(unicode(tag)))
 	for lang in languages_list:
 		if valid.lang(lang):
 			lo = post.languages.append(lang)
-	if isReceived(refer.strip()): 	
-		post.refer = refer.strip()
+	if isReceived(refer): 	
+		post.refer = refer
 	post_content = stringifyPost(post)
 	if not postpowshift==None:
 		pow_shift = int(postpowshift)
