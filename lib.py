@@ -585,7 +585,8 @@ def POWBonus(postid,recursionValue=0):
 		if postid in get['timestamp']:
 			if postid in get['pow']:
 				if postid in get['connected']:
-					r += get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence + POWBonus(get['connected'][postid], recursionValue +1)
+					for connected in get['connected'][postid]:
+						r += get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence + POWBonus(connected, recursionValue +1)
 				else:
 					r = get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence
 	return r
@@ -607,6 +608,7 @@ def cutOutdatedPosts():
 				for postid in sorted_post_rating:
 					log("cutOutdatedPosts: "+postid+":",post_rating[postid],3)
 					deletePost(postid)
+					log("Deleted: "+postid,3)
 					deleted_counter+=1
 					if deleted_counter >= delete_count:
 						break

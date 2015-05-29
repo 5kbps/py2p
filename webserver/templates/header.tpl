@@ -13,10 +13,12 @@
 	</head>
 	<body>
 		<div class="headercontent">
-			<a class="link" href="/all">[all]</a>
-			<a class="link" href="/threads">[threads]</a>
-			<a class="link" href="/trees">[trees]</a>
-			<a class="link" href="javascript:toggleBoardManage();">[manage]</a>
+			<div class="navlist">
+				<a class="link navitem" href="/all">All %%all_counter%%</a>
+				<a class="link navitem" href="/threads">Threads %%thread_counter%%</a>
+				<a class="link navitem" href="/trees">Trees %%tree_counter%%</a>
+				<a class="link navitem" href="javascript:toggleBoardManage();">Manage</a>
+			</div>
 		</div>
 		<form method="POST" action="/manage" id="manageboard" class="manageboard admin" style="display:none;">
 			<input id="manageboard_login" name="username" placeholder="Username"><br>
@@ -27,5 +29,6 @@
 				</div>
 			</div>
 			<input type="hidden" id="manageboard_todelete" name="manageboard_todelete" autocomplete="off">
-			<input type="submit">Submit</input>
+			<input type="submit">
 		</form>
+		<br>

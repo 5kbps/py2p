@@ -317,6 +317,11 @@ class HTMLGeneratorClass():
 			else:
 				replacements['replyto'] = ''
 				replacements['postingmode'] = "New post"
+		if templateName == "header":
+			replacements['all_counter'] = self.getAllCounter()
+			replacements['thread_counter'] = self.getThreadCounter()
+			replacements['tree_counter'] = self.getTreeCounter()
+
 		for replacement in replacements:
 			try:
 				template = template.replace("%%"+replacement+"%%",replacements[replacement])
@@ -482,6 +487,28 @@ class HTMLGeneratorClass():
 				return ""
 		else:
 			return ""
+	def getAllCounter(self):
+		if len(get['received']):
+			return "<span class=\"counter\" id=\"allcounter\">"+str(len(get['received']))+"</span>"
+		else:
+			return ""
+	def getThreadCounter(self):	
+		if len( get['connected'].keys()):
+			return "<span class=\"counter\" id=\"allcounter\">"+str(len( get['connected'].keys()))+"</span>"
+		else:
+			return ""
+	def getTreeCounter(self):		
+		postlist = []
+		for postid in get['connected'].keys():
+			if isTree(postid):
+				if not postid in get['refer']:
+					postlist.append(postid)
+		length = len(postlist)
+		if length:
+			return "<span class=\"counter\" id=\"allcounter\">"+str(length)+"</span>"
+		else:
+			return ""
+
 	def getPOWValue(self,post):
 		global get
 		if post.id in get['pow']:

@@ -10,6 +10,29 @@ a{
 	text-decoration: none;
 	color:#33F;
 }
+.navlist{
+	background-color: white;
+	position: fixed;
+	top: 0;
+	left: 0;	
+	right: 0;
+	border-bottom: 1px solid rgba(0,0,255,0.2);
+	overflow: hidden;
+}
+.navitem{
+	margin: 10px;
+	color: grey;
+	font-size: 15px;
+}
+.navitem:hover{
+	
+}
+.counter{
+	background-color: #4D3;
+	padding: 10px;
+	color: white;
+	font-weight: bold;
+}
 .post{
 	border-radius: 14px;
 	overflow: hidden;

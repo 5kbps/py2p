@@ -4,7 +4,7 @@ var powThreadsCount = 2
 var powWorkers = []
 var manageBoard = false
 var popupEffectScroll = scrollY
-var popupEffectResetValue = 0.08
+var popupEffectResetValue = 0.1
 function _(text){
 	return text
 }
