@@ -302,7 +302,7 @@ class HTMLGeneratorClass():
 		for tag in webServerAdditionalTags:
 			self.additionalTagsHTML+="<a target=\"_blank\" href=\"/tag/"+unicode(tag.strip())+"\" class=\"additionaltag posttag tag\">#"+unicode(tag.strip())+"</a>"
 		for i in range(1,webServerPostingMaxFileCount+1):
-			self.fileSelectListHTML +=" 					<input id=\"fileselect_"+str(i)+"\"  autocomplete=\"off\"  type=\"file\" onchange=\"handleSelect(this,event);\">"
+			self.fileSelectListHTML +=" 					<input id=\"fileselect_"+str(i)+"\"  autocomplete=\"off\"  type=\"file\" onchange=\"handleSelect(this,event);\"><br>"
 	def fromTemplate(self,templateName,replacements={}):
 		template = readFile(webServerTemplatestDir+templateName+".tpl","r")
 		if templateName == "form":
@@ -324,10 +324,11 @@ class HTMLGeneratorClass():
 				print "		:fromTemplate:",e
 		return template
 	def updatePostHTML(self,postid,reqLevel = 0):
-		writeFile(webServerPostsDir+postid,self.genPostHTML(postid),"w")
-		if postid in get['refer'] and reqLevel < 3:
-			self.updatePostHTML(get['refer'][postid],reqLevel+1)
-		print ":updatePostHTML updated ",postid
+		if postid in get['received']:
+			writeFile(webServerPostsDir+postid,self.genPostHTML(postid),"w")
+			if postid in get['refer'] and reqLevel < 3:
+				self.updatePostHTML(get['refer'][postid],reqLevel+1)
+			print ":updatePostHTML updated ",postid
 	def makePosts(self):
 		for post_file in get['received']:
 		#	if not fileExists(webServerPostsDir+post_file):
@@ -444,7 +445,7 @@ class HTMLGeneratorClass():
 			if r >= 1000:
 				rh = "m3"
 			output = "<span class=\"replycounter "+rh+"\">"
-			output += "<a onmouseenter=\"showReplies(this);\" class=\"small_reply_counter\" href=\"/thread/"+post.id+"\"><input type=\"hidden\" class=\"post_replies_list\" autocomplete=\"off\" value=\""+self.getRepliesListHTML(post.id)+"\"> <span class=\"replies_s\">Replies: </span><span class=\"rc\">"+str(r)+"</span></a></span>"
+			output += "<a class=\"small_reply_counter\" onmouseenter=\"showReplies(this);\"  href=\"/thread/"+post.id+"\"><input type=\"hidden\" class=\"post_replies_list\" autocomplete=\"off\" value=\""+self.getRepliesListHTML(post.id)+"\"> <span class=\"replies_s\">Replies: </span><span class=\"rc\">"+str(r)+"</span></a></span>"
 			return output
 		else:
 			return ""
@@ -630,14 +631,31 @@ class myHandler(BaseHTTPRequestHandler):
 			pass
 
 	def do_POST(self):
-		if self.path=="/send":
-			# creating new post
-			form = cgi.FieldStorage(
-				fp=self.rfile,
-				headers=self.headers,
-				environ={'REQUEST_METHOD':'POST',
-				'CONTENT_TYPE':self.headers['Content-Type'],
-			})
+		# creating new post
+		form = cgi.FieldStorage(
+			fp=self.rfile,
+			headers=self.headers,
+			environ={'REQUEST_METHOD':'POST',
+			'CONTENT_TYPE':self.headers['Content-Type'],
+		})
+		path_list = removeEmptyItems( urllib.unquote(self.path).decode('utf8').split("/"))
+		path_length = len(path_list)
+		if path_list[0]=="manage":
+			proceed = True	
+			errMessage = ''
+			name = self.getParamFromForm(form,"username")
+			password = self.getParamFromForm(form,"password")
+			to_delete = self.getParamFromForm(form,"manageboard_todelete")
+			to_delete = removeEmptyItems( to_delete.split(","))
+			if name in get['admins']:
+				if md5source( password )==get['admins'][name]['passwordmd5']:
+					for item in to_delete:
+						deletePost(item)
+				else:
+					errMessage += "Password or username is not correct"
+			else:
+				errMessage += "Password or username is not correct"
+		if path_list[0]=="send":
 
 			'''
 			self.wfile.write('Client: %s\n' % str(self.client_address))
@@ -647,43 +665,42 @@ class myHandler(BaseHTTPRequestHandler):
 			'''
 			proceed = True
 			errMessage = ''
-			if proceed:
-				name = self.getParamFromForm(form,"name")
-				subject = self.getParamFromForm(form,"subject")
-				text = self.getParamFromForm(form,"text")
-				refer = self.getParamFromForm(form,"refer")
-				print "R:",refer,len(refer)
+			name = self.getParamFromForm(form,"name")
+			subject = self.getParamFromForm(form,"subject")
+			text = self.getParamFromForm(form,"text")
+			refer = self.getParamFromForm(form,"refer")
+			print "R:",refer,len(refer)
 
-				posttime = toInt( self.getParamFromForm(form,"posttime"),0)
-				postpowshift = toInt( self.getParamFromForm(form,"postpowshift"),None)
-				files = []
-				for i in range(1,webServerPostingMaxFileCount+1):
-					filename = self.getParamFromForm(form,"filename_"+str(i))
-					filesource = valid.base64URL( self.getParamFromForm(form,"source_"+str(i)))
-					filesize = len(filesource)
-					if filename and filesource:
-						if filesize <= webServerPostingMaxFileSize:
-							files.append({
-							"name": filename,
-							"source":filesource
-							})
-						else:
-							proceed = False
-							errMessage += "file "+filename+" is too big ["+str(filesize)+"] limit: "+str(webServerPostingMaxFileSize)+"<br>"
+			posttime = toInt( self.getParamFromForm(form,"posttime"),0)
+			postpowshift = toInt( self.getParamFromForm(form,"postpowshift"),None)
+			files = []
+			for i in range(1,webServerPostingMaxFileCount+1):
+				filename = self.getParamFromForm(form,"filename_"+str(i))
+				filesource = valid.base64URL( self.getParamFromForm(form,"source_"+str(i)))
+				filesize = len(filesource)
+				if filename and filesource:
+					if filesize <= webServerPostingMaxFileSize:
+						files.append({
+						"name": filename,
+						"source":filesource
+						})
 					else:
-						pass
+						proceed = False
+						errMessage += "file "+filename+" is too big ["+str(filesize)+"] limit: "+str(webServerPostingMaxFileSize)+"<br>"
+				else:
+					pass
 #						proceed = False
 #						errMessage += "Filename is empty"
-				tags = webServerAdditionalTags+removeEmptyItems( self.getParamFromForm(form,"tags").split("#") )
-				languages = webServerAdditionalLanguages
-				self.send_response(200)
-				self.send_header('Content-type','text/html')
-	#				self.send_header('Location',"http://"+host+'/post/'+id)
-				self.end_headers()
-				if proceed:
-					self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
-				else:
-					self.wfile.write(errMessage)
+			tags = webServerAdditionalTags+removeEmptyItems( self.getParamFromForm(form,"tags").split("#") )
+			languages = webServerAdditionalLanguages
+			self.send_response(200)
+			self.send_header('Content-type','text/html')
+#				self.send_header('Location',"http://"+host+'/post/'+id)
+			self.end_headers()
+			if proceed:
+				self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
+			else:
+				self.wfile.write(errMessage)
 def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowshift=None):
 	current_time = int(time.time()*10000)
 	post = protocol_pb2.Post()
@@ -741,6 +758,7 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 
 global get
 initDB()
+loadAdministration()
 BBCodeParser = bbcode.Parser()
 BBCodeParser.add_simple_formatter('hr', '<hr>')
 BBCodeParser.add_simple_formatter('sub', '<sub>%(value)s</sub>')

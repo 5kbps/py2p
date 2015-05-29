@@ -1,4 +1,4 @@
-<div class="post" id="post_%%id%%">
+<div class="post" id="post_%%id%%" onmouseover="postMouseOver(this);">
 	<div class="postinfo">
 		<input type="hidden" value="%%replieslist">
 		<span class="username">%%name%%</span>

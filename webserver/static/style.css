@@ -230,3 +230,27 @@ hr{
 .postpreview > .post > .postinfo > .postuplink, .postpreview > .post > .postinfo > .posttreelink {
 	display: none;
 }
+
+.manageboard{
+	position: fixed;
+	bottom: 0px;
+	right: 0px;
+	background: white;
+}
+#manageboard_login{
+	width: 200px;
+	margin: 5px 10px 5px 10px;
+}
+#manageboard_password{
+	width: 200px;
+	margin: 5px 10px 5px 10px;
+}
+#manageboard_todelete_div{
+	height: 180px;
+	margin: 5px 10px 5px 10px;
+	overflow-y:auto;
+}
+.todelete_item{
+	color: #00F;
+	cursor: pointer;
+}

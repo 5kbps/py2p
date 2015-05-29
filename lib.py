@@ -393,6 +393,20 @@ def checkFiles(postfiles):
 			if md5source( file_entry.source ) != file_entry.md5hash:
 				return False
 	return True
+
+def loadAdministration():
+	if fileExists(administrationFile):
+		admins = protocol_pb2.BoardAdministration()
+		admins.ParseFromString(readFile(administrationFile))
+		log("Administration: ")
+		for admin in admins.list:
+			log("	- "+admin.name)
+			get['admins'][admin.name] = {
+				"passwordmd5": admin.passwordmd5,
+				"modsigning": admin.modsigning,
+				"modsign": admin.modsign,
+				"deleting": admin.deleting
+			}
 def loadProtectedPosts():
 	global get
 	#log("loadProtectedPosts",2)
@@ -620,6 +634,7 @@ def initDB():
 	get['received'] = set()
 	get['deleted'] = set()
 
+	get['admins'] = {}
 	updateDB()
 	loadServers()
 #	loadServers()

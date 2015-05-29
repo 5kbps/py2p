@@ -31,6 +31,7 @@ webServerTemplatestDir = "webserver/templates/"
 serversListFile = "meta/servers"
 defaultServersListFile = "meta/servers-default"
 protectedPostsFile = "meta/protected-posts"
+administrationFile = "meta/administration"
 
 #[POSTS]
 maxPostsCount = 10 # todo
@@ -63,7 +64,6 @@ newPostDefaultLanguages = "ru,en"
 #[MODERATION]
 bannedTags = ['somethingillegal','thatshouldnot','besaved']
 bannedWords= ['blacklistedword','onemoreblacklistedword']
-bannedFiles= ['somefilehash']
 #[CLIENT SETTINGS]
 clientRequestsInterval = 2			# Интервал между запросами
 clientMaxIterationCount = 10 			# Максимальное количество сеансов обмена постами с сервером в каждом цикле

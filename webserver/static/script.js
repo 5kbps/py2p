@@ -2,19 +2,38 @@ var fileSelectCounter = 1
 var powWorkersActive = false
 var powThreadsCount = 2
 var powWorkers = []
+var manageBoard = false
+var popupEffectScroll = scrollY
+var popupEffectResetValue = 0.08
+function _(text){
+	return text
+}
+//some sugar
+
+doc = document
+bd = doc.body
+hd = doc.head
+
 function hasValue(arr,value) {
 	return (arr.indexOf(value) != -1);
 }
 
 function id(eid){
-	return document.getElementById(eid);
+	return doc.getElementById(eid);
+}
+
+function createElement(tagName){
+	return doc.createElement(tagName)
+}
+function addEvent(elem, action,func){
+	elem.addEventListener(action,func)
 }
 function vid(eid){
 	r = id(eid).value
 	return r
 }
 function byc(className){
-	return document.getElementsByClassName(className)
+	return doc.getElementsByClassName(className)
 }
 //math
 function hex2base36(hexint){
@@ -60,7 +79,7 @@ function appendTag(e) {
 		list = removeEmptyItems( id("tags").value.split("#"))
 		if(id("taginput").value.trim() !="" && !inList(id("taginput").value.trim(),list) ){
 			id("tags").value += "#"+id("taginput").value.trim()+"#"
-			newtag = document.createElement("a")
+			newtag = createElement("a")
 			newtag.onclick=function(){
 				removeTag(this)
 			}
@@ -225,17 +244,17 @@ function handleSelect(elem,evt){
 			s = e.target.result
 			if(id('fileentry_'+i) == null){
 				
-				fileentry = document.createElement('div')
+				fileentry = createElement('div')
 				fileentry.id = 'fileentry_'+i
 				id('filelist').appendChild(fileentry)
 
-				filesource = document.createElement('input')
+				filesource = createElement('input')
 				filesource.id = 'filesource_'+i
 				filesource.name = 'source_'+i
 				filesource.type = 'hidden'
 				fileentry.appendChild(filesource)
 
-				filename = document.createElement('input')
+				filename = createElement('input')
 				filename.id = 'filename_'+i
 				filename.name = 'filename_'+i
 				filename.type = 'hidden'
@@ -249,7 +268,7 @@ function handleSelect(elem,evt){
 			filesource.value = s
 			if( hasValue(supported_image_fromats, ext) ){
 				if(id('filethumb_'+i) == null){
-					filethumb = document.createElement('img')
+					filethumb = createElement('img')
 					filethumb.id= 'filethumb_'+i
 					filethumb.title = n
 					filethumb.className = 'filethumb'
@@ -279,7 +298,7 @@ function handleSelect(elem,evt){
 		   hashval = spark.end()
 		   console.info("computed hash", hashval,i); // compute hash
 			fileentry = id('fileentry_'+i)
-			filehash = document.createElement('input')
+			filehash = createElement('input')
 			filehash.name = 'filehash_'+i
 			filehash.id = 'filehash_'+i
 			filehash.type = 'hidden'
@@ -323,8 +342,9 @@ function cutPostId(postid,cutAt){
 function showReplies(elem){
 	repliesList = removeEmptyItems(elem.getElementsByClassName("post_replies_list")[0].value.split(","))
 	if(repliesList.length){
+		popupEffectReset()
 		var position = getPosition(elem);
-		var p = document.createElement('div');
+		var p = createElement('div');
 		p.style['top'] = (position.y) -scrollY +25+ 'px';
 		p.style['left'] = (position.x) - scrollX +8+'px';
 		p.className = 'popup menu';
@@ -334,13 +354,13 @@ function showReplies(elem){
 		}
 		for(r in repliesList){
 			reply = repliesList[r]
-			pe = document.createElement('div')
+			pe = createElement('div')
 			pe.innerHTML = cutPostId(reply,15)
 			pe.id = "reply_"+reply
 			pe.className = "item replyitem"
 			pe.onmouseover = function(){
 				if(this.getElementsByClassName("postpreview").length==0)
-				addPostPreview(this, this.id.split("_")[1])
+				addPostPreview(this,this.id.split("_")[1])
 			}
 			pe.onmouseleave = function(){
 				removePostPreview(this)
@@ -349,20 +369,22 @@ function showReplies(elem){
 		}
 	}
 }
-function addPostPreview(elem,postid){
+function addPostPreview(elem,postid,xshift,yshift){
+	xshift = xshift?xshift:3
+	yshift = yshift?yshift:0
 	var reqUrl = '/rawpost/'+postid
 	xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", reqUrl, true );
 	xmlHttp.send( null );
     xmlHttp.onreadystatechange = function(){
 		if (this.readyState == 4 && this.status == 200) {
+			popupEffectReset()
 			var position = getPosition(elem);
-			postdiv = document.createElement("div")
+			postdiv = createElement("div")
 			postdiv.className = "postpreview"
 			postdiv.innerHTML = this.responseText
-			postdiv.style['position'] = "absolute"
-			postdiv.style['right'] = position.w+3+scrollX+"px"
-			postdiv.style['top'] = "0px"
+			postdiv.style['right'] = position.w+xshift+scrollX+"px"
+			postdiv.style['top'] = yshift+"px"
 			postdiv.onmouseover = function(){
 				cancelBubble = true
 				return false
@@ -371,7 +393,119 @@ function addPostPreview(elem,postid){
 		}
 	}
 }
+
 function removePostPreview(elem){
 	if(elem.getElementsByClassName("postpreview").length)
 		elem.getElementsByClassName("postpreview")[0].remove()
 }
+
+function removePostOptions(elem){
+	if(id("delete_"+elem.id.split("_")[1]))
+		id("delete_"+elem.id.split("_")[1]).remove()
+}
+function postMouseOver(elem){
+	if(manageBoard && elem.parentNode.className.indexOf("postpreview")==-1){
+		var postid = elem.id.split("_")[1]
+		var position = getPosition(elem);
+		if(!id("delete_"+postid)){
+			popupEffectReset()
+
+			var p=createElement("div")
+			p.className = "popup menu postoption"
+			p.id="delete_"+postid
+			p.style['top'] = (position.y) -scrollY +25+ 'px';
+			p.style['left'] = (position.x) - scrollX +8+'px';
+			p.textContent = _("delete")
+			elem.appendChild(p);
+			elem.onmouseleave = function(){
+				removePostOptions(elem)
+			}
+			p.onclick = function(){
+				addToDeletingList(this)
+			}
+		}
+	}
+}
+//board manage
+function toggleBoardManage(){
+	if(!manageBoard){
+		manageBoard = true
+		id("manageboard").style['display'] = "block"
+	}else{
+		manageBoard = false
+		id("manageboard").style['display'] = "none"
+	}
+}
+function isInDeletingList(postid){
+	return (vid("manageboard_todelete").indexOf(postid)!=-1)
+}
+function addToDeletingList(elem){
+	if(manageBoard){
+		postid = elem.id.split("_")[1]
+		if(!isInDeletingList(postid)){
+			id("manageboard_todelete").value+=postid+","
+			var p = createElement("div")
+			p.className = "todelete_item"
+			p.id="todelete_"+postid
+			p.textContent = postid
+			p.onmouseover = function(){
+				if(this.getElementsByClassName("postpreview").length==0)
+				addPostPreview(this,postid,10,80)
+			}
+			p.onmouseleave = function(){
+				removePostPreview(this)
+			}
+			p.onclick = function(){
+				removeFromDeletingList(this)
+			}
+
+			id("manageboard_todelete_div").appendChild(p)
+			id("manageboard_todelete_div").style['display'] = 'block'
+		}
+	}
+}
+function removeFromDeletingList(elem){
+	if(manageBoard){
+		postid = elem.id.split("_")[1]
+		if(isInDeletingList(postid)){
+			id("manageboard_todelete").value = vid("manageboard_todelete").replace(postid+",","")
+		}
+		elem.remove()
+		if(vid("manageboard_todelete")==""){
+			id('manageboard_todelete_div').style['display'] = 'none';
+		}
+	}
+}
+function removeAllPopups(){
+	r = []
+	for(i in document.getElementsByClassName("popup")){
+		r.push(document.getElementsByClassName("popup")[i]) 
+	}
+	for(i in document.getElementsByClassName("postpreview")){
+		r.push(document.getElementsByClassName("postpreview")[i]) 
+	}
+	for(i in r){
+		if(typeof r[i].remove == "function")
+			r[i].remove()
+	}
+}
+function popupEffectReset(){
+	popupEffectScroll = scrollY
+	id("popup_effect").innerHTML = ".popup,.postpreview { opacity: 1; }"
+
+}
+function popupEffect(){
+	k = 10/Math.abs(popupEffectScroll - scrollY)
+	if(k < popupEffectResetValue){
+		removeAllPopups()
+		popupEffectReset()
+	}
+	id("popup_effect").innerHTML = ".popup,.postpreview { opacity: "+k+"; }"
+}
+function addGUIEvents(){
+	addEvent(window,"scroll",function(){
+		//removeAllPopups()
+		popupEffect()
+	})	
+}
+window.onload = addGUIEvents

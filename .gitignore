@@ -8,5 +8,6 @@ webserver/posts/*
 webserver/thumb/*
 webserver/file/*
 meta/servers
+meta/administration
 *.txt
 *.ignore.*

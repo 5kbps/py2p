@@ -15,6 +15,16 @@ message Post{
 	repeated string tags = 9;
 	repeated string languages = 10;
 }
+message BoardAdministration{
+	message Administrator{
+		required string name = 1;
+		required string passwordmd5 = 2;
+		required bool deleting = 3;
+		required bool modsigning = 4;
+		required string modsign = 5;
+	}
+	repeated Administrator list = 1;
+}
 message ProtectedPosts{
 	message ProtectedPost{
 		required string id = 1;

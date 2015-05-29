@@ -13,7 +13,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='protocol.proto',
   package='',
-  serialized_pb='\n\x0eprotocol.proto\"\xdc\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\t\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\"\xa0\x01\n\x0eProtectedPosts\x12+\n\x04list\x18\x01 \x03(\x0b\x32\x1d.ProtectedPosts.ProtectedPost\x1a\x61\n\rProtectedPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x11\n\ttimebonus\x18\x02 \x01(\x03\x12\x0f\n\x07modhtml\x18\x03 \x01(\t\x12\x0f\n\x07modname\x18\x04 \x01(\t\x12\x0f\n\x07sticked\x18\x05 \x01(\x08\"g\n\x0bKeyExchange\x12\x14\n\x0c\x63lientPublic\x18\x01 \x01(\t\x12\x14\n\x0cserverPublic\x18\x02 \x01(\t\x12\x15\n\rclientSending\x18\x03 \x01(\t\x12\x15\n\rserverSending\x18\x04 \x01(\t\"\x86\x01\n\x0bServersList\x12&\n\x04list\x18\x01 \x03(\x0b\x32\x18.ServersList.ServerEntry\x1aO\n\x0bServerEntry\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x10\n\x08rejected\x18\x02 \x01(\x03\x12\x10\n\x08received\x18\x03 \x01(\x03\x12\x0b\n\x03new\x18\x04 \x01(\x08\"\xc2\x04\n\x04\x44\x61ta\x12\x0f\n\x07sending\x18\x01 \x03(\x0c\x12%\n\nrequesting\x18\x02 \x03(\x0b\x32\x11.Data.PostRequest\x12\x1e\n\x05known\x18\x03 \x03(\x0b\x32\x0f.Data.KnownPost\x12\x1c\n\x04meta\x18\x04 \x01(\x0b\x32\x0e.Data.MetaData\x1a\xe1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\x03\x12\x1e\n\x05\x66iles\x18\x07 \x03(\x0b\x32\x0f.Data.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\x1aS\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0b\n\x03pow\x18\x03 \x01(\x03\x12\x0c\n\x04tags\x18\x04 \x03(\t\x12\x11\n\tlanguages\x18\x05 \x03(\t\x1aU\n\x08MetaData\x12\x13\n\x0bmaxPostSize\x18\x01 \x01(\x03\x12\x12\n\nrequestPOW\x18\x02 \x01(\x05\x12\x0f\n\x07version\x18\x03 \x01(\x05\x12\x0f\n\x07servers\x18\x04 \x03(\t\x1a\x34\n\x0bPostRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04time\x18\x03 \x01(\x03')
+  serialized_pb='\n\x0eprotocol.proto\"\xdc\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\t\x12\x19\n\x05\x66iles\x18\x07 \x03(\x0b\x32\n.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\"\xb2\x01\n\x13\x42oardAdministration\x12\x30\n\x04list\x18\x01 \x03(\x0b\x32\".BoardAdministration.Administrator\x1ai\n\rAdministrator\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\x13\n\x0bpasswordmd5\x18\x02 \x02(\t\x12\x10\n\x08\x64\x65leting\x18\x03 \x02(\x08\x12\x12\n\nmodsigning\x18\x04 \x02(\x08\x12\x0f\n\x07modsign\x18\x05 \x02(\t\"\xa0\x01\n\x0eProtectedPosts\x12+\n\x04list\x18\x01 \x03(\x0b\x32\x1d.ProtectedPosts.ProtectedPost\x1a\x61\n\rProtectedPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x11\n\ttimebonus\x18\x02 \x01(\x03\x12\x0f\n\x07modhtml\x18\x03 \x01(\t\x12\x0f\n\x07modname\x18\x04 \x01(\t\x12\x0f\n\x07sticked\x18\x05 \x01(\x08\"g\n\x0bKeyExchange\x12\x14\n\x0c\x63lientPublic\x18\x01 \x01(\t\x12\x14\n\x0cserverPublic\x18\x02 \x01(\t\x12\x15\n\rclientSending\x18\x03 \x01(\t\x12\x15\n\rserverSending\x18\x04 \x01(\t\"\x86\x01\n\x0bServersList\x12&\n\x04list\x18\x01 \x03(\x0b\x32\x18.ServersList.ServerEntry\x1aO\n\x0bServerEntry\x12\x0f\n\x07\x61\x64\x64ress\x18\x01 \x01(\t\x12\x10\n\x08rejected\x18\x02 \x01(\x03\x12\x10\n\x08received\x18\x03 \x01(\x03\x12\x0b\n\x03new\x18\x04 \x01(\x08\"\xc2\x04\n\x04\x44\x61ta\x12\x0f\n\x07sending\x18\x01 \x03(\x0c\x12%\n\nrequesting\x18\x02 \x03(\x0b\x32\x11.Data.PostRequest\x12\x1e\n\x05known\x18\x03 \x03(\x0b\x32\x0f.Data.KnownPost\x12\x1c\n\x04meta\x18\x04 \x01(\x0b\x32\x0e.Data.MetaData\x1a\xe1\x01\n\x04Post\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04name\x18\x03 \x01(\t\x12\x0f\n\x07subject\x18\x04 \x01(\t\x12\x0c\n\x04text\x18\x05 \x01(\t\x12\x0c\n\x04time\x18\x06 \x01(\x03\x12\x1e\n\x05\x66iles\x18\x07 \x03(\x0b\x32\x0f.Data.Post.File\x12\r\n\x05refer\x18\x08 \x01(\t\x12\x0c\n\x04tags\x18\t \x03(\t\x12\x11\n\tlanguages\x18\n \x03(\t\x1a\x35\n\x04\x46ile\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x0e\n\x06source\x18\x02 \x01(\x0c\x12\x0f\n\x07md5hash\x18\x03 \x01(\t\x1aS\n\tKnownPost\x12\n\n\x02id\x18\x01 \x02(\t\x12\x0c\n\x04size\x18\x02 \x01(\x03\x12\x0b\n\x03pow\x18\x03 \x01(\x03\x12\x0c\n\x04tags\x18\x04 \x03(\t\x12\x11\n\tlanguages\x18\x05 \x03(\t\x1aU\n\x08MetaData\x12\x13\n\x0bmaxPostSize\x18\x01 \x01(\x03\x12\x12\n\nrequestPOW\x18\x02 \x01(\x05\x12\x0f\n\x07version\x18\x03 \x01(\x05\x12\x0f\n\x07servers\x18\x04 \x03(\t\x1a\x34\n\x0bPostRequest\x12\n\n\x02id\x18\x01 \x01(\t\x12\x0b\n\x03pow\x18\x02 \x01(\x03\x12\x0c\n\x04time\x18\x03 \x01(\x03')
 
 
 
@@ -150,6 +150,89 @@ _POST = _descriptor.Descriptor(
 )
 
 
+_BOARDADMINISTRATION_ADMINISTRATOR = _descriptor.Descriptor(
+  name='Administrator',
+  full_name='BoardAdministration.Administrator',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='name', full_name='BoardAdministration.Administrator.name', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='passwordmd5', full_name='BoardAdministration.Administrator.passwordmd5', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='deleting', full_name='BoardAdministration.Administrator.deleting', index=2,
+      number=3, type=8, cpp_type=7, label=2,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='modsigning', full_name='BoardAdministration.Administrator.modsigning', index=3,
+      number=4, type=8, cpp_type=7, label=2,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='modsign', full_name='BoardAdministration.Administrator.modsign', index=4,
+      number=5, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=315,
+  serialized_end=420,
+)
+
+_BOARDADMINISTRATION = _descriptor.Descriptor(
+  name='BoardAdministration',
+  full_name='BoardAdministration',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='list', full_name='BoardAdministration.list', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[_BOARDADMINISTRATION_ADMINISTRATOR, ],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=242,
+  serialized_end=420,
+)
+
+
 _PROTECTEDPOSTS_PROTECTEDPOST = _descriptor.Descriptor(
   name='ProtectedPost',
   full_name='ProtectedPosts.ProtectedPost',
@@ -201,8 +284,8 @@ _PROTECTEDPOSTS_PROTECTEDPOST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=305,
-  serialized_end=402,
+  serialized_start=486,
+  serialized_end=583,
 )
 
 _PROTECTEDPOSTS = _descriptor.Descriptor(
@@ -228,8 +311,8 @@ _PROTECTEDPOSTS = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=242,
-  serialized_end=402,
+  serialized_start=423,
+  serialized_end=583,
 )
 
 
@@ -277,8 +360,8 @@ _KEYEXCHANGE = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=404,
-  serialized_end=507,
+  serialized_start=585,
+  serialized_end=688,
 )
 
 
@@ -326,8 +409,8 @@ _SERVERSLIST_SERVERENTRY = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=565,
-  serialized_end=644,
+  serialized_start=746,
+  serialized_end=825,
 )
 
 _SERVERSLIST = _descriptor.Descriptor(
@@ -353,8 +436,8 @@ _SERVERSLIST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=510,
-  serialized_end=644,
+  serialized_start=691,
+  serialized_end=825,
 )
 
 
@@ -485,8 +568,8 @@ _DATA_POST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=774,
-  serialized_end=999,
+  serialized_start=955,
+  serialized_end=1180,
 )
 
 _DATA_KNOWNPOST = _descriptor.Descriptor(
@@ -540,8 +623,8 @@ _DATA_KNOWNPOST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1001,
-  serialized_end=1084,
+  serialized_start=1182,
+  serialized_end=1265,
 )
 
 _DATA_METADATA = _descriptor.Descriptor(
@@ -588,8 +671,8 @@ _DATA_METADATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1086,
-  serialized_end=1171,
+  serialized_start=1267,
+  serialized_end=1352,
 )
 
 _DATA_POSTREQUEST = _descriptor.Descriptor(
@@ -629,8 +712,8 @@ _DATA_POSTREQUEST = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=1173,
-  serialized_end=1225,
+  serialized_start=1354,
+  serialized_end=1406,
 )
 
 _DATA = _descriptor.Descriptor(
@@ -677,12 +760,14 @@ _DATA = _descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=647,
-  serialized_end=1225,
+  serialized_start=828,
+  serialized_end=1406,
 )
 
 _POST_FILE.containing_type = _POST;
 _POST.fields_by_name['files'].message_type = _POST_FILE
+_BOARDADMINISTRATION_ADMINISTRATOR.containing_type = _BOARDADMINISTRATION;
+_BOARDADMINISTRATION.fields_by_name['list'].message_type = _BOARDADMINISTRATION_ADMINISTRATOR
 _PROTECTEDPOSTS_PROTECTEDPOST.containing_type = _PROTECTEDPOSTS;
 _PROTECTEDPOSTS.fields_by_name['list'].message_type = _PROTECTEDPOSTS_PROTECTEDPOST
 _SERVERSLIST_SERVERENTRY.containing_type = _SERVERSLIST;
@@ -697,6 +782,7 @@ _DATA.fields_by_name['requesting'].message_type = _DATA_POSTREQUEST
 _DATA.fields_by_name['known'].message_type = _DATA_KNOWNPOST
 _DATA.fields_by_name['meta'].message_type = _DATA_METADATA
 DESCRIPTOR.message_types_by_name['Post'] = _POST
+DESCRIPTOR.message_types_by_name['BoardAdministration'] = _BOARDADMINISTRATION
 DESCRIPTOR.message_types_by_name['ProtectedPosts'] = _PROTECTEDPOSTS
 DESCRIPTOR.message_types_by_name['KeyExchange'] = _KEYEXCHANGE
 DESCRIPTOR.message_types_by_name['ServersList'] = _SERVERSLIST
@@ -713,6 +799,18 @@ class Post(_message.Message):
   DESCRIPTOR = _POST
 
   # @@protoc_insertion_point(class_scope:Post)
+
+class BoardAdministration(_message.Message):
+  __metaclass__ = _reflection.GeneratedProtocolMessageType
+
+  class Administrator(_message.Message):
+    __metaclass__ = _reflection.GeneratedProtocolMessageType
+    DESCRIPTOR = _BOARDADMINISTRATION_ADMINISTRATOR
+
+    # @@protoc_insertion_point(class_scope:BoardAdministration.Administrator)
+  DESCRIPTOR = _BOARDADMINISTRATION
+
+  # @@protoc_insertion_point(class_scope:BoardAdministration)
 
 class ProtectedPosts(_message.Message):
   __metaclass__ = _reflection.GeneratedProtocolMessageType
