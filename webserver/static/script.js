@@ -10,10 +10,6 @@ function _(text){
 }
 //some sugar
 
-doc = document
-bd = doc.body
-hd = doc.head
-
 function hasValue(arr,value) {
 	return (arr.indexOf(value) != -1);
 }
@@ -400,8 +396,8 @@ function removePostPreview(elem){
 }
 
 function removePostOptions(elem){
-	if(id("delete_"+elem.id.split("_")[1]))
-		id("delete_"+elem.id.split("_")[1]).remove()
+	while(elem.getElementsByClassName('menu'))
+		elem.getElementsByClassName('menu')[0].remove()
 }
 function postMouseOver(elem){
 	if(manageBoard && elem.parentNode.className.indexOf("postpreview")==-1){
@@ -412,19 +408,42 @@ function postMouseOver(elem){
 
 			var p=createElement("div")
 			p.className = "popup menu postoption"
-			p.id="delete_"+postid
 			p.style['top'] = (position.y) -scrollY +25+ 'px';
 			p.style['left'] = (position.x) - scrollX +8+'px';
-			p.textContent = _("delete")
 			elem.appendChild(p);
+
+			pe = createElement('div')
+			pe.className = "item "
+			pe.id = p.id="delete_"+postid
+			pe.textContent = _("Delete")
+			p.appendChild(pe)
+			pe.onclick = function(){
+				addToDeletingList(this)
+			}
+			pe = createElement('div')
+			pe.className = "item postoption"
+			pe.id = p.id="modsign_"+postid
+			pe.textContent = _("Sign")
+			p.appendChild(pe)
+			pe.onclick = function(){
+				modSign(this)
+			}
+
+
 			elem.onmouseleave = function(){
 				removePostOptions(elem)
 			}
-			p.onclick = function(){
-				addToDeletingList(this)
-			}
 		}
 	}
+}
+
+function modSign(elem){
+	postid=elem.id.split("_")
+	form = createElement('form')
+	form.method="POST"
+	from.action="/manage"
+
+	passfield = createElement('input')
 }
 //board manage
 function toggleBoardManage(){
@@ -503,6 +522,9 @@ function popupEffect(){
 	id("popup_effect").innerHTML = ".popup,.postpreview { opacity: "+k+"; }"
 }
 function addGUIEvents(){
+	doc = document
+	bd = doc.body
+	hd = doc.head
 	addEvent(window,"scroll",function(){
 		//removeAllPopups()
 		popupEffect()

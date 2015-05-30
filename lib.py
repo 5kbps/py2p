@@ -539,6 +539,15 @@ def deletePost(postid):
 		os.remove(webServerPostsDir+postid)
 	purgePost(postid)
 
+def add2UpdateQueue(postid):
+	if type(postid)==set:
+		get['update'] = get['update'].union(postid)
+	else:
+		get['update'].add(postid)
+def updateQueue(callback):
+	for postid in get['update']:
+		callback(postid)
+	get['update'] = set()
 def purgePost(postid):
 	#removing tags 
 	if postid in get['tags']:
@@ -561,6 +570,14 @@ def purgePost(postid):
 	if postid in get['connected']:
 		get['connected'].pop(postid)
 	if postid in get['refer']:
+		add2UpdateQueue(get['refer'][postid])
+		if get['refer'][postid] in get['refer']:
+			add2UpdateQueue(get['refer'][get['refer'][postid]])
+		if get['refer'][postid] in get['connected']:
+			add2UpdateQueue(get['connected'][get['refer'][postid]])
+			get['connected'][get['refer'][postid]].remove(postid)
+			if not len(get['connected'][get['refer'][postid]]):
+				get['connected'].pop(get['refer'][postid])
 		get['refer'].pop(postid)
 	if postid in get['timestamp']:
 		get['timestamp'].pop(postid)
@@ -592,10 +609,9 @@ def POWBonus(postid,recursionValue=0):
 				else:
 					r = get['pow'][postid]*hashesCount(get['pow'][postid])*powInfluence
 	return r
-def cutOutdatedPosts(callback = 0 ):
+def cutOutdatedPosts():
 	log(":cutOutdatedPosts",2)
 	deleted = set()
-	need_update = set()
 
 	if maxPostsCount != 0:
 		if len(get['received']) > maxPostsCount:
@@ -614,18 +630,15 @@ def cutOutdatedPosts(callback = 0 ):
 				for postid in sorted_post_rating:
 					log("cutOutdatedPosts: "+postid+":",post_rating[postid],3)
 					if postid in get['connected']:
-						need_update = set(list(need_update)+ list(get['connected'][postid]))
+						add2UpdateQueue(get['connected'][postid])
 					if postid in get['refer']:
-						need_update.add( get['refer'][postid])
+						add2UpdateQueue( get['refer'][postid])
 					deletePost(postid)
 					deleted.add(postid)
 					log("Deleted: "+postid,3)
 					deleted_counter+=1
 					if deleted_counter >= delete_count:
 						break
-	if callback != 0 :
-		callback(need_update)
-	return deleted
 
 def initDB():
 	global get
@@ -654,7 +667,7 @@ def initDB():
 	#postmap
 	get['received'] = set()
 	get['deleted'] = set()
-
+	get['update'] = set() #
 	get['admins'] = {}
 	updateDB()
 	loadServers()

@@ -173,7 +173,7 @@ class PageViewerClass():
 		postlist = []
 		for postid in get['connected'].keys():
 			if isTree(postid):
-				if not postid in get['refer']:
+				if not postid in get['refer'] or not isReceived(get['refer'][postid]):
 					postlist.append(postid)
 		all_length = len(postlist)
 		postlist = cutLatestPosts( sortPostsByDate(postlist),webServerPostsOnPage,shift )
@@ -441,7 +441,7 @@ class HTMLGeneratorClass():
 		return output		
 	def getReplyCount(self,post):
 		global get
-		if post.id in get['connected']:
+		if post.id in get['connected'] and len(get['connected'][post.id])>0:
 			r = len(get['connected'][post.id])
 			rh = "m1"
 			if r >= 3:
@@ -623,6 +623,7 @@ class myHandler(BaseHTTPRequestHandler):
 			for new_post in new_posts:
 				HTMLGenerator.updatePostHTML(new_post)
 
+		updateQueue(HTMLGenerator.updatePostHTML)
 		if path_length == 0:
 			output = PageViewer.showAll()	
 
@@ -752,12 +753,6 @@ class myHandler(BaseHTTPRequestHandler):
 				self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
 			else:
 				self.wfile.write(errMessage)
-def deletingActions(need_update, recursionValue=0):
-	for postid in need_update:
-		log("	deleting action: updated"+postid,3)
-		HTMLGenerator.updatePostHTML(postid)
-		if postid in get['connected'] and recursionValue < 3:
-			deletingActions(get['connected'][postid],recursionValue+1)
 
 def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowshift=None):
 	current_time = int(time.time()*10000)
@@ -810,7 +805,7 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 		add2DB(post.id)
 		HTMLGenerator.updatePostHTML(post.id)
 		ThumbCreator.genPostThumbs(post.id)
-		cutOutdatedPosts(deletingActions)
+		cutOutdatedPosts()
 		return HTMLGenerator.newPostHTML(post)
 	else:
 		return "Post is too large, max post size = "+str(maxPostSize)
