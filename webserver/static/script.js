@@ -10,6 +10,10 @@ function _(text){
 }
 //some sugar
 
+String.prototype.replaceAll = function(search, replace){
+  return this.split(search).join(replace);
+}
+
 function hasValue(arr,value) {
 	return (arr.indexOf(value) != -1);
 }
@@ -111,7 +115,7 @@ function stringifyPost(timestamp){
 	referid	 = vid('refer_id')
 	postname = vid('post_name')
 	postsubj = vid('post_subject')
-	posttext = vid('post_text')
+	posttext = vid('post_text').replaceAll("\n","\r\n")
 	id('post_time').value = posttime
 	string  = referid+postname+postsubj+posttext+posttime
 	i = 1

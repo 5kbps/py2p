@@ -747,7 +747,6 @@ class myHandler(BaseHTTPRequestHandler):
 			languages = webServerAdditionalLanguages
 			self.send_response(200)
 			self.send_header('Content-type','text/html')
-#				self.send_header('Location',"http://"+host+'/post/'+id)
 			self.end_headers()
 			if proceed:
 				self.wfile.write(createPost(name,subject,text,refer,files,tags,languages,posttime,postpowshift))
@@ -759,7 +758,8 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 	post = protocol_pb2.Post()
 	post.name = unicode(name)
 	post.subject = unicode(subject)
-	post.text = unicode(text)
+	post.text = (text)
+	print "!!!",md5digest(post.text)
 	if posttime == 0:
 		post.time = str(current_time)
 	else:
