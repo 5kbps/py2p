@@ -75,7 +75,7 @@ class ThumbCreatorClass():
 						im.thumbnail(size)
 						im.save(webServerImageThumbDir+img_file.md5hash+".jpg", "JPEG",quality=webServerThumbnailQuality)
 					except IOError as e:
-						log("cannot create thumbnail for"+ post.id+e,4)
+						log("cannot create thumbnail for"+ post.id+str(e),4)
 			else:
 				log("		Not an image file:"+img_file.name,4)
 class PageViewerClass():
@@ -482,7 +482,7 @@ class HTMLGeneratorClass():
 	def upLink(self,postid):
 		if postid in get['refer']:
 			if isReceived(get['refer'][postid]):
-				return "<span class=\"postuplink\"><a class=\"uplink\" href=\"/tree/"+get['refer'][postid]+"\">Up</a></span>"
+				return "<span class=\"postuplink\" onmouseleave=\"removePostPreview(this);\" onmouseenter=\"addPostPreview(this,\'"+get['refer'][postid]+"\');\"><a class=\"uplink\" href=\"/tree/"+get['refer'][postid]+"\">Up</a></span>"
 			else:
 				return ""
 		else:
