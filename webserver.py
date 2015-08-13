@@ -758,7 +758,7 @@ def createPost(name,subject,text,refer,files,tags,languages,posttime=0,postpowsh
 	post = protocol_pb2.Post()
 	post.name = unicode(name)
 	post.subject = unicode(subject)
-	post.text = (text)
+	post.text = unicode(text)
 	print "!!!",md5digest(post.text)
 	if posttime == 0:
 		post.time = str(current_time)
